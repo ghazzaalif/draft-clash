@@ -1,0 +1,1322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="1v1 Dota 2 Captains Mode draft game. Matches auto-simulate from a year of OpenDota pro data and pause at early, mid and late game.">
+<meta name="theme-color" content="#0f1317">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='16' height='32' fill='%2372b55c'/%3E%3Crect x='16' width='16' height='32' fill='%23e0623f'/%3E%3C/svg%3E">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Draft Clash</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Chivo:wght@400;500;700&family=Chivo+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a tournament broadcast draft board. Hard edges, flat team-colour fields, ruled tables instead of cards.
+   Radiant always reads left, Dire always reads right, on every screen. */
+:root{
+  --ground:#0f1317; --deck:#151b21; --deck-2:#1c242b; --rule:#283139; --rule-2:#3a4650;
+  --ink:#e6e9e3; --ink-2:#a7b0b4; --ink-3:#86919a;
+  --rad:#72b55c; --rad-field:#1d3018; --rad-ink:#0e1a0a;
+  --dire:#e0623f; --dire-field:#3a1a12; --dire-ink:#1f0b05;
+  --gold:#d6a442; --gold-field:#2e2512;
+  --str:#cc7650; --agi:#93bb52; --int:#5f9fd8; --all:#ab8fd4;
+  --f-display:"Big Shoulders Display","Oswald","Arial Narrow",Impact,sans-serif;
+  --f-ui:"Chivo","Segoe UI",system-ui,sans-serif;
+  --f-num:"Chivo Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:2px;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 28px}
+*{box-sizing:border-box}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+h1,h2,h3,.disp{font-family:var(--f-display);font-weight:800;line-height:.95;margin:0;text-transform:uppercase;letter-spacing:.005em;text-wrap:balance}
+p{margin:0}
+.rad{color:var(--rad)} .dire{color:var(--dire)} .gold{color:var(--gold)} .ink2{color:var(--ink-2)} .ink3{color:var(--ink-3)}
+.label{font-size:13px;color:var(--ink-2);font-weight:500}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:10px}
+.wordmark{font-family:var(--f-display);font-weight:900;font-size:24px;text-transform:uppercase;letter-spacing:.02em;display:flex;gap:10px;align-items:baseline}
+.wordmark small{font-family:var(--f-ui);font-weight:500;font-size:13px;color:var(--ink-3);text-transform:none;letter-spacing:0}
+.btn{border:1px solid var(--rule-2);background:var(--deck-2);padding:9px 16px;border-radius:var(--r);font-weight:700;transition:border-color .15s,background .15s}
+.btn:hover{border-color:var(--ink-2)}
+.btn.go{background:var(--gold);color:#1b1407;border-color:var(--gold);font-family:var(--f-display);font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:8px 22px}
+.btn.go:hover{background:#e2b257}
+.btn.go:disabled{opacity:.4;cursor:not-allowed}
+.btn.quiet{background:transparent}
+.btn.sm{padding:5px 11px;font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--rule-2);border-radius:var(--r);overflow:hidden;flex-wrap:wrap}
+.seg button{background:transparent;border:0;padding:7px 13px;font-weight:500;color:var(--ink-2);font-size:14px}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--ground);font-weight:700}
+
+/* attribute glyph + monogram */
+.attr{display:inline-block;width:9px;height:9px;flex:0 0 9px}
+.attr.str{background:var(--str)} .attr.agi{background:var(--agi)} .attr.int{background:var(--int)} .attr.all{background:var(--all)}
+.mono{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:17px;color:#0d1012;border-radius:var(--r)}
+.mono.str{background:var(--str)} .mono.agi{background:var(--agi)} .mono.int{background:var(--int)} .mono.all{background:var(--all)}
+.mono.sm{width:26px;height:26px;flex-basis:26px;font-size:14px}
+
+/* ---------- setup ---------- */
+.intro{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:40px;align-items:end;padding-top:18px}
+.logo{font-size:clamp(64px,11vw,140px);font-weight:900;line-height:.82;letter-spacing:-.005em}
+.logo span{display:block}
+.logo .r{color:var(--rad)} .logo .d{color:var(--dire)}
+.lede{font-size:17px;line-height:1.55;color:var(--ink-2);max-width:56ch;margin-top:20px}
+.lede b{color:var(--ink);font-weight:500}
+.form{border-top:2px solid var(--ink);display:flex;flex-direction:column}
+.form .row{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule)}
+.form .row[hidden]{display:none}
+.namerow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.namerow input{width:100%;background:var(--deck);border:1px solid var(--rule-2);border-radius:var(--r);padding:7px 10px}
+.namerow input:first-child{border-left:3px solid var(--rad)} .namerow input:last-child{border-right:3px solid var(--dire);text-align:right}
+.form .act{padding-top:16px;display:flex;justify-content:flex-end}
+.flow{margin-top:8px}
+.flow h2{font-size:28px;margin-bottom:14px}
+.track{display:grid;grid-template-columns:1.2fr .8fr 1fr 1fr 1fr;border-top:1px solid var(--rule-2)}
+.track > div{padding:12px 16px 0 0;position:relative;display:flex;flex-direction:column;gap:4px}
+.track > div::before{content:"";position:absolute;top:-5px;left:0;width:9px;height:9px;background:var(--ground);border:2px solid var(--ink-2)}
+.track > div.cp::before{background:var(--gold);border-color:var(--gold)}
+.track .t{font-family:var(--f-num);font-size:13px;color:var(--ink-3)}
+.track b{font-weight:700;font-size:15px}
+.track p{font-size:14px;color:var(--ink-2);max-width:30ch}
+.source{font-size:13.5px;color:var(--ink-3);max-width:90ch;border-top:1px solid var(--rule);padding-top:12px}
+
+/* ---------- draft board ---------- */
+.board{display:grid;grid-template-columns:minmax(0,1fr) 220px minmax(0,1fr);border:1px solid var(--rule)}
+.tb{display:flex;flex-direction:column;min-width:0}
+.tb .head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px}
+.tb.t0 .head{background:var(--rad-field)} .tb.t1 .head{background:var(--dire-field);flex-direction:row-reverse}
+.tb .head h2{font-size:32px}
+.tb.t0 h2{color:var(--rad)} .tb.t1 h2{color:var(--dire)}
+.tb .who{font-size:13px;color:var(--ink-2)}
+.tb.t1 .who{text-align:right}
+.tb .wc{font-family:var(--f-num);font-size:26px;font-weight:700}
+.tb.t1 .wc{order:-1}
+.tb .wc small{display:block;font-family:var(--f-ui);font-size:12px;font-weight:500;color:var(--ink-2);text-align:inherit}
+.picks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--rule)}
+.slot{min-height:84px;padding:10px 8px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:6px;justify-content:flex-end;min-width:0}
+.tb.t1 .slot{border-right:0;border-left:1px solid var(--rule)}
+.slot .nm{font-size:13px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.slot.empty{color:var(--ink-3);font-size:13px;justify-content:center;align-items:center}
+.slot.now{background:var(--gold-field);color:var(--gold);font-weight:700;box-shadow:inset 0 -3px 0 var(--gold)}
+.bans{display:flex;gap:4px;padding:8px;border-top:1px solid var(--rule);flex-wrap:wrap;min-height:42px;align-items:center}
+.tb.t1 .bans{justify-content:flex-end}
+.ban{font-size:12.5px;padding:3px 7px;border:1px solid var(--rule-2);color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--dire);white-space:nowrap;border-radius:var(--r)}
+.ban.now{border-color:var(--gold);color:var(--gold);text-decoration:none;font-weight:700}
+.ban.open{border-style:dashed;text-decoration:none;color:var(--rule-2)}
+.turn{border-inline:1px solid var(--rule);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 10px;text-align:center}
+.turn .ph{font-size:13px;color:var(--ink-2)}
+.turn .act{font-size:42px}
+.turn .act.t0{color:var(--rad)} .turn .act.t1{color:var(--dire)}
+.turn .cnt{font-family:var(--f-num);font-size:13px;color:var(--ink-3)}
+.order{grid-column:1/-1;display:grid;grid-template-columns:repeat(24,minmax(0,1fr));border-top:1px solid var(--rule)}
+.order i{height:22px;display:grid;place-items:center;font-style:normal;font-family:var(--f-num);font-size:10px;color:var(--ink-3);border-right:1px solid var(--rule)}
+.order i:last-child{border-right:0}
+.order i.pick.t0{background:var(--rad-field);color:var(--rad)} .order i.pick.t1{background:var(--dire-field);color:var(--dire)}
+.order i.ban.t0{color:var(--rad)} .order i.ban.t1{color:var(--dire)}
+.order i.done{opacity:.4}
+.order i.cur{background:var(--gold);color:#1b1407;font-weight:700;opacity:1}
+
+.pool{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:24px;align-items:start}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.filters input{flex:1 1 170px;min-width:0;background:var(--deck);border:1px solid var(--rule-2);border-radius:var(--r);padding:7px 10px}
+.filters select{background:var(--deck);border:1px solid var(--rule-2);border-radius:var(--r);padding:7px 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);max-height:540px;overflow:auto;scrollbar-color:var(--rule-2) transparent}
+.tile{display:flex;align-items:center;gap:8px;padding:8px 9px;background:var(--ground);border:0;text-align:left;min-width:0;position:relative}
+.tile:hover{background:var(--deck-2)}
+.tile[aria-pressed="true"]{background:var(--gold-field);box-shadow:inset 0 0 0 1px var(--gold)}
+.tile:disabled{cursor:not-allowed;background:var(--ground)}
+.tile:disabled .nm,.tile:disabled .wr{color:var(--rule-2);text-decoration:line-through}
+.tile:disabled .attr{opacity:.25}
+.tile .nm{font-size:14px;line-height:1.15;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile .wr{font-family:var(--f-num);font-size:12px;color:var(--ink-3)}
+.tile.top .wr{color:var(--gold)}
+.sheet{position:sticky;top:12px;border-top:2px solid var(--ink);display:flex;flex-direction:column;gap:16px;padding-top:14px}
+.sheet h3{font-size:38px}
+.sheet .sub{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-block:1px solid var(--rule)}
+.facts div{padding:8px 0;display:flex;flex-direction:column}
+.facts div+div{padding-left:10px;border-left:1px solid var(--rule)}
+.facts b{font-family:var(--f-num);font-size:17px;font-weight:700}
+.facts span{font-size:12px;color:var(--ink-3)}
+.sbars{display:flex;flex-direction:column;gap:6px}
+.sb{display:grid;grid-template-columns:40px minmax(0,1fr) 54px;gap:10px;align-items:center;font-size:13px}
+.sb .bar{height:10px;background:var(--deck-2);position:relative}
+.sb .bar::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--ink-3)}
+.sb .fill{position:absolute;top:0;bottom:0}
+.sb .v{font-family:var(--f-num);text-align:right}
+.sh{font-family:var(--f-display);font-size:19px;font-weight:800;text-transform:uppercase;margin-bottom:4px}
+.rl{display:flex;flex-direction:column;font-size:14px}
+.rl > div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--rule)}
+.rl .v{font-family:var(--f-num);font-size:13px}
+.pos{color:var(--rad)} .neg{color:var(--dire)}
+.cta{display:flex;flex-direction:column;gap:8px}
+.cta .val{font-size:13px;color:var(--ink-2)}
+.sugg{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--rule-2);background:transparent;border-radius:var(--r);padding:4px 9px;font-size:13px;display:inline-flex;gap:6px;align-items:center}
+.chip:hover{border-color:var(--gold);color:var(--gold)}
+.note{font-size:12.5px;color:var(--ink-3);line-height:1.5}
+.mbar{display:none}
+@media (max-width:760px){
+  .mbar{position:fixed;left:0;right:0;bottom:0;z-index:15;display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--deck);border-top:1px solid var(--rule-2);
+    padding:10px max(16px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+  .mbar[hidden]{display:none}
+  .mbar .who{font-size:13px;color:var(--ink-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #draft{padding-bottom:70px}
+}
+
+/* ---------- preview ---------- */
+.versus{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);border:1px solid var(--rule)}
+.lu .head{padding:10px 14px}
+.lu.t0 .head{background:var(--rad-field)} .lu.t1 .head{background:var(--dire-field);text-align:right}
+.lu h2{font-size:30px}
+.lu.t0 h2{color:var(--rad)} .lu.t1 h2{color:var(--dire)}
+.lu .hrow{display:flex;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid var(--rule)}
+.lu.t1 .hrow{flex-direction:row-reverse;text-align:right}
+.lu .hrow .r{margin-inline-start:auto;font-size:12.5px;color:var(--ink-3)}
+.lu.t1 .hrow .r{margin-inline-start:0;margin-inline-end:auto}
+.mid{border-inline:1px solid var(--rule);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 24px;gap:4px;text-align:center}
+.mid .big{font-family:var(--f-num);font-size:56px;font-weight:700;line-height:1}
+.mid .lab{font-size:13px;color:var(--ink-2)}
+table{border-collapse:collapse;width:100%}
+.ftab th,.ftab td{padding:10px 8px;border-bottom:1px solid var(--rule);text-align:right;font-weight:400;vertical-align:middle}
+.ftab th{font-size:12.5px;color:var(--ink-3);font-weight:500}
+.ftab th:first-child,.ftab td:first-child{text-align:left}
+.ftab td.p{font-family:var(--f-num);font-size:18px;font-weight:700}
+.ftab td.m{font-family:var(--f-num);font-size:13px}
+.ftab .stg b{font-family:var(--f-display);font-size:20px;font-weight:800;text-transform:uppercase;display:block;line-height:1}
+.ftab .stg span{font-size:12.5px;color:var(--ink-3)}
+.split{height:12px;display:flex;min-width:120px}
+.split i{display:block;height:100%}
+.tablewrap{overflow-x:auto}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.go-row{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:14px}
+.go-row p{font-size:14px;color:var(--ink-2);max-width:68ch}
+
+/* ---------- match ---------- */
+.scorebug{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:stretch;border:1px solid var(--rule)}
+.scorebug .s{display:flex;align-items:center;gap:14px;padding:8px 16px}
+.scorebug .s.t0{background:var(--rad-field)} .scorebug .s.t1{background:var(--dire-field);justify-content:flex-end}
+.scorebug .k{font-family:var(--f-num);font-size:46px;font-weight:700;line-height:1}
+.scorebug .s.t0 .k{color:var(--rad)} .scorebug .s.t1 .k{color:var(--dire)}
+.scorebug .tn{font-family:var(--f-display);font-size:26px;font-weight:800;text-transform:uppercase}
+.scorebug .clk{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 26px;min-width:170px}
+.scorebug .clk b{font-family:var(--f-num);font-size:34px;font-weight:700;line-height:1.05}
+.scorebug .clk .stg{font-size:13px;font-weight:700;color:var(--gold)}
+.scorebug .clk .dn{font-size:12px;color:var(--ink-3)}
+.arena{display:grid;grid-template-columns:minmax(0,460px) minmax(0,1fr);gap:24px;align-items:start}
+.mapcol{display:flex;flex-direction:column;gap:10px}
+.mapcol svg{width:100%;height:auto;display:block;aspect-ratio:1;max-width:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px}
+dl.obj{margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);border-top:1px solid var(--rule)}
+dl.obj dt,dl.obj dd{margin:0;padding:7px 0;border-bottom:1px solid var(--rule);font-size:14px}
+dl.obj dt{color:var(--ink-3);padding-right:18px}
+.feedcol{display:flex;flex-direction:column;gap:14px;min-width:0}
+.ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.feed{height:320px;overflow:auto;border-block:1px solid var(--rule);display:flex;flex-direction:column;scrollbar-color:var(--rule-2) transparent}
+.ev{display:grid;grid-template-columns:46px 4px minmax(0,1fr);gap:10px;align-items:stretch;padding:5px 0;border-bottom:1px solid #ffffff0a;font-size:14px}
+.ev.fresh{animation:in .6s ease-out}
+@keyframes in{from{background:#d6a44222}to{background:transparent}}
+.ev .ts{font-family:var(--f-num);font-size:12.5px;color:var(--ink-3);padding-top:2px}
+.ev .bar{background:var(--rule-2)}
+.ev.t0 .bar{background:var(--rad)} .ev.t1 .bar{background:var(--dire)}
+.ev.big .tx{font-weight:700}
+.ev.obj .tx{color:var(--gold)}
+.chart .label{margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.chart svg{width:100%;height:auto;display:block}
+.kdas{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.kda th,.kda td{padding:6px 6px;border-bottom:1px solid var(--rule);font-size:14px;text-align:right;font-weight:400}
+.kda th{font-size:12.5px;color:var(--ink-3);font-weight:500}
+.kda td:first-child,.kda th:first-child{text-align:left}
+.kda td.n{display:flex;align-items:center;gap:8px}
+.kda td.v{font-family:var(--f-num);font-size:13px}
+.kda .tt{font-family:var(--f-display);font-size:20px;font-weight:800;text-transform:uppercase}
+
+/* intermission */
+.inter{position:fixed;inset:0;background:var(--ground);overflow:auto;z-index:20;
+  padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheetwrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.ihead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:12px}
+.ihead .when{font-family:var(--f-num);font-size:14px;color:var(--ink-2)}
+.ihead h2{font-size:clamp(44px,8vw,76px)}
+.ihead .winner.t0{color:var(--rad)} .ihead .winner.t1{color:var(--dire)}
+.ibody{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:28px;align-items:start}
+.score th,.score td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:right}
+.score th{font-family:var(--f-display);font-size:22px;font-weight:800;text-transform:uppercase}
+.score th.t0{color:var(--rad)} .score th.t1{color:var(--dire)}
+.score td{font-family:var(--f-num);font-size:20px;font-weight:700}
+.score td:first-child,.score th:first-child{text-align:left;font-family:var(--f-ui);font-size:14px;font-weight:500;color:var(--ink-2)}
+.score td.lead:nth-child(2){color:var(--rad)} .score td.lead:nth-child(3){color:var(--dire)}
+.score td.dim{color:var(--ink-3);font-weight:500}
+.ibody svg{width:100%;height:auto;aspect-ratio:1;display:block}
+.status{font-size:14px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.status b{color:var(--ink);font-weight:500}
+.outlook{font-size:16px;line-height:1.55;max-width:72ch}
+.outlook strong{font-family:var(--f-display);font-size:21px;font-weight:800;text-transform:uppercase;margin-right:6px;color:var(--gold)}
+.moments .ev{font-size:14.5px}
+.iact{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:16px}
+.foot{font-size:12.5px;color:var(--ink-3);border-top:1px solid var(--rule);padding-top:10px}
+
+@media (max-width:1020px){
+  .pool{grid-template-columns:1fr}
+  .sheet{position:static}
+  .arena{grid-template-columns:1fr}
+  .mapcol{max-width:520px}
+  .intro{grid-template-columns:1fr;gap:24px}
+}
+@media (max-width:760px){
+  .board{grid-template-columns:1fr}
+  .turn{border-inline:0;border-block:1px solid var(--rule);order:-1;flex-direction:row;flex-wrap:wrap;justify-content:space-between}
+  .turn .act{font-size:30px}
+  .order{order:-1}
+  .order i{font-size:0;height:12px}
+  .tb.t1 .head{flex-direction:row}
+  .tb.t1 .wc{order:0}
+  .tb.t1 .who{text-align:left}
+  .tb.t1 .slot{border-left:0;border-right:1px solid var(--rule)}
+  .tb.t1 .bans{justify-content:flex-start}
+  .slot{min-height:64px;padding:6px 5px}
+  .slot .mono{width:26px;height:26px;flex-basis:26px;font-size:14px}
+  .slot .nm{font-size:12px}
+  .versus{grid-template-columns:1fr}
+  .mid{border-inline:0;border-block:1px solid var(--rule);flex-direction:row;gap:12px}
+  .mid .big{font-size:40px}
+  .lu.t1 .head{text-align:left} .lu.t1 .hrow{flex-direction:row;text-align:left} .lu.t1 .hrow .r{margin-inline-start:auto;margin-inline-end:0}
+  .cols2,.kdas{grid-template-columns:1fr}
+  .ibody{grid-template-columns:1fr}
+  .ibody svg{max-width:300px}
+  .track{grid-template-columns:1fr;border-top:0;border-left:1px solid var(--rule-2);margin-left:5px}
+  .track > div{padding:0 0 14px 18px}
+  .track > div::before{top:4px;left:-6px}
+  .scorebug .k{font-size:32px} .scorebug .tn{font-size:18px}
+  .scorebug .clk{min-width:0;padding:6px 10px} .scorebug .clk b{font-size:24px}
+  .scorebug .s{padding:8px 10px;gap:8px}
+  .form .row{grid-template-columns:1fr;gap:6px}
+  .facts{grid-template-columns:1fr 1fr} .facts div:nth-child(3){padding-left:0;border-left:0}
+  .grid{max-height:400px;grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="topbar">
+    <div class="wordmark">Draft Clash <small id="crumb">Captains Mode</small></div>
+    <div id="topActions"></div>
+  </header>
+
+  <!-- SETUP -->
+  <section id="setup" style="display:flex;flex-direction:column;gap:36px">
+    <div class="intro">
+      <div>
+        <h1 class="logo"><span class="r">Draft</span><span class="d">Clash</span></h1>
+        <p class="lede">Ban and pick five heroes in Captains Mode against a bot or a friend. The match then plays itself, scored on <b>20,330 professional games</b> from the past year, and stops at 15:00, at 30:00 and at the end so you can read the map.</p>
+      </div>
+      <div class="form">
+        <div class="row"><span class="label">Opponent</span>
+          <div class="seg" id="modeSeg"><button data-v="bot" aria-pressed="true">Bot</button><button data-v="pvp" aria-pressed="false">Friend, same screen</button></div></div>
+        <div class="row" id="lvlField"><span class="label">Bot level</span>
+          <div class="seg" id="lvlSeg"><button data-v="0" aria-pressed="false">Easy</button><button data-v="1" aria-pressed="true">Normal</button><button data-v="2" aria-pressed="false">Hard</button></div></div>
+        <div class="row" id="sideField"><span class="label">You play</span>
+          <div class="seg" id="sideSeg"><button data-v="0" aria-pressed="true">Radiant</button><button data-v="1" aria-pressed="false">Dire</button></div></div>
+        <div class="row"><span class="label">First pick</span>
+          <div class="seg" id="fpSeg"><button data-v="0" aria-pressed="true">Radiant</button><button data-v="1" aria-pressed="false">Dire</button><button data-v="coin" aria-pressed="false">Coin toss</button></div></div>
+        <div class="row"><span class="label">Captains</span>
+          <div class="namerow"><input id="nameR" maxlength="18" value="You" aria-label="Radiant captain name"><input id="nameD" maxlength="18" value="Bot" aria-label="Dire captain name"></div></div>
+        <div class="act"><button class="btn go" id="startDraft">Start the draft</button></div>
+      </div>
+    </div>
+    <div class="flow">
+      <h2>How a match runs</h2>
+      <div class="track">
+        <div><span class="t">24 turns</span><b>Captains Mode draft</b><p>14 bans and 10 picks in tournament order. First pick bans first.</p></div>
+        <div><span class="t">before 0:00</span><b>Draft read</b><p>Win chance per stage, with the reasons.</p></div>
+        <div class="cp"><span class="t">0:00 – 15:00</span><b>Early game</b><p>Laning, first blood, first towers. Check-in at 15:00.</p></div>
+        <div class="cp"><span class="t">15:00 – 30:00</span><b>Mid game</b><p>Teamfights, Roshan, Tormentors from 20:00. Check-in at 30:00.</p></div>
+        <div class="cp"><span class="t">30:00 – end</span><b>Late game</b><p>High ground, barracks, Aegis fights. Final report when an Ancient falls.</p></div>
+      </div>
+    </div>
+    <p class="source">Hero win rates by game length (under 30, 30 to 42, over 42 minutes), head-to-head records and teammate records for all 127 heroes come from OpenDota's public pro-match data, 30 Oct 2025 to 30 Oct 2026. The draft sets the odds; gold leads, Aegis, Shards and match-day form decide each fight.</p>
+  </section>
+
+  <!-- DRAFT -->
+  <section id="draft" hidden style="display:flex;flex-direction:column;gap:22px">
+    <div class="board" id="board">
+      <div class="tb t0" id="team0"></div>
+      <div class="turn" id="turn"></div>
+      <div class="tb t1" id="team1"></div>
+      <div class="order" id="order"></div>
+    </div>
+    <div class="pool">
+      <div>
+        <div class="filters">
+          <input id="search" placeholder="Search heroes" aria-label="Search heroes">
+          <div class="seg" id="attrSeg"><button data-v="" aria-pressed="true">All</button><button data-v="str" aria-pressed="false">Str</button><button data-v="agi" aria-pressed="false">Agi</button><button data-v="int" aria-pressed="false">Int</button><button data-v="all" aria-pressed="false">Uni</button></div>
+          <select id="roleSel" aria-label="Filter by role"><option value="">Any role</option><option>Carry</option><option>Support</option><option>Initiator</option><option>Disabler</option><option>Nuker</option><option>Durable</option><option>Escape</option><option>Pusher</option></select>
+          <select id="sortSel" aria-label="Sort heroes"><option value="name">A–Z</option><option value="suggest">Best for this turn</option><option value="wr">Pro win rate</option><option value="contest">Most contested</option></select>
+        </div>
+        <div class="grid" id="grid" role="listbox" aria-label="Heroes"></div>
+      </div>
+      <aside class="sheet" id="detail"></aside>
+    </div>
+  </section>
+
+  <!-- PREVIEW -->
+  <section id="preview" hidden></section>
+
+  <!-- MATCH -->
+  <section id="match" hidden style="display:flex;flex-direction:column;gap:22px">
+    <div class="scorebug">
+      <div class="s t0"><span class="tn">Radiant</span><span class="k" id="kR">0</span></div>
+      <div class="clk"><span class="stg" id="stgLabel">Early game</span><b id="clock">0:00</b><span class="dn" id="dayNight">Day</span></div>
+      <div class="s t1"><span class="k" id="kD">0</span><span class="tn">Dire</span></div>
+    </div>
+    <div class="arena">
+      <div class="mapcol">
+        <svg id="map" viewBox="0 0 1000 1000" role="img" aria-label="Minimap with towers, barracks, Roshan and Tormentors"></svg>
+        <div class="legend"><span><i style="background:var(--ink-2)"></i>Tower</span><span><i style="background:var(--ink-2);height:6px"></i>Barracks</span><span><i style="background:var(--ink-2);transform:rotate(45deg)"></i>Ancient</span><span><i style="background:var(--gold);border-radius:50%"></i>Roshan</span><span><i style="background:var(--int);clip-path:polygon(50% 0,100% 100%,0 100%)"></i>Tormentor</span></div>
+        <dl class="obj">
+          <dt>Net worth</dt><dd id="leadTxt">Even</dd>
+          <dt>Structures</dt><dd id="structTxt"></dd>
+          <dt>Roshan</dt><dd id="roshTxt">Alive</dd>
+          <dt>Tormentors</dt><dd id="tormTxt">Spawn at 20:00</dd>
+        </dl>
+      </div>
+      <div class="feedcol">
+        <div class="ctl">
+          <div class="seg" id="speedSeg"><button data-v="0.5" aria-pressed="false">0.5×</button><button data-v="1" aria-pressed="true">1×</button><button data-v="2" aria-pressed="false">2×</button><button data-v="4" aria-pressed="false">4×</button></div>
+          <div style="display:flex;gap:8px"><button class="btn sm" id="pauseBtn">Pause</button><button class="btn sm" id="skipBtn">Skip to check-in</button></div>
+        </div>
+        <div class="feed" id="feed" aria-live="polite"></div>
+        <div class="chart"><div class="label"><span><span class="gold">━</span> Radiant win chance</span><span><span class="rad">▮</span><span class="dire">▮</span> Net worth lead</span></div><svg id="chart" viewBox="0 0 600 150" preserveAspectRatio="none" style="aspect-ratio:600/150"></svg></div>
+      </div>
+    </div>
+    <div class="kdas"><table class="kda" id="kda0"></table><table class="kda" id="kda1"></table></div>
+  </section>
+  <p class="foot">Data: OpenDota public pro matches, 30 Oct 2025 – 30 Oct 2026. The simulation is a model built on those numbers, not a prediction service.</p>
+</div>
+<div class="mbar" id="mbar" hidden><span class="who" id="mbarTxt"></span><button class="btn go" id="mbarBtn">Pick</button></div>
+<div class="inter" id="overlay" hidden><div class="sheetwrap" id="report" role="dialog" aria-modal="true" aria-labelledby="repTitle"></div></div>
+
+<script>
+/* ===== Draft Clash engine: data model, draft scoring, match simulation ===== */
+var DRAFTW = 0.5, FORMW = 0.4; // calibrated so draft win% matches simulated outcomes
+var DC = (function(){
+const ALPH='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const META = { matches: 20330, from: 'Oct 2025', to: 'Oct 2026', avgMin: 34.9, avgKills: 58.8, radiantWin: 0.521 };
+let H = [], N = 0, VS = '', SY = '';
+
+function load(csv, vs, sy){
+  VS = vs.replace(/\s+/g,''); SY = sy.replace(/\s+/g,'');
+  H = csv.trim().split('\n').map(function(line, i){
+    const p = line.split(',');
+    const d = p[8].split(';').map(function(x){ return x.split(':').map(Number); });
+    const g = +p[5], w = +p[6];
+    return {
+      i: i, id: +p[0], name: p[1], attr: p[2], atk: p[3], roles: p[4].split('|'),
+      g: g, w: w, bans: +p[7], slug: p[9],
+      wr: (w + 15) / (g + 30),
+      rawWr: g ? w / g : 0.5,
+      stageG: d.map(function(x){ return x[0]; }),
+      stageWr: d.map(function(x){ return (x[1] + 20) / (x[0] + 40); })
+    };
+  });
+  N = H.length;
+  return H;
+}
+function pk(i, j){ return i * N - (i * (i + 1)) / 2 + (j - i - 1); }
+function dec(c){ return (ALPH.indexOf(c) - 31) / 100; }
+function vs(a, b){ if (a === b) return 0; return a < b ? dec(VS[pk(a, b)]) : -dec(VS[pk(b, a)]); }
+function syn(a, b){ if (a === b) return 0; return a < b ? dec(SY[pk(a, b)]) : dec(SY[pk(b, a)]); }
+function has(h, r){ return H[h].roles.indexOf(r) >= 0; }
+
+/* hero strength by stage: 0 early, 1 mid, 2 late (pro win rate in <30, 30-42, >42 min games) */
+function stageWr(h, s){
+  const w = H[h].stageWr;
+  if (s === 0) return w[0];
+  if (s === 1) return 0.5 * w[0] + 0.5 * w[1];
+  return 0.3 * w[1] + 0.7 * w[2];
+}
+function logit(p){ return Math.log(p / (1 - p)); }
+function sig(x){ return 1 / (1 + Math.exp(-x)); }
+
+function comp(team, s){
+  if (team.length < 5) return 0;
+  let sup = 0, car = 0, ini = 0, dis = 0, dur = 0;
+  team.forEach(function(h){
+    if (has(h,'Support')) sup++;
+    if (has(h,'Carry')) car++;
+    if (has(h,'Initiator')) ini++;
+    if (has(h,'Disabler')) dis++;
+    if (has(h,'Durable')) dur++;
+  });
+  let c = 0;
+  if (sup === 0) c -= 0.035; else if (sup >= 4) c -= 0.02;
+  if (car === 0) c -= (s === 2 ? 0.05 : 0.02);
+  if (ini === 0) c -= 0.02;
+  if (dis <= 1) c -= 0.02;
+  if (dur === 0) c -= 0.015;
+  return c;
+}
+
+/* Evaluate two (possibly partial) lineups. Returns per-stage radiant win prob and breakdown. */
+function evaluate(R, D){
+  const out = { stages: [] };
+  let vsSum = 0; const pairs = [];
+  R.forEach(function(a){ D.forEach(function(b){ const v = vs(a, b); vsSum += v; pairs.push({ a: a, b: b, v: v }); }); });
+  function synTeam(T){ let s = 0; const l = [];
+    for (let x = 0; x < T.length; x++) for (let y = x + 1; y < T.length; y++){ const v = syn(T[x], T[y]); s += v; l.push({ a: T[x], b: T[y], v: v }); }
+    return { s: s, l: l }; }
+  const sR = synTeam(R), sD = synTeam(D);
+  for (let s = 0; s < 3; s++){
+    let hr = 0, hd = 0;
+    R.forEach(function(h){ hr += stageWr(h, s) - 0.5; });
+    D.forEach(function(h){ hd += stageWr(h, s) - 0.5; });
+    const parts = { hero: hr - hd, matchup: vsSum / 5, synergy: (sR.s - sD.s) / 2, comp: comp(R, s) - comp(D, s) };
+    const diff = parts.hero + parts.matchup + parts.synergy + parts.comp;
+    const p = sig(4 * 0.9 * diff + logit(META.radiantWin));
+    out.stages.push({ p: p, parts: parts, heroR: hr, heroD: hd });
+  }
+  pairs.sort(function(x, y){ return Math.abs(y.v) - Math.abs(x.v); });
+  out.pairs = pairs; out.synR = sR.l.sort(function(x,y){return y.v-x.v;}); out.synD = sD.l.sort(function(x,y){return y.v-x.v;});
+  out.overall = 0.3 * out.stages[0].p + 0.4 * out.stages[1].p + 0.3 * out.stages[2].p;
+  return out;
+}
+
+function contest(h){ return (H[h].g + H[h].bans) / META.matches; }
+
+/* Marginal value of adding hero h to team A facing E */
+function pickValue(h, A, E){
+  let v = H[h].wr - 0.5;
+  E.forEach(function(e){ v += vs(h, e) / 5; });
+  A.forEach(function(a){ v += syn(h, a) / 2; });
+  const need = roleNeed(A);
+  if (need.sup && has(h,'Support')) v += 0.02;
+  if (need.car && has(h,'Carry')) v += 0.02;
+  if (need.ini && (has(h,'Initiator'))) v += 0.012;
+  if (!need.sup && has(h,'Support') && countRole(A,'Support') >= 3) v -= 0.02;
+  if (!need.car && has(h,'Carry') && !has(h,'Support') && countRole(A,'Carry') >= 3) v -= 0.015;
+  v += 0.03 * Math.min(1, contest(h) * 2);
+  return v;
+}
+function countRole(T, r){ return T.filter(function(h){ return has(h, r); }).length; }
+function roleNeed(A){
+  const left = 5 - A.length;
+  return {
+    sup: countRole(A,'Support') < 2 && left <= 4 - countRole(A,'Support') + 1,
+    car: countRole(A,'Carry') < 1 && left <= 3,
+    ini: countRole(A,'Initiator') < 1 && left <= 2
+  };
+}
+
+/* ---------- seeded RNG ---------- */
+function rng(seed){ let s = seed >>> 0 || 1; return function(){ s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; }; }
+
+/* Bot draft action. level: 0 easy,1 normal,2 hard */
+function botChoose(kind, mine, theirs, unavailable, level, rand){
+  const pool = [];
+  for (let h = 0; h < N; h++) if (!unavailable[h]) pool.push(h);
+  let scored;
+  if (kind === 'pick') scored = pool.map(function(h){ return { h: h, v: pickValue(h, mine, theirs) }; });
+  else scored = pool.map(function(h){ return { h: h, v: pickValue(h, theirs, mine) + 0.04 * contest(h) }; });
+  scored.sort(function(a, b){ return b.v - a.v; });
+  const top = [3, 2, 1][level] * ({0:6,1:2,2:1}[level]);
+  const k = Math.min(scored.length, [14, 5, 2][level]);
+  const r = rand();
+  return scored[Math.floor(r * r * k)].h;
+  void top;
+}
+
+/* ---------- map structures ---------- */
+const LANES = ['top', 'mid', 'bot'];
+function freshSide(){
+  return { tw: { top: [1,1,1], mid: [1,1,1], bot: [1,1,1] }, t4: [1,1], rax: { top: [1,1], mid: [1,1], bot: [1,1] }, anc: 1 };
+}
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function towersUp(sd){ let n = sd.t4[0] + sd.t4[1]; LANES.forEach(function(l){ n += sd.tw[l][0] + sd.tw[l][1] + sd.tw[l][2]; }); return n; }
+function raxUp(sd){ let n = 0; LANES.forEach(function(l){ n += sd.rax[l][0] + sd.rax[l][1]; }); return n; }
+
+/* ---------- match simulation ---------- */
+const KILLW = { Carry: 1.35, Nuker: 1.3, Escape: 1.05, Initiator: 1.0, Disabler: 0.95, Durable: 0.9, Pusher: 1.0, Support: 0.6 };
+const DEATHW = { Support: 1.4, Carry: 0.85, Durable: 0.75, Escape: 0.85 };
+
+function simulate(R, D, seed){
+  const rand = rng(seed);
+  const ev = evaluate(R, D);
+  const teams = [R, D];
+  const side = [freshSide(), freshSide()];
+  const kda = {}; R.concat(D).forEach(function(h){ kda[h] = [0,0,0]; });
+  const st = {
+    kills: [0, 0], lead: 0, aegis: null, rosh: { alive: true, kills: [0, 0], respawn: null },
+    torm: [{ alive: false, spawn: 20, kills: 0 }, { alive: false, spawn: 20, kills: 0 }], shards: [0, 0], fb: false,
+    roshTotal: 0
+  };
+  const frames = []; const events = [];
+  let winner = null, endT = null;
+  function gauss(){ return Math.sqrt(-2 * Math.log(rand() + 1e-9)) * Math.cos(6.2832 * rand()); }
+  const f0 = gauss() * FORMW; const form = [f0 + gauss() * 0.25, f0 + gauss() * 0.25, f0 + gauss() * 0.3]; // match-day form: execution the draft can't see
+
+  function poisson(l){ let L = Math.exp(-l), k = 0, p = 1; do { k++; p *= rand(); } while (p > L); return k - 1; }
+  function pickW(arr, wf){ let tot = 0; const ws = arr.map(function(x){ const w = wf(x); tot += w; return w; }); let r = rand() * tot; for (let i = 0; i < arr.length; i++){ r -= ws[i]; if (r <= 0) return arr[i]; } return arr[arr.length - 1]; }
+  function roleW(h, table){ let w = 1; H[h].roles.forEach(function(r){ if (table[r]) w *= Math.pow(table[r], 0.6); }); return w; }
+  function stageOf(t){ return t <= 15 ? 0 : t <= 30 ? 1 : 2; }
+  function leadLogit(t, team){ const l = team === 0 ? st.lead : -st.lead; return 0.42 * l / (3500 + 260 * t); }
+  function structEdge(team){ const o = 1 - team; return (towersUp(side[team]) - towersUp(side[o])) * 0.025 + (raxUp(side[team]) - raxUp(side[o])) * 0.05; }
+  function fightP(t, extra){ // radiant win prob for a fight
+    const s = stageOf(t);
+    let x = DRAFTW * logit(ev.stages[s].p) + form[s] + leadLogit(t, 0) + (extra || 0);
+    if (st.aegis) x += st.aegis.team === 0 ? 0.42 : -0.42;
+    x += (st.shards[0] - st.shards[1]) * 0.07;
+    return sig(x);
+  }
+  function livePr(t){ const s = stageOf(t); return sig(logit(ev.stages[s].p) + 1.3 * leadLogit(t, 0) + structEdge(0) * 1.2); }
+  function log(t, sec, type, team, text, extra){ const e = { t: t, sec: sec, type: type, team: team, text: text }; if (extra) for (const k in extra) e[k] = extra[k]; events.push(e); return e; }
+
+  function nextTarget(att){ // returns description of next structure attacker can hit, per lane
+    const def = side[1 - att]; const opts = [];
+    LANES.forEach(function(l){
+      const tw = def.tw[l];
+      if (tw[0]) opts.push({ lane: l, kind: 'tower', tier: 1 });
+      else if (tw[1]) opts.push({ lane: l, kind: 'tower', tier: 2 });
+      else if (tw[2]) opts.push({ lane: l, kind: 'tower', tier: 3 });
+      else if (def.rax[l][0] || def.rax[l][1]) opts.push({ lane: l, kind: 'rax' });
+    });
+    const anyT3 = LANES.some(function(l){ return !def.tw[l][2]; });
+    if (anyT3 && (def.t4[0] || def.t4[1])) opts.push({ lane: 'base', kind: 't4' });
+    if (!def.t4[0] && !def.t4[1]) opts.push({ lane: 'base', kind: 'ancient' });
+    return opts;
+  }
+  const TEAM = ['Radiant', 'Dire'];
+  const LN = { top: 'top', mid: 'middle', bot: 'bottom', base: 'base' };
+  function takeStructure(t, att, o, sec){
+    const def = side[1 - att];
+    if (o.kind === 'tower'){
+      def.tw[o.lane][o.tier - 1] = 0; st.lead += (att === 0 ? 1 : -1) * (o.tier === 1 ? 650 : o.tier === 2 ? 800 : 950);
+      log(t, sec, 'tower', att, TEAM[att] + ' destroyed ' + TEAM[1 - att] + ' ' + LN[o.lane] + ' tier ' + o.tier + ' tower', { lane: o.lane, tier: o.tier, victim: 1 - att });
+    } else if (o.kind === 'rax'){
+      const r = def.rax[o.lane]; const both = rand() < 0.75;
+      if (r[0]) r[0] = 0; if (both || !r[0]) r[1] = 0;
+      st.lead += (att === 0 ? 1 : -1) * 900;
+      const all = raxUp(def) === 0;
+      log(t, sec, 'rax', att, TEAM[att] + ' broke ' + TEAM[1 - att] + ' ' + LN[o.lane] + ' barracks' + (all ? ', mega creeps unleashed' : ''), { lane: o.lane, victim: 1 - att });
+    } else if (o.kind === 't4'){
+      if (def.t4[0]) def.t4[0] = 0; else def.t4[1] = 0;
+      log(t, sec, 'tower', att, TEAM[att] + ' destroyed a ' + TEAM[1 - att] + ' tier 4 tower', { lane: 'base', tier: 4, victim: 1 - att });
+    } else if (o.kind === 'ancient'){
+      def.anc = 0; winner = att; endT = t;
+      log(t, sec, 'ancient', att, TEAM[att] + ' destroyed the ' + TEAM[1 - att] + ' Ancient', { victim: 1 - att });
+    }
+  }
+  function attemptPush(t, att, power, sec){ // power: number of structures it may take
+    for (let n = 0; n < power && winner === null; n++){
+      const opts = nextTarget(att); if (!opts.length) return;
+      // prefer outer towers; high-ground needs time
+      const o = pickW(opts, function(x){
+        if (x.kind === 'tower') return x.tier === 1 ? 6 : x.tier === 2 ? (t >= 14 ? 3 : 0.4) : (t >= 24 ? 1.6 : 0.15);
+        if (x.kind === 'rax') return 2.5; if (x.kind === 't4') return 2; return 3;
+      });
+      if (o.kind === 'tower' && o.tier === 3 && t < 22 && rand() < 0.7) return;
+      if (o.kind === 'ancient' && rand() < 0.2) return;
+      takeStructure(t, att, o, sec);
+    }
+  }
+  function fight(t, size, place, sec, extra){
+    const q = fightP(t, extra);
+    let w = rand() < q ? 0 : 1; const l = 1 - w;
+    let wk = Math.max(1, Math.round(size * (0.62 + rand() * 0.38)));
+    let lk = size - wk; if (lk > wk){ const z = wk; wk = lk; lk = z; }
+    if (size <= 2 && rand() < 0.75) lk = 0, wk = size;
+    const s = stageOf(t);
+    function credit(team, n){
+      const killers = teams[team], victims = teams[1 - team];
+      for (let i = 0; i < n; i++){
+        const k = pickW(killers, function(h){ return roleW(h, KILLW) * (0.6 + stageWr(h, s)); });
+        const v = pickW(victims, function(h){ return roleW(h, DEATHW); });
+        kda[k][0]++; kda[v][1]++;
+        killers.forEach(function(a){ if (a !== k && rand() < (size >= 3 ? 0.55 : 0.25)) kda[a][2]++; });
+        st.kills[team]++;
+        st.lead += (team === 0 ? 1 : -1) * (180 + 11 * t);
+        if (!st.fb){ st.fb = true; log(t, sec, 'fb', team, 'First Blood: ' + H[k].name + ' killed ' + H[v].name, { killer: k, victim: v }); }
+        else if (size <= 2) log(t, sec, 'kill', team, H[k].name + ' killed ' + H[v].name, { killer: k, victim: v, place: place });
+      }
+    }
+    credit(w, wk); credit(l, lk);
+    if (st.aegis && st.aegis.team === l && wk > 0){ st.aegis = null; }
+    if (size >= 3) log(t, sec, 'fight', w, 'Teamfight at ' + place + ': ' + TEAM[w] + ' won ' + wk + '–' + lk, { wk: wk, lk: lk, place: place });
+    return { w: w, margin: wk - lk };
+  }
+
+  for (let t = 1; t <= 90 && winner === null; t++){
+    const s = stageOf(t);
+    // timers
+    if (st.aegis && t >= st.aegis.until){ log(t, 0, 'aegis', st.aegis.team, 'Aegis expired for ' + TEAM[st.aegis.team]); st.aegis = null; }
+    if (!st.rosh.alive && st.rosh.respawn && t >= st.rosh.respawn[0] && (t >= st.rosh.respawn[1] || rand() < 0.4)){ st.rosh.alive = true; st.rosh.respawn = null; log(t, 0, 'roshup', -1, 'Roshan has respawned'); }
+    st.torm.forEach(function(tm, i){ if (!tm.alive && t >= tm.spawn){ tm.alive = true; if (t === 20 && i === 0) log(t, 0, 'tormup', -1, 'Tormentors have spawned on both sides of the map'); else if (t > 20) log(t, 0, 'tormup', -1, (i === 0 ? 'Radiant' : 'Dire') + '-side Tormentor is back'); } });
+
+    // fights
+    const lam = [1.05, 1.62, 1.9][s];
+    const avgSize = [1.35, 2.5, 3.6][s];
+    const nf = poisson(lam / avgSize);
+    for (let f = 0; f < nf && winner === null; f++){
+      const sec = Math.floor(rand() * 60);
+      let size;
+      if (s === 0) size = rand() < 0.72 ? 1 : 2 + (rand() < 0.25 ? 1 : 0);
+      else if (s === 1) size = rand() < 0.45 ? 1 + (rand() < 0.4 ? 1 : 0) : 3 + Math.floor(rand() * 4);
+      else size = rand() < 0.3 ? 1 + (rand() < 0.4 ? 1 : 0) : 3 + Math.floor(rand() * 6);
+      const place = pickW(['top lane', 'mid lane', 'bot lane', 'the jungle', 'the river'], function(x){ return x === 'the river' && st.rosh.alive && t > 14 ? 2 : 1; });
+      const r = fight(t, size, place, sec);
+      if (size >= 3 && r.margin >= 2){
+        // convert the fight
+        const roll = rand();
+        if (st.rosh.alive && t >= 14 && roll < 0.38){ killRosh(t, r.w, sec + 1); }
+        else if (st.torm.some(function(x){ return x.alive; }) && roll < 0.5){ const i = st.torm[r.w].alive ? r.w : 1 - r.w; takeTorm(t, r.w, i, sec + 1); }
+        else attemptPush(t, r.w, r.margin >= 4 ? 2 + (t > 30 ? 1 : 0) : 1, Math.min(59, sec + 2));
+      } else if (r.margin >= 1 && s >= 1 && rand() < (size >= 3 ? 0.6 : 0.2)){
+        attemptPush(t, r.w, 1, Math.min(59, sec + 2));
+      }
+    }
+    if (winner !== null) break;
+
+    // laning / split-push pressure
+    for (let team = 0; team < 2 && winner === null; team++){
+      const adv = team === 0 ? fightP(t) : 1 - fightP(t);
+      let base = t < 7 ? 0 : t < 12 ? 0.11 : t < 20 ? 0.2 : t < 30 ? 0.18 : 0.14;
+      if (rand() < base * (0.4 + 1.2 * adv)) {
+        const opts = nextTarget(team).filter(function(o){ return o.kind === 'tower' && (o.tier === 1 || (o.tier === 2 && t >= 16)); });
+        if (opts.length){ const o = opts[Math.floor(rand() * opts.length)]; takeStructure(t, team, o, 20 + Math.floor(rand() * 39)); }
+      }
+    }
+
+    // sieges by the stronger side
+    if (t >= 14 && winner === null){
+      const pr = fightP(t, structEdge(0)), team = pr >= 0.5 ? 0 : 1, edge = Math.abs(pr - 0.5) * 2;
+      if (rand() < 0.09 + 0.4 * edge + (t > 30 ? 0.1 : 0)) attemptPush(t, team, 1 + (edge > 0.5 && t > 25 ? 1 : 0), 10 + Math.floor(rand() * 40));
+    }
+    if (winner !== null) break;
+    // roshan attempts without a big fight
+    if (st.rosh.alive && t >= 17){
+      const pr = fightP(t);
+      if (rand() < 0.11 + 0.22 * Math.abs(pr - 0.5) + (t > 35 ? 0.06 : 0)){
+        const team = rand() < pr ? 0 : 1;
+        if (rand() < 0.35){ const r = fight(t, 2 + Math.floor(rand() * 4), 'Roshan’s lair', 40); if (r.w === team || rand() < 0.5) killRosh(t, r.w, 50); }
+        else killRosh(t, team, 45);
+      }
+    }
+    // tormentors
+    st.torm.forEach(function(tm, i){
+      if (tm.alive && rand() < 0.07){ const pr = fightP(t); let team = rand() < (i === 0 ? 0.65 : 0.35) ? 0 : 1; if (rand() < Math.abs(pr - 0.5)) team = pr > 0.5 ? 0 : 1; takeTorm(t, team, i, 30); }
+    });
+
+    frames.push(snapshot(t));
+  }
+  if (winner === null){ // safety: decide by live probability
+    const t = frames.length; winner = livePr(t) >= 0.5 ? 0 : 1; endT = t; side[1 - winner].anc = 0;
+    log(t, 59, 'ancient', winner, TEAM[winner] + ' destroyed the ' + TEAM[1 - winner] + ' Ancient', { victim: 1 - winner });
+    frames.push(snapshot(t));
+  } else frames.push(snapshot(endT));
+
+  function killRosh(t, team, sec){
+    st.rosh.alive = false; st.rosh.kills[team]++; st.roshTotal++;
+    st.rosh.respawn = [t + 8, t + 11];
+    st.aegis = { team: team, until: t + 5 };
+    st.lead += (team === 0 ? 1 : -1) * 600;
+    const n = st.roshTotal;
+    const loot = n === 1 ? 'Aegis' : n === 2 ? 'Aegis + Cheese' : 'Aegis, Cheese + Refresher Shard';
+    log(t, sec, 'rosh', team, TEAM[team] + ' slew Roshan (' + ordinal(n) + '): ' + loot, { n: n });
+  }
+  function takeTorm(t, team, i, sec){
+    const tm = st.torm[i]; tm.alive = false; tm.spawn = t + 10; tm.kills++;
+    st.shards[team]++;
+    log(t, sec, 'torm', team, TEAM[team] + ' defeated the ' + (i === 0 ? 'Radiant' : 'Dire') + '-side Tormentor for an Aghanim’s Shard', { which: i });
+  }
+  function snapshot(t){
+    return { t: t, kills: st.kills.slice(), lead: Math.round(st.lead), side: clone(side), aegis: st.aegis ? clone(st.aegis) : null,
+      rosh: clone(st.rosh), torm: clone(st.torm), shards: st.shards.slice(), p: livePr(t), kda: clone(kda), day: Math.floor(t / 5) % 2 === 0 };
+  }
+  events.sort(function(a, b){ return a.t - b.t || a.sec - b.sec; });
+  return { ev: ev, frames: frames, events: events, winner: winner, endT: endT, seed: seed };
+}
+function ordinal(n){ return n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'); }
+
+/* Captains Mode order (team 0 = first pick). type: 'ban' | 'pick' */
+const CM = [
+  ['ban',0],['ban',0],['ban',1],['ban',1],['ban',0],['ban',1],['ban',1],
+  ['pick',0],['pick',1],
+  ['ban',0],['ban',0],['ban',1],
+  ['pick',1],['pick',0],['pick',0],['pick',1],['pick',1],['pick',0],
+  ['ban',0],['ban',1],['ban',0],['ban',1],
+  ['pick',0],['pick',1]
+];
+const PHASES = [[0,6,'Ban phase 1'],[7,8,'Pick phase 1'],[9,11,'Ban phase 2'],[12,17,'Pick phase 2'],[18,21,'Ban phase 3'],[22,23,'Pick phase 3']];
+
+return { load: load, heroes: function(){ return H; }, vs: vs, syn: syn, evaluate: evaluate, pickValue: pickValue,
+  botChoose: botChoose, simulate: simulate, rng: rng, CM: CM, PHASES: PHASES, META: META, stageWr: stageWr,
+  towersUp: towersUp, raxUp: raxUp, contest: contest, LANES: LANES, has: has };
+})();
+if (typeof module !== 'undefined') module.exports = DC;
+
+</script>
+<script>
+DC.load(`1,Anti-Mage,agi,M,Carry|Escape|Nuker,660,322,1310,254:125;286:142;120:55,antimage
+2,Axe,str,M,Initiator|Durable|Disabler|Carry,2638,1332,2360,1049:527;1035:532;554:273,axe
+3,Bane,all,R,Support|Disabler|Nuker|Durable,1110,601,1974,259:140;466:268;385:193,bane
+4,Bloodseeker,agi,M,Carry|Disabler|Nuker|Initiator,218,109,325,96:44;69:32;53:33,bloodseeker
+5,Crystal Maiden,int,R,Support|Disabler|Nuker,1753,864,151,997:487;644:334;112:43,crystal_maiden
+6,Drow Ranger,agi,R,Carry|Disabler|Pusher,1097,543,1893,374:191;436:210;287:142,drow_ranger
+7,Earthshaker,str,M,Support|Initiator|Disabler|Nuker,737,335,511,257:114;295:144;185:77,earthshaker
+8,Juggernaut,agi,M,Carry|Pusher|Escape,1541,792,1200,728:357;609:336;204:99,juggernaut
+9,Mirana,agi,R,Carry|Support|Escape|Nuker|Disabler,1025,534,387,276:135;445:222;304:177,mirana
+10,Morphling,agi,R,Carry|Escape|Durable|Nuker|Disabler,1171,562,1649,511:209;496:264;164:89,morphling
+11,Shadow Fiend,agi,R,Carry|Nuker,4677,2341,4522,2197:1152;1821:903;659:286,nevermore
+12,Phantom Lancer,agi,M,Carry|Escape|Pusher|Nuker,677,310,1230,290:110;267:137;120:63,phantom_lancer
+13,Puck,int,R,Initiator|Disabler|Escape|Nuker,2337,1177,6160,593:294;1037:499;707:384,puck
+14,Pudge,str,M,Disabler|Initiator|Durable|Nuker,2412,1215,653,1172:601;997:492;243:122,pudge
+15,Razor,agi,R,Carry|Durable|Nuker|Pusher,1484,730,1820,521:252;655:332;308:146,razor
+16,Sand King,all,M,Initiator|Disabler|Support|Nuker|Escape,1047,498,3764,248:111;501:240;298:147,sand_king
+17,Storm Spirit,int,R,Carry|Escape|Nuker|Initiator|Disabler,2709,1349,3745,893:419;1159:582;657:348,storm_spirit
+18,Sven,str,M,Carry|Disabler|Initiator|Durable|Nuker,1041,500,530,415:181;422:214;204:105,sven
+19,Tiny,str,M,Carry|Nuker|Pusher|Initiator|Durable|Disabler,3431,1696,3409,995:544;1513:745;923:407,tiny
+20,Vengeful Spirit,agi,R,Support|Initiator|Disabler|Nuker|Escape,993,482,360,518:253;378:183;97:46,vengefulspirit
+21,Windranger,all,R,Carry|Support|Disabler|Escape|Nuker,3362,1710,6371,1123:559;1378:706;861:445,windrunner
+22,Zeus,int,R,Nuker|Carry,1418,671,1414,727:336;553:265;138:70,zuus
+23,Kunkka,str,M,Carry|Support|Disabler|Initiator|Durable|Nuker,1000,521,530,364:180;439:237;197:104,kunkka
+25,Lina,int,R,Support|Carry|Nuker|Disabler,1745,841,1253,893:431;612:297;240:113,lina
+26,Lion,int,R,Support|Disabler|Nuker|Initiator,3289,1625,795,1398:627;1348:716;543:282,lion
+27,Shadow Shaman,int,R,Support|Pusher|Disabler|Nuker|Initiator,2046,1007,744,884:422;826:414;336:171,shadow_shaman
+28,Slardar,str,M,Carry|Durable|Initiator|Disabler|Escape,2656,1341,3506,909:437;1132:598;615:306,slardar
+29,Tidehunter,str,M,Initiator|Durable|Disabler|Nuker|Carry,2769,1334,2339,1039:492;1120:562;610:280,tidehunter
+30,Witch Doctor,int,R,Support|Nuker|Disabler,1114,546,1049,413:198;457:226;244:122,witch_doctor
+31,Lich,int,R,Support|Nuker,1882,896,526,736:321;784:380;362:195,lich
+32,Riki,agi,M,Carry|Escape|Disabler,197,88,332,77:34;80:34;40:20,riki
+33,Enigma,all,R,Disabler|Initiator|Pusher,571,326,2442,141:90;247:133;183:103,enigma
+34,Tinker,int,R,Carry|Nuker|Pusher,560,246,3107,201:86;247:112;112:48,tinker
+35,Sniper,agi,R,Carry|Nuker,1635,866,1316,888:485;614:314;133:67,sniper
+36,Necrophos,int,R,Carry|Nuker|Durable|Disabler,1327,658,2024,509:260;519:249;299:149,necrolyte
+37,Warlock,int,R,Support|Initiator|Disabler,2630,1247,1823,1023:484;1118:529;489:234,warlock
+38,Beastmaster,all,M,Initiator|Disabler|Durable|Nuker,2333,1198,5855,819:473;968:475;546:250,beastmaster
+39,Queen of Pain,int,R,Carry|Nuker|Escape,2891,1404,4752,1080:521;1199:564;612:319,queenofpain
+40,Venomancer,all,R,Support|Nuker|Initiator|Pusher|Disabler,1116,576,4368,363:211;514:254;239:111,venomancer
+41,Faceless Void,agi,M,Carry|Initiator|Disabler|Escape|Durable,972,475,1540,299:124;455:240;218:111,faceless_void
+42,Wraith King,str,M,Carry|Support|Durable|Disabler|Initiator,645,314,643,331:166;269:129;45:19,skeleton_king
+43,Death Prophet,all,R,Carry|Pusher|Nuker|Disabler,737,334,1945,340:157;260:122;137:55,death_prophet
+44,Phantom Assassin,agi,M,Carry|Escape,603,269,252,293:113;247:126;63:30,phantom_assassin
+45,Pugna,int,R,Nuker|Pusher,873,438,1025,340:180;362:189;171:69,pugna
+46,Templar Assassin,agi,R,Carry|Escape,2154,1054,2422,984:504;867:391;303:159,templar_assassin
+47,Viper,agi,R,Carry|Durable|Initiator|Disabler,1761,868,5155,566:291;743:371;452:206,viper
+48,Luna,agi,R,Carry|Nuker|Pusher,2338,1139,748,1039:502;990:498;309:139,luna
+49,Dragon Knight,str,M,Carry|Pusher|Durable|Disabler|Initiator|Nuker,2861,1377,2098,1245:588;1099:533;517:256,dragon_knight
+50,Dazzle,all,R,Support|Nuker|Disabler,971,493,1659,319:169;413:207;239:117,dazzle
+51,Clockwerk,str,M,Initiator|Disabler|Durable|Nuker,1846,954,1869,498:278;795:399;553:277,rattletrap
+52,Leshrac,int,R,Carry|Support|Nuker|Pusher|Disabler,976,498,957,371:186;397:199;208:113,leshrac
+53,Nature's Prophet,all,R,Carry|Pusher|Escape|Nuker,1621,830,3852,586:321;691:341;344:168,furion
+54,Lifestealer,str,M,Carry|Durable|Escape|Disabler,1630,789,2094,551:248;743:360;336:181,life_stealer
+55,Dark Seer,int,M,Initiator|Escape|Disabler,828,400,1079,213:101;337:168;278:131,dark_seer
+56,Clinkz,agi,R,Carry|Escape|Pusher,1209,636,1894,448:229;471:240;290:167,clinkz
+57,Omniknight,str,M,Support|Durable|Nuker,469,240,259,219:117;176:84;74:39,omniknight
+58,Enchantress,int,R,Support|Pusher|Durable|Disabler,1077,575,1039,312:186;471:234;294:155,enchantress
+59,Huskar,str,R,Carry|Durable|Initiator,973,517,4992,412:232;414:214;147:71,huskar
+60,Night Stalker,str,M,Carry|Initiator|Durable|Disabler|Nuker,907,435,1293,317:155;386:180;204:100,night_stalker
+61,Broodmother,agi,M,Carry|Pusher|Escape|Nuker,420,235,883,187:118;171:89;62:28,broodmother
+62,Bounty Hunter,agi,M,Escape|Nuker,658,363,1310,229:132;281:148;148:83,bounty_hunter
+63,Weaver,agi,R,Carry|Escape,1262,568,2114,439:198;550:248;273:122,weaver
+64,Jakiro,int,R,Support|Nuker|Pusher|Disabler,3880,1937,4328,1364:712;1692:791;824:434,jakiro
+65,Batrider,all,R,Initiator|Disabler|Escape,1682,886,5795,439:239;792:417;451:230,batrider
+66,Chen,int,R,Support|Pusher,717,413,1586,242:164;313:163;162:86,chen
+67,Spectre,agi,M,Carry|Durable|Escape,306,135,1000,92:35;132:55;82:45,spectre
+68,Ancient Apparition,int,R,Support|Disabler|Nuker,972,467,1122,374:181;393:177;205:109,ancient_apparition
+69,Doom,str,M,Carry|Disabler|Initiator|Durable|Nuker,1773,932,3179,487:236;785:428;501:268,doom_bringer
+70,Ursa,agi,M,Carry|Durable|Disabler,2265,1082,4463,896:402;900:431;469:249,ursa
+71,Spirit Breaker,str,M,Carry|Initiator|Disabler|Durable|Escape,2092,1067,1390,848:435;932:475;312:157,spirit_breaker
+72,Gyrocopter,agi,R,Carry|Nuker|Disabler,1840,897,1757,660:315;810:399;370:183,gyrocopter
+73,Alchemist,str,M,Carry|Support|Durable|Disabler|Initiator|Nuker,902,482,1857,284:144;401:212;217:126,alchemist
+74,Invoker,int,R,Carry|Nuker|Disabler|Escape|Pusher,2517,1292,2851,1012:473;1036:559;469:260,invoker
+75,Silencer,int,R,Carry|Support|Disabler|Initiator|Nuker,1552,736,1917,697:331;577:265;278:140,silencer
+76,Outworld Devourer,int,R,Carry|Nuker|Disabler,558,250,1518,235:94;207:99;116:57,obsidian_destroyer
+77,Lycan,str,M,Carry|Pusher|Durable|Escape,586,312,1335,201:125;240:124;145:63,lycan
+78,Brewmaster,all,M,Carry|Initiator|Durable|Disabler|Nuker,1035,523,3230,261:127;447:231;327:165,brewmaster
+79,Shadow Demon,int,R,Support|Disabler|Initiator|Nuker,2580,1373,4266,806:447;1171:614;603:312,shadow_demon
+80,Lone Druid,agi,R,Carry|Pusher|Durable,685,413,3898,181:114;313:170;191:129,lone_druid
+81,Chaos Knight,str,M,Carry|Disabler|Durable|Pusher|Initiator,739,351,107,413:198;286:134;40:19,chaos_knight
+82,Meepo,agi,M,Carry|Escape|Nuker|Disabler|Initiator|Pusher,276,137,793,122:59;122:64;32:14,meepo
+83,Treant Protector,str,M,Support|Initiator|Durable|Disabler|Escape,1436,872,4668,437:286;625:363;374:223,treant
+84,Ogre Magi,str,M,Support|Nuker|Disabler|Durable|Initiator,2842,1407,434,1594:767;1038:539;210:101,ogre_magi
+85,Undying,str,M,Support|Durable|Disabler|Nuker,1256,600,1623,370:177;541:252;345:171,undying
+86,Rubick,int,R,Support|Disabler|Nuker,4736,2428,2597,1944:1055;1925:926;867:447,rubick
+87,Disruptor,int,R,Support|Disabler|Nuker|Initiator,3448,1631,1516,1401:659;1493:715;554:257,disruptor
+88,Nyx Assassin,all,M,Disabler|Nuker|Initiator|Escape,1167,625,3249,342:174;552:302;273:149,nyx_assassin
+89,Naga Siren,agi,M,Carry|Support|Pusher|Disabler|Initiator|Escape,468,250,1397,140:72;201:103;127:75,naga_siren
+90,Keeper of the Light,int,R,Support|Nuker|Disabler,1416,789,2813,460:300;582:323;374:166,keeper_of_the_light
+91,Io,all,R,Support|Escape|Nuker,567,306,2129,206:109;246:132;115:65,wisp
+92,Visage,all,R,Support|Nuker|Durable|Disabler|Pusher,247,116,4132,100:46;109:48;38:22,visage
+93,Slark,agi,M,Carry|Escape|Disabler|Nuker,1065,535,1990,378:193;457:220;230:122,slark
+94,Medusa,agi,R,Carry|Disabler|Durable,848,371,2116,357:139;340:157;151:75,medusa
+95,Troll Warlord,agi,R,Carry|Pusher|Disabler|Durable,804,382,1298,399:199;301:124;104:59,troll_warlord
+96,Centaur Warrunner,str,M,Durable|Initiator|Disabler|Nuker|Escape,2643,1337,2304,814:381;1200:604;629:352,centaur
+97,Magnus,all,M,Initiator|Disabler|Nuker|Escape,757,372,1536,338:153;291:149;128:70,magnataur
+98,Timbersaw,str,M,Nuker|Durable|Escape,2119,1044,3954,617:303;956:470;546:271,shredder
+99,Bristleback,str,M,Carry|Durable|Initiator|Nuker,1640,754,1539,607:272;717:329;316:153,bristleback
+100,Tusk,str,M,Initiator|Disabler|Nuker,3775,1887,2982,1179:595;1683:851;913:441,tusk
+101,Skywrath Mage,int,R,Support|Nuker|Disabler,2461,1157,1686,1043:482;980:469;438:206,skywrath_mage
+102,Abaddon,all,M,Support|Carry|Durable,1267,649,3887,454:256;557:277;256:116,abaddon
+103,Elder Titan,str,M,Initiator|Disabler|Nuker|Durable,133,57,99,39:16;60:23;34:18,elder_titan
+104,Legion Commander,str,M,Carry|Disabler|Initiator|Durable|Nuker,715,350,395,307:142;303:151;105:57,legion_commander
+105,Techies,all,R,Nuker|Disabler,1611,798,4319,524:275;631:317;456:206,techies
+106,Ember Spirit,agi,M,Carry|Escape|Nuker|Disabler|Initiator,3266,1748,4367,940:544;1404:743;922:461,ember_spirit
+107,Earth Spirit,str,M,Nuker|Escape|Disabler|Initiator|Durable,1298,686,1163,431:239;509:266;358:181,earth_spirit
+108,Underlord,str,M,Support|Nuker|Disabler|Durable|Escape,2092,966,2452,687:321;851:373;554:272,abyssal_underlord
+109,Terrorblade,agi,M,Carry|Pusher|Nuker,1433,718,2399,415:231;647:320;371:167,terrorblade
+110,Phoenix,str,R,Support|Nuker|Initiator|Escape|Disabler,2418,1283,2442,707:379;1100:594;611:310,phoenix
+111,Oracle,int,R,Support|Nuker|Disabler|Escape,463,229,814,180:87;187:90;96:52,oracle
+112,Winter Wyvern,int,R,Support|Disabler|Nuker,1210,604,1233,334:171;510:271;366:162,winter_wyvern
+113,Arc Warden,all,R,Carry|Escape|Nuker,206,104,1734,111:53;74:37;21:14,arc_warden
+114,Monkey King,agi,M,Carry|Escape|Disabler|Initiator,1302,703,1812,430:241;564:291;308:171,monkey_king
+119,Dark Willow,int,R,Support|Nuker|Disabler|Escape,2182,1041,1081,614:286;934:447;634:308,dark_willow
+120,Pangolier,all,M,Carry|Nuker|Disabler|Durable|Escape|Initiator,2634,1305,5108,736:381;1177:581;721:343,pangolier
+121,Grimstroke,int,R,Support|Nuker|Disabler|Escape,1126,577,513,384:187;483:255;259:135,grimstroke
+123,Hoodwink,agi,R,Support|Nuker|Escape|Disabler,3819,1928,2076,936:491;1655:835;1228:602,hoodwink
+126,Void Spirit,all,M,Carry|Escape|Nuker|Disabler,2018,946,5146,577:276;897:423;544:247,void_spirit
+128,Snapfire,all,R,Support|Nuker|Disabler|Escape,3551,1834,4563,1435:747;1460:769;656:318,snapfire
+129,Mars,str,M,Carry|Initiator|Disabler|Durable,3169,1477,2869,1160:542;1384:645;625:290,mars
+131,Ring Master,int,R,Support|Nuker|Escape|Disabler,2240,1091,1320,661:325;973:469;606:297,ringmaster
+135,Dawnbreaker,str,M,Carry|Durable,1851,907,2337,686:326;768:390;397:191,dawnbreaker
+136,Marci,all,M,Support|Carry|Initiator|Disabler|Escape,1184,598,4427,445:239;512:250;227:109,marci
+137,Primal Beast,str,M,Initiator|Durable|Disabler,1338,681,1571,401:192;614:313;323:176,primal_beast
+138,Muerta,int,R,Carry|Nuker|Disabler,1596,787,1460,498:240;664:336;434:211,muerta
+145,Kez,agi,M,Carry|Escape|Disabler,1817,960,2493,591:314;779:420;447:226,kez
+155,Largo,str,M,Durable|Disabler|Support,1619,881,2813,499:263;663:354;457:264,largo`, `VWVQXYSSPXUTYYUVaLSSQQbQUVVNaTQbSXcXWPSMRQaTSTcYUVXjYQWbWXSbJMTWTNZZNVRZTbUWXQSSaUQbZUWPSVQQZXSNXWSVSYVUbbWPaaQZYWRVWVZeXVbVTUJRbXPYSbUWcUUXXTUWUTUURZYVURSTTcSPUUXbXbVaZabTRbOXSYVXNRUQOVVVSRQYYPSVVaPQYVXRKVaQYTbUQVdWVWQRXaVWMYYaRUXbYOZWMUaUVYVTQSVUWUaXcYWZVLWXbceWQQbcYaTPZRRYTOUWQRRfPWdUVJXSaVYUNWUNWRVXUZTVNXUbVWUTPRbaSWYZVbPSbYbPYWUXbPaOXTFWcYWTVUSZUUXTeWQTLNYSUXfOTcTZRVTSaYUbeURcbTYOWVRZYVPSVVXRXXXTSQUNXZTaSSZSVPXTXReWWSVRWbSYSURQTVVTPTNXaWRSVSaVYUWIMRVbZVVYVRYgXVbYVQTbVTgRTaXSUVSbQSUaZZTWZYZQTRUYaSUIaYRXXRWRSXPeQRaRPZdbPUVSRZQVdOWZUWYQWXSYYYTYQZLWLQbQYUSQZWUbSXdaaRcVOYSLcTTZPUXTaaWRTVSbNUXZWXaTZVOTPQUUZTUYYVSSPccQYPUkVfRQZTTbUUTTRahaTMbZYLSRZUaYUhVPWSXQaNSTTSXbZQQbSRXYUVXeVMVYdQVSWbSUWVXcYSUVRXRTTTOaVXXTYWXJfWdYPYTQUWOPUNWXVYZbRaPhZSSXRWVXSZYTQZOUYPZWTVbaRQYSThgWVhVRSXVMTSPQYUQSNVTUSXTZTPQUISaaPSRXTPcRXYXVSZVXTYYYVSOMTXTXURUYYWYYgZTVOUZSQSZScbbjWXXWWQTVXXTRUXfaSUZUTZTQYYOWXfWScTVRZTTWRQVUdRdXVbXMTaUSXUWVZOUZZUSQUOXVRdPXTSRRZPWWZWLViRURTUYaaYWaShYRVXUeQXTPVXRXSYUTRcYTWWeiJPYTRQSWUeOaVVVePVSRVOZaZLYTWQUUXWZYdXSOUaSTcRLZcaWecOYaaPXKUSWTMhZYUTQTTPWTRSVQYSUWXPQTWcUYaSVTPTfZNWUZVYVQWbTThLZNZPSORQSTSRVTWcWQSMVVRdVZULUZWQKOUaQSfURZZRWJTnTeNbRPRSXMdXbVUYTORUSWZTTRVdNYcdSVUWXTYTYVTUYgUTXeWSZUUcSaXcSVTXaWYTaUXYRTXWYTWUXXPXWNUSRUTVOXVXTcUVTWRSaXVVWRYUbYUQWPXNQYSRWSXUTVWXTWPcUaVXSZYdVabMaYVVVVQUXZYRWZPbWYQQVQSYWVRVVVRXZRZQUZVRaVRVXacgaYaVUWUKSUKaZZUNOZYVQZTTXYQVOTaXUUPbTVWQbRROTaTaTWVSVPUSaTRbTWTUSaaTWSTSYGVNVbRVaXcUTQcYRQSPdbPYYQVSTaTWTVUXXZYWRUZXRQUXaUWZWZPhRSXTYUXQSVPXUUWUQMYUYUVbSTVbTSZaedYYWJTMYXSVSPQVbXRUcLQTXYWTYWSZWXcWKTdZZWSUVYSXZaQSWVYVTWTSZXRdVOXXRbOdZWUXTSbPeaeSRQTXZTQbRTfXVVTUSVWUVWWNXXbTWVUbZZTRYWRTVWWUbbYRRfaLVWOPZSRUYMYSNRjWRcTRRPVVVSQSTTPQUUXWZTSRONTccQZVNVcbSUSRSQZUWaWXXaWNWSaaLPYdSSUTTUaRWdfQWdUZVURTVOSaTUYZbXVVfNYXWNWbaWSMYePNMZWJZUQaPTZVWQdeXaXVRRTRKUPdXTVcQUWWaWObNacYUQagWPPUYYQTLRbWaeXYUeVaZYTbTZPSQOPSaaRTaTXVcSdWbSQUZaLSQSVRaYOcUWUQRTZUWXXXYPbYXXQeLIUUXVUaPQUWVSYUTTRVZTcRSUaXPeTVVScRXRZWcYPPYkVVaTTVWUTVeUSVSVTWSUTWXTWZfWfcRYbWQXSWTaYcaVbUVXTWXWTRZRaXWVPPbUXVQRVaUZNQTXYJTYOMRVRSWVaUUUTWSbWZZSWeVVUTSTUSURSZTYYUTTSYVSPYcRPSVcUTOgVcYXVVcOTUWcYXUTdUURQRUQZWTSXVZXSOdUWSYbUXQVVWVVOVUOTNTYTXWVRYTWQXTTSTbSUZUQdRTfWdXRTVRWXVUaSVTQWUYQeWZXVUWURSYURVTRUbXXaaUVRTUTaSVdTOSVUaZZVVWYaPSXOSXWXcVUdaPVYVVOVbZbXTRVPSWTNONPQfWTfaRRPVRTbRTXWPRWVXVQXSVZUWVRYXSXOVVYWUZRPMSYUhWVScSPTXWYRZQaXTWOMXUZVhcZWZRaTRQVPaUaUSVVTSVUYYbXRQPWVZWVXUXWQXZRXaKWcYUTPSYWWVRScMOTRTXTSWUYWUXRQUXaUSYSVPWXXdZYOSXSiVTYWVWYWWdUbYYRfUXSWZVRZXTRTcIPRUXeSYXTVbTLXXNTRTdVTQJXSVXXbSZWXZUcUYWVOZYYQQUPaZXVPUUXVRTPUXUgQRWbkaZPYPUHUUXbWVZSVTZMPWZSaQXaOZYZQbXXKdMWTVPTYVTcbXPiSPOWQSTbMTWXSWSYaUVOSVcZRZQWcUSRYYZUWaSbTagWbbYNOWWYWRZRbeYNcRQaNXVYXRXUVXVPVWYaaXYSVSXXRSaaTaaPWWXYLPcSUSXTZPYVTWcWRQMSXRTWZSaWXSTTZOTZWYVSTQWURZYSVUQYYeUWTTSMZYaWUUMQXPTaYXSWUVNYTXVTVUaOXUcPSWXcTUVUaQdZRVWRQYXTcTRWXPRUVPUVWaRYSRJVUYRZZOaQbYaZZURPWXTcPTYYYWYRYMfXVQUTUSYaVYZSXTYUYQZROSXWPNWTYWUSVUTZQVWZWeZWSWUOYTVTWRTTWXLRYbJXZXYNSTbUdQMUadUXVXWTYSSSZXUOdJXPcYTaMNSWcMPOXWVYTaVVVXUWXUcSXKTYXZWUZWRVeKZbcWYXNYTVYbUUXWYZPRcPNWYQRWbVWXSRcWUXPOaZSWTYabVVSOYOUaLVdUXdXbVZVTLbUXUQQRWVfbVUXUfUUWPaOYaXJVXVYScYRVTfWYWYWZTUcZSZSTdXUKRTSUaWVTXTYYRXQUVTSTTZXSXQWUWbYYXXXSQTWPXWRbTScZZYTXJNXVUWTSNRVUUVTYSQQPQQSZcMSSdTXVScbUYWTYUbTYVdQYQUYaWaTUPWgWUaTTTWMXNZSQadhUWURYTXSXJQVSTQbYZTSYUPaYcUXUYVTWUWVTYWRUYUWPRWWUYPUUNRaWdVVdTSPWQZPHdUVQYUIOSaRXRTUVYSRZaXYYWaTTRdZXTWXVVSSVbUYaOOWYaTWOZRZWUVVUZSTUiZQdUUVSWZUZWXWVVXSVUQZReSVXUSRTSXbTSQYUPOXYVMOUVPXYMXXTTUUTQUYQTRVYUUUYRTSWYaUaNVUONaXWURYPWPRVOSPhXRSXPVWYTTbTVabZVTQWPTYQRUXYVbTWYYTZNZaRUUSSTQdPYXWRgbJQYfYUXVTNXSSTYUOSgYcYZbSYZbNUSUaXbSQLaUdcYWTVWXUTNXQTVaQPWcbNWQUWWYObQaZVXTSZPWNbZdPXWYVLUVYWbYYfSKXVMVMQSTZROVRQRIXYSaQjScUQPRTRNTWRTWbVYQaaUXRPNPaZPUaWPbSWQZUaRRRSYVWTVKVabYUXXTXWZXKUUVWTTNWXWbTVWVSRSfXTaUSSXRaRVcZWVVXTXWVQPYMgPXUVUObZNXYTYcSVVTTPZXSWUVTaYQRcRWZYUWYbUPSUXUaaddWbVQeWTOXaVWYWSTNURXRPblRcUWVWUTXXVUYTVRTZgWRVRYgYbXbVZUVZUSRTOWUWQTYYWOaOOQZVRZRQWUVXcTYRYTWYRVTYbWXWVVVTUYZSXTTVSZSSZWWMeZTbaTaTaUXWTSNWWYRZWWRZXhaZZSZYZYaTTWWUVQLMXSWQRPWVTSUaTUOTWcXXWOOTZXRWZYTWUbbWXUWSSXZTVPXQZQVXRTTOOPWZMWWXbYVYUUZVRWYafUYTaWZeOTUTZQVVgXTOVZXWTRTWWWWYTPOXRWWUZRZTaRLZUYVXSdVdXaUPUPQcYdaYZZZRWXcOMVUaPXUQXWXaTbPPUTeQcVRXYSVdWWdRPUMUNYVRUcNTSWUUQXVRUcaVUXdSWPXZLWaZTXRXWSQSTYUUVUaZKSRfYcfXbaNdaSIUUSSSbTTUWXTSUNLTSUNWYXYZYYYXQXVZRTYXUYWZhZcRYaPTQadSVOaTXaeZQWZWQSSbTWYVaVVVVRSQUSdVVPWQdZUSUSeXPWZaPdbORiXTSTRPRaUXXQXRRSOUYVOUWYcSYRYeQcZKUVYUWTQMUPaSTOdTTPQMbeYPTQbfcXUabQTTXaTYQWUaUVacPScWMSWafHORRWTTSaQWQXSRTPTUTZQQTcXSQVOSSSUPZYiVYPLXahSPWRWQVYXUbTZVePROXTYTVRZSYTWTSYVVeUQVJYTUROSdWcMPTYWYaPQQNTSYcURXQYYcXacdWWXUSRXRZUWebRMRZYRaWRTgTQUZWcaYYUWNVYQbSZPTSXcSQTVYQUYdXbOVXSZURUWWXXUUWWSVXdZZSUXMZTVaRUbZVOSaWWWSZUPVSTSWUZRYPYSOZZZbLQSYbWRSaNSUTVTORSPVYTUWVUZVPQScSZXWYUYNWWdWbVRUXTdYWYSYVaeVTTORYXbTVRUWcOXUWNTgRcUbVYQMWYVTXXXaYVaPURYRORaRWVaWVObWQYYWUZTWQWSZPXSWUYMeXbSSWYUaQaaPTTUISUTaVVWQYWSUSWNPYaTZTVXWVPUUYYRYSUWYPXUaZXYOQRSZeWUURZcaWaeUVUbUVSUNSaWVXVPWRYfWZSZPaXZVOaPNWWWTaQURfSgRWaRVNSVbVQUQaTYSSZVfXOVYRXRZUZaSZUbHbWbVUONWRRUbNXXUWWVPXNiOdTYTfMTYTPQZRcZUXOYVSTMaUXUXTSSVPNUOIXVTTVPSVWSXUaTRWbVZdTbPPWWWZWZYYNSTPeVRUQSdYSMYZVTSZVXWQaSXZYYYTVQaZdYVUUSZVTZYVXULURSYdNXRQWSagePSZcQTVPZOVXWOWfWWUUWQWXUUTVXUWSSSTaYVOQVNTXSVUbZXXYZOOWWSQVOTUTWWUPTacUTcQXUTMWbSYVURXVVXVRaWbMVWPaXbRRWSXWUXWXZbXUXUWYUYQWRVVUVXZbXYSWXWSVJVYVOUUVcWWZXcbVRVWUUWPQTWQWVSVRXZaYXZUXVPUQSTZOYVRWSYaSabPUVSdQUPYVaWaZXWPRNSPaUQXQhTXaTTZZXYSSbVVWWOTdaYWVeUNYbhJVQVbTVRWhZXVbSTQYXTKTdRVWaPQecaWIZQUHWXYYReVPYaTVXVWXUYaRWOUUXeXUQScUTWXTTTUSKaVTcSVSeSUQYYdZZWXQYVWZTYgbbUSVQYTbWcSVTUZTORZUSSPTZVURYaRTWVRUKZYTNVRRZZNYSYfVZTQVUbNXZWWOTYSZROTVPaWXWTZTcaYXVbSNQZUYUaeVXURcWXYXOTSQYRYZXSZZabTZTUSSRYPOaVVVhQJSXdUfVcRaYXiOWcRSQZaVcYaYYaTRWVRXRUVYXSWVdbSXNVZbKTTWXWTRZZcUVSOLTTcWbUYWSeVUYXYORaVMSORRRUYZTWXXaWURWTUQWTXTfVhQMWWZSUaXaURVaUcYYORaWXRSTYeUXUaZLPYTYbdVZTWRVTVaYSTVPZNTVSWRTWTXYPUQUXVVYYQaSMPPQTVQbVWVZYPVTXhWSZPSSaWZTUXbeRbSWaRaSYSTVYVSbUbVSXcUTZcYSPOaTWXKWWXPSSYdeMUUeVSQTUdQVYVdVSQUUPdYZWOTPTWWYVaVJUWSUSTRQbORWRTOcSZYZTYUZTbJYZRTSPYOQVVVRbWTTeRWZXaQXbYUVVSPVXUZUcUVQWXWaTSUORTWWXUQWRQbUVbNTTaReUUZMRUUVdXTUWVTKbPXWUcSUWcYUPXPXRTMRTKcaTLVaYUVWUbTSUWZVSTaROYYdaafWXXXkSdaYNOdZSTbXTZTURZRTXdTbReSXTXfPUZUQTYbfTTWQNaPPUNTTWTUScUVQUcQSbZYRPVPbZPSeUPcbZYdTXQcfUVVZQSZWOSfUaWRWVUfXKYOUOTYYYbYVXUWUcQTXbWbRaTYWUPNYadVZUKNYTURRVVVeSQbWacMWVSZRXbTbMVUSWaXVYUWUaVSTaZYTURcVTXKUOTVTTbeRaSWUWQWUaZaYbYWPQWYOTMPSTUURYSTOVZYMYROTQWYTdUZVXQWVUWeXSUSRZbTcZWYWVVQaeXSSUUdTTSXaUVMVXTVVTOHUaSaVYWRRYYXVWUVWaWLSORSSWZYZUXbRURRSPWQXXVPVcONVVXYQZSSbPRYUYUUVVeWYVQYOWSVVPTbTTTaYTUVPTUXWYUYVeeTeZWacYSOVMVXZTUSJYYQVcVTZZhWJURMWTaXWTWWUhcQQWVSVYVbRSbUKVNVURRTVgWRYScWVSUcaTTZXUVUSUXQZVbTSTWcQZbWWbXVTWXVRQURUUaVQbcUYQWTdXaUUUVUZSUQePVQafUWTVUXTVUeWTMTNTQVWVXRYVKaPcReSVUUYWVZPVXQcLYXQWTWcdPXVUYTPRaaTRYTYRaQQOUYSNObTVTNPQaXOXWTXePWTcQKhbTVTReYcPRffNcVVRWcQcWUTUUTWXZYYWTbRTHXZTPPSVZTVUNWSVbQQWdXSSLbXTXVRHSYUQQZVUWHXYhTVTYRXQXWTNWUVWPYSZSYMPUUWZbYXZYWbTUVTZWSMQRPVRWRUTUWTaVTUPWUXZaYVZfSZZTSXWaVZZYZUVQSQURRXReSUgVXPRTWSRWYNYUWWOUUWTSSWRfWLPYNVbbZQQZaTOSYXXQUTXTPdSXUbTRSSRXbZVVSZSQcXNVbaTQVXcXWPTVVaZXTdYbUURbbYYOPVQaTUNcTgaVUVVVVVbWOSYVSVWVZXbjTcUZVWdXVbURQXSUcNZbaYPTTUUTQSOXaVQWQSWNOZXRiOXSUURUdOXRRVXaSQNTOTQUZXYVTSQYUVVVWQWbPVWSSeYXRSPYRYVNZTTbWYVVWRSUUUVVXXUUXZVaPZWSUXTTZZVOQTNWYPSTZUWSVVcTUWVWVUUbMXWUcWWTZYXcbRYYZVQYFRKTVaTcXOYafUTSVXUSZOUZVXPWYOQSVYXUVSPbPPUTRTbWZWZbSPLWOQOVZScPRdXdOaSRZXaWVPVOgPaSOTTRbRaVbaQRUdSPdTJbVWaWaPSeRfcXTWWSTeNWdYWaUNUVNUTNbTXiZfYSbTVXSXVVWWVXVWUXXOWXUReWPPYVRQVcaWRWWTPSdfXUSWXYSYSZaWRNWXUWgWWVLUZQWaSXbfSWZRWaSWVaVZVWRUQPbZORSPXPbXXITYXTMRRPReXYdSbVXZZOWQVWNRPPTWUUaVWWTVeXPRSTVYRYQUWSTVRVXYWTOdeRUSNQSSeYXVZTTXdYVQQZXcUSQSaWTSKeVQWXdTWjTSXWaZWYNaWXUVQYZVRQeXXYOPcYRUbSXSYWUVTUTPYXYROhUSVQRRfVUWUTSVaXVVVbSMVYWWSZVaYZQNYaLSXPUTPSOTPYYVTQgXRVJdaTdSZcSNPXRUSYNTSVSVTaWRYSSVVWWeYJUaRWbUbXTSSWUPRVVaVWYZVPZTTUQVQWUPWaWUNQUTPYZWVTYRVRRROUXZPcUSSPTVROcbZXTVXRRVUVVbdSXYVVWYSVTSZMVSVUURTMUQVXcRYTaVPXYXPUYQRSYQXTVfWRQQcMUWUNVYWSXVNcXZYThWXQXbRZPSaNRXVaWTYZRYVRZXYXdRTbfUbUVVbWVXQPWQVWQTYVRWZXQPQcRJXSUUMdXYVRTRQVXQXXSUSSVXVPSTUMZRPVdTYXfQSVUTVTVVZURYaaZVVbUTUQYRSUWUUcTWVWZUYWZaUVSZQVUSXVcPNTaT`, `ZZVGVVXXVRXXXORPTbUNUbTSTYYVTUVYXUVTUYTUNVXTbVVZdUcVURUWSZPUSVPYXZUVaMecXVXZUZTOLWVaZVVZWUSXZVdLXRUPVTYMSQXfVVXbTZbWgRTIYWRObUPXVTPRYUXaaVaVQWWSRdTZXOXQXYTXSaUcOVZbYWRUUTYSOYUaXVUPVQYUYVVWTVNNTVZMUVRUVUYWTVaWUXMYKQSSMWVUVcQVVKXcUYXaWTUVYRNaTVWOXVYaWXXYVVPOOjVXdUYQUaUWMfUXVbVXULQWUQXVVUWZRVaUbTRTTUYORNXRTNmVbUWJTaXZadRQUZQURcPWWVLSWUaTYZVWTWZQWWZSVVPUNSRSYXWXReXVRPfVTVbcXZVUTXTVVQVYNSVZVdQWaWcTUQOgWVUTVXTTTWVRUVVTXXVSYVQVZTaPOUXWSeTPXRcXZTRUXSTQRXXXUSUTXTVRUXVVZWUYUSVXVaYOWTVeVYVRYTQhUZURSTbVOSXaPTRaSLSVXbXWeaTbabOTaQVRZMUbVWUJJbSaRVSTSSWaVTPUSZYSVTXZJVbRWWXZcTYZUUWXWSZZbYUZQQUXTTaWXUQQbbVVPUQTVWTUaWRSYUTQTYUTMNSTYVcQTVKPbXcXVXSQaTXQZWUSdPWaPdaVVTWWVVaOVWbTgRXUVTROdWOXRVWTJWTVVYNicXOUSfTReQXRSRVZMTVVWONZZTObUYXTUVTXZaXZYUSTVUQWRcSSQSaYUadTVYVTYXPWVcYVVONUWNTUYPUZWNWRJVaQVUWPTaSUdXZOVdVYbZTURUURfUaOWNObUXUdUSYTNVYOSXTRQUfafSVXVbNXUNRSTXSSRZRVcbXTdRUYTYZVVOVfRTTVORXdVYWUSWTPXPUUZUbYVROVYVNXUTSXaVXThVYQYbSaWSVRYVQSRWSVQXNWXRcTYZbQRUUMXVVYObVfZUVPQVXUVUSVSUaPUSXUVRbWVWaaYSbRVbZRfVTQVWXaRWYWOUVTZVVNTWWTeSUXVXRUSXfVRKXWRXZdTUMVaXRMaYRUVaVZfQNYZVaTYWaVQPXZNUbSbRUVTMdSXWRbVTZbUUQMVeTSbPOQbSUYbRNaXWeUZVSMQYgTVVWUZcQPSYdeXQYQLfSaZXPPXaWUdVWdRTbVaWXXSUQWSSaZQRVPbXLXQZSSVWcPTVaXbTSWbWXaRTbRVaQTSNbKZQVSYTOQURRSVRUcbSaWWVTXTaQWbUQTWTXUXaRXXXQRXXTVaULOVWWOWTbWZTSTTOSaRQWWSWUWQVVSQYVZUTXXSZVWTVVPZRXXXUSSbTVYWTVYbZYSYXTZVZRYTVSaWfXWVXPQQSYWReTRZZUWcheLUUVXUVJWRXPTYaVVQXPXKRVRVWMTVWUVTQYPZMTTaXWYVXPYXTTTRYbTVPaYTQPZXVYQdYVWPfUSaTNUObSMYTVRXbOURTVSPUWVfUOaVUYXdZYZaZTXbZXNQVWTWRbXUMSUUSQQZXWXNQSSQcUUUVbVUYYOOVTSNYUNQWVUZReUVZcUZRVZSSLVXRTQXZRUWaXTRXSWPVSaMPYWXbWWYZSfWWaXUUbSUWUWZVVPXXeYYYYSbQObTZXQRSPbTQUQaRcTbZReeWWUSRKTXWZTURZVeVXbfVOaYTLedaNRUKbYPYRPUUcYZUUaUUYXTUVXWQXZTZXTYSWbRISMcRSYTTcUOUWPTPVTXJLXdTSaZWWXWYRbVSUOOVXZPWWZQTgWTVVYUVWTPWYbbWOOWYOVVWUSSTSYOVZebUTWWeZLYWYRbNUURSOYWYbYXVPRSVKfRUUSPXVLPXWUaZXNLcScVbcUNXXXUTQNVZRRUPQRPWSUVUYdSUWNdUPWaVOYRRgaWVWXRSYQbZaKXNYYWVUXWXWScYRYRUbTPaPVbOUQWWVbYXVSOTVXRWUTQSQSMeRTXWUUPUXSUWXYbXVTaVaSWVSZTaUeWTZSSWRWhaQTZbKdNTYRSSSXWbZSZOVWVTRZUTZSXPcUYWTKYTWWZTSXTXZaOZTSVTPTYSTVPQVQPZXQVTTTQbNPVaMMTVXfTQWVZYdWWWOQXWYTVSQXaVTXVXQYTUPVeTWcUXQVUXbbTUXXZfSWYYTTWVXdPZRWTWSXTUMVNZRVWTXTYTVXYUSTURUSZabURdZPScVcYbUSRbWYZSVRSUUXVfYTVVYOYcLVXPVdTXUUPXPPVZTVRWUSTYSXRXVRVVPPWSXPUSSYTaVSUTUTXUedbaTQWcOaTWUVZNVeWaVUPRTVXOQabQVRVMdWVXZQTSTYcOZYRYTURZWQRTVPWOZYXRWOeVWXXOabMTbWdZVWbYPcaLaPUTbVUUWRSTYWbRTYafTSRTbVVRSSZTZPRUXQSTQUYXOTNWXSLTbYUfXaXcYSVYSSZSTYaZXSYSTVWfXNZcTVUXOZYSUXfYRSWUeaUSWUUXVSRXVXYRRZTdYiTXPTXbYQVRROTXZNbURZWUYVUXYUYSRYPSRWWYUWaVXHTXRSVYXTSXYTVSQWUVbRTRYRQKeVcLXXbYceTYYTONibLVTXdPXYUbWYTPfYPYYadPZSZUXcMPYVWLXVXbWYYZZUTUSVNVdRWSOVUXTPTWSTaWXVTUNVLRTRTbLZcVeZTWXSUVcVVVULbWRTcPQVWVSMYYZWYVcaWTTkOaMXYVfYReaVcPUTYbQSVZUTWXdPPYVVQPbYSQPNYTaXTWSedPOUSTZVSTUUTXPRVeQZPSJQVSWSXPYVRRYPSVTSWTaaaYXUWPaSbcQOSQgVUbUeRRWWNRXVWVPRXUZSWeXPMZfWVYTTRXUTMVTSRXUWSVZQaXTVWSMZTRVSUTYaaSTWTXeTYXTWRZPYXaWURWTVWRWbYQLLZYWVYdUZVPKZSUZQXWRPZaXYMTbgUQTTXZVVZQPVKdRdcbLTPbQTRaPQWcNYNOLVdaWVaSTTPRJPYdaSZTUNVNZQVVZTUYRQOVUXaQQPURbYWbXVWTUOVXcNOSQTbbPUXTWWMTYWUWaVVaTVWWQPWZXMXacRXVTWSYbVZSTUWaWRYRcTVSXaZUQeXXUYWUSSSaUWRQSXSeXSYVUdTUVVVWUYcWeTYWYSNRRSWQYXTRVRRVbYSTSRTXVQcUbQUVQYVUSTYVTUVUXYURgSZVQYYXRXXWdSXUQSYSaVVXUUSWXYSXRVVMVWLcTWUTbbSSUUSVKUWWiXZSMRTRZRVUQOSYbUXbYUSURTPUQUcUXWQYZQVXTLSXZdVVPVXYcaOKRTVQdZNSXRYXTaYVNWVYaaZWTdXMTIabeRWZbYRQOTVaTReUWTSXZWYZVaSVQiUVPSRSbZRPMSTWSVaSUZSXSVYUZZRTSVaSbUUZRXTiZdRVTRSUWTWeRWXXTXXUVOUVXQPYVVWSYQPUSWTbUbTTVYRYTcTXZRYSYUaWYbVTSXUXUXTXQVXXVSYQWYcOPVNZYVXQZSPRbaZSWRaWWUYYTZaUTaLcWZXbSPYVVOWQbbXZSRVWTZVQViTZUUSOVTbYYXWTRZWUTTTUTRSQWaTZZQOcWNRTVLOSYUVPSVWUWfYShWTfMTVXfVPQQZSdaOYUXYVOWXOifcPXXecXVTSRVZSTOaSaKaUVbQHXUTWUYZOTMYbWVWPVXVSYWRYcRbiWbYZVSTYdXeYfVXPTROQXXZRTMOVSaRXSVNNTXXTZWUVPUQOXZSYTWWOYQMSaQXSXWWcVaUaPWQWQUYTdWWadWXObWQOMUVWZSOWYWZMROWVTVZdcVYQTeZVQWVTUNVQYSVXOTULTNXbTUTXZUWTWUaWdRYQWUTXUTdVUUaZYPXRVQUYXZSXPXQSZZUXTbeTaZSURXRQPZVWQWVRTRUSWWYdUKSVTaYYScZQWbUTZXUUSPVVYWNVSWTOQYUURYVWWaSTWdMVUORVSXPbZYcZbSWPLgbNVUTRXSUVMZPVbbSbYUSXSVZSWWcRVXXXMULVSVQbZVZXeNXaSZRYROTRXYWQYVgcZXOYaRSTXRSWQPUcUfeXXUebYWVXVMXWYXZWWLYRVROVSQMOaVVUdVUURSTVZcPaYVYbbVYVRdOQPTSVVZbXaWURQZZcXRTUVWMTSPYVXSUXbTOUWPMTVWPWaTVZZTOSYaVNLVOcWXRVQYPVOaVeSPQZTXWUdSVSSTUbRYacRTVVQWWSZbVVQWXYWVVeWRXOSPVcXWXRUaVcYOUUThZSPRQVXPVcTXTVSUUXaQPQZNUTTTVaYSQVYaVYSVWVTSSTeVUPOcSTcYPVQiUUUUUZZSdcPaTSSSaRVbYYRcQcTLNQWMeNXSVTTPWRcQKPTROYQSRVVWWbbVWXXaZTUSdOOfWXbSWSQTbUQSXLQUTZTPXPYVSQbSTcRZUTWVcYTSTaSeYaXWUaZXddNaTQYWXUXXVXWRYXRVUXUVZPVQeJQeMQVcVXWTWTWWWVPVYaPOXTPTWVOYWacVOUUcXTMVUVPaXXMSaWVWSVQVXRXOVRZWZUTPZRZYTVQaTVTVSTXRNWUTYRXYVPXbRUZTcQfTTYdUbWZZSgYWQaPUbVUaLbZUUaYZSZKVYfRYgUSXPaZZNMaXTXTRWPSbWQXUVUUQSTQbXTabWTcTdVbPUULZZOZUZKRcSWYSPMccMaYgQSTWXPVUZRWWTcXUVJVUZbYQWbVSaXRPZXTXRTPYXTVTWTUWSSbaQSQUURXTUVWUXPUYTSPYSbeWdRTVYTYTYWcdaaXTeRQSQXSSZRVYZWWSNZVSPcYQPZkaaSXTWXZPSaVQaSQVUVVTNVWUSVVUQUTSbRSTNSUXURScUcaXTSSVRUYXZMZOPOTQUTWUSZWUQeRVVVIUWTXWWcRYTXVUOTVhKWWVaUZTXYUbPYQXWaOZadRcYXIZVVZeTaVbUPYTSRWZTQLRUTVRYSTXSXZTYXTURXSUVWWbUQWdYXSXVdTQUZcYVYOZTVPdQQQTRUSaPLUTUXTWZTPNecTNTUQKZZaaXWTVZPVYLWScbfTRWVVROSSVYVVVXbQcZdSaXZbYLaXVSOVWUfPPUZSRSTKPeSUWXaYYYRUWRZfWXXUTYUXUbWVTbXbaWXXUdVURUTObVWWWXRVWRXRcRUWXTRZYdMYZcYeRYZcYJQbaYhVXgURRUVWThTZZUZXbRVYUXWYUTUWZjXWYKVQVXSQTaRTeVXRaeWTNScXYTRRZbPQXVTYUeSSNYUSaRYYWeOOUTYPNRaUbWPRUdPYRZOTbbTRYWVWTfWNVRVZWfRdQQTSYVXRaVTWUYZjXWaZbQPfUhcXOTQPbZQVWSaQWbVTVXYUaXTQTVWPZWVTSUUYYVTUSaSXUWQRYVNQWXTTfYXNVWWOQRPZXXTZXYWRXZXVMRUPZTVSSVQZTZWWYOVWRVVRaXRXOXWTSOYZYUSLaXSaVQTQWXVUTTbbbVZMZXaUbWUQTZWURXXVYRSXSTPUaVVSRUYSObbaSOIVRbRVTVcTYSQXSJTZgaYUeOJWWdWTTUYVcNRRRYSTVURWbSZXXQYUQdbVXUOTVNUZWVTaVfRXafUZVTXbaSeVNVWXXYZWQXbTfVVXWRdPSOXMTWVWTVPXVRbacKSXTaQccPZSRXYTZYVRRXQTbTXOVYVYSZUUfSbIbQSVSUTTabQTVSVbdVWVSYbWRUYbVcXKVTUWQLeVMXUfPYSReXdVaaUWNXXbQYSWPUJaUUVXVWQbZZYbaXSRaXXOcVdUURVbTRSUcXOSPOOaVSUYdVRTPRVUSZQWUWWUdXUNUYPcTQRZVWXXRKRYWUlaYXUTWZVVTZWTPcXXUPVTZZXWNbTTULVPYTXVcZaQQVaTbMPYbUXVTRZVePWRXZYRWdQTNVZYSUSXWUYaTXXXWNSbTXdOZWUMaRWbcbYTPZPQURTbPTUTRSXTbPXbQZSOUVSQVUbaUbaYRcPRUYZXTXWTWNZSVQYWSYTZaVRTVTYWVMPYPcUZNZYRWbRVSRXXRdYXXZUVSScbVWaVaRWfVUXTWQgSUZSRbVTVSTRTSUUZYPbaOWTQSWSWUTPYXXTNbOTRVYVXZQLgOQWNVNZXaYQZbWdbPaPRbVPdPQZRUXUbWSXTUWVVWYabZVdTWOVYaVZUVhVTXPTUPWOTWWYfWZXYVaQSRZVaVSbWTNUPTXbTTPRUSUVVXXZdTVUJTWVWVWNVSVYZUQVTUdcTdUXSZWPXWVSXOQURTUWXVMXZVPVRYQYfaUQUSVeZYYfYXYUaRcTcUMYNcYXZRaaTXSYWYKRQVSOScOacZWRSUWVUbaRPWWTPVYMPXUYYTWUXbTRNVVaYbXYZaWSTTTXcWWXUXRTaTXVaLPXUNYWOSSbVQYTWUSQUYbSYbQNUfYTTVWaTXWbVUPQZTdTTYZPPQXQZOSWaUSSdUSVUTYYUcZUUSWUbZVNeZOZTWaQXYTWYVXTVWVXUWSTXTbWRVbWQPYVRVTTaWYXYUSLdUZWWWVZeMRVPTPUZYWWSTYSSZYUaTbXTQVVSWNVVXWXQWVVYQVWcRZVRKaTUZWWeVQWXWOYTXYXWUcQUSMUTOOVdVRRaOQWTXSaZWOVTbeVVaWdUXVTcXVTTZWRYLSTXSSQUQWVUUZZaVSRcURQYUUUVSZUWSPXYVYWRWUYOQRWeZUThXTXVTVUTfQVZVRdbVVWTSVQRTXWSVUMRWSTVSTXVSYRUUQNNTPbYecaUKeVUbTbUQWRTYVbaTVWTXYPQWSTYRWQOTXWNSYVWYTXTUWYXbRXVOUTXVRaVIVRdTZfaTaYWZSXURWTTTScabNVaUTVUZaaXUXXRXVTXSZTXZZcQVhTXTRRWNZTWQXWWRQUPeYRQUWRRPVOWeTaQSUUTWZQeWWZZRYRVWSXUXZSZOaQYQXaTYdWNaSZVQXXYWTRVbYUVTRTTZUSWZPcXRNbWWZVbeXcTRTaTLZScTYVcMYXReYVXTWVYYPPYWSXTRbSUXXYRYYadcZTUZTRVTOcTTWWVVZVSaQTVaVVTSVXYTXXfTUXRTRVQYXRTTcaRNTPWUZYMTPXXYYaVXVZTYTVRQPSVZQZYWWWXXTVXVPZKUYWcWUXXSRYSQOUWYYUSVVaPSaTUadUVcabTVSdUNYQaVSeQTTUURaZUcSNXSdSZSUaPeRWRYRSNUQZVWUTVhSSNWaTUPTVVYTUUVWaYVPRSRUUWSWcVVTUQOYWUYUPYWUSVeOcPSUROXWYUVbTaWTaYUWZTVMUdaYVSaTUTYSUVZWYVZRTUVQeRZTXTcSYTXXRVXcZcTVWfLZSTOPVVYVTQOaYWSWZUVVQcXdTWTWTUXQWZcWcYQQQTSUdVVQZSVVUWMWSVaXaaRZbSTUUUPRPQWUQUWcZaVYaWQaTVVRSZTiQPabSRWRYUaPXWUcVaNSTXRaWWOXMbXWOVVXeTWZRNXbSZRXYUYUSXOXZTOSQTUcUWZXUSUORVTdUeXRWbUXbSQRVZTcRVTeSWQTeScVXWTVXSUVSUUTdVSXPZXXbQSZKMRTTWaTReZUdVeUQVQTYaNTYYUMZZQZSTXZUWdYQTUZSPPRQVYWXZUXSNbVSjTYdbcYZVYQVTVPZQgeTPcSWSZRZYTUXNOYVQQTRUSYZRYRRYOYaVXTbUSXXNPWTWUVUWSYXUYeQMeXSTNUTSSUYMVUYSOTOYcZXNWaYUVVYRSWTUUVRZWYXRXWaYNUQVUPRSZXcWYRVfUWXaZZRPVUPSSRWPQSOXRQaXTYYXXVZaRWTXaUYWRVXTQWUTPOVWWQVVVXXQWPTOgRMZZPbYfZZSYUgYfVRXYQfRVPQYTTWTVUUTYWYbUYXQRTKZVTYUMRZUUTTVOOYaRVRQdYaYaYYULQTcTRXYRTRXRTPTZRTYSUWSYbSYRRfNXQOXcXbUVPRWXaWWTJTUYYPVOXWSRQXXTXTVabYMXfTaUbYOabObbaUbUMURRNbKbZeZUTQTTUZaTQVTTWQZYRRWVUZZVJaRVaWYWURVUVVVSXTVRVTQWVWXQGTQUaWPWUdUVZVTTbUaUXcSSSUYWUaTdVZYSSQSTUXRYOQWaVVQUYTSNabUSVMYWVY`);
+const H = DC.heroes();
+const $ = s => document.querySelector(s);
+const TEAM = ['Radiant', 'Dire'];
+const STG = ['Early game', 'Mid game', 'Late game'];
+const pct = p => Math.round(p * 100) + '%';
+const pp = v => (v >= 0 ? '+' : '−') + Math.abs(v * 100).toFixed(1);
+const pi = v => (v >= 0 ? '+' : '−') + Math.round(Math.abs(v * 100));
+const mmss = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+function initials(h){ const n = H[h].name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean); return (n.length > 1 ? n.slice(0, 2).map(w => w[0]).join('') : n[0].slice(0, 2)).toUpperCase(); }
+function mono(h, sm){ return `<span class="mono ${H[h].attr}${sm ? ' sm' : ''}" aria-hidden="true">${initials(h)}</span>`; }
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---------- state ---------- */
+let G = { screen: 'setup', cfg: { mode: 'bot', lvl: 1, side: 0, fp: 0, names: ['You', 'Bot'] },
+  step: 0, first: 0, picks: [[], []], bans: [[], []], used: {}, sel: null, filt: { q: '', attr: '', role: '', sort: 'name' },
+  seed: 0, clock: 0, speed: 1, paused: false, shown: [] };
+let M = null;
+let timer = null, lastTs = 0, botTimer = null;
+
+function show(id){ ['setup','draft','preview','match'].forEach(s => $('#' + s).hidden = s !== id); G.screen = id; $('.topbar').hidden = id === 'setup'; $('.foot').hidden = id === 'setup'; renderTop(); renderBar(); window.scrollTo(0, 0); }
+function renderTop(){
+  const a = $('#topActions');
+  a.innerHTML = G.screen === 'setup' ? '' : '<button class="btn sm quiet" id="newGame">New game</button>';
+  const b = $('#newGame'); if (b) b.onclick = () => { stopLoop(); clearTimeout(botTimer); $('#overlay').hidden = true; show('setup'); };
+  $('#crumb').textContent = { setup: 'Captains Mode', draft: 'Draft', preview: 'Draft read', match: 'Match' }[G.screen];
+}
+
+/* ---------- setup ---------- */
+function segBind(id, key, after){
+  $(id).querySelectorAll('button').forEach(b => b.onclick = () => {
+    $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    let v = b.dataset.v; if (key !== 'mode' && key !== 'fp' && key !== 'attr') v = +v; if (key === 'fp' && v !== 'coin') v = +v;
+    after(v);
+  });
+}
+segBind('#modeSeg', 'mode', v => { G.cfg.mode = v; $('#lvlField').hidden = v !== 'bot'; $('#sideField').hidden = v !== 'bot'; syncNames(); });
+segBind('#lvlSeg', 'lvl', v => G.cfg.lvl = v);
+segBind('#sideSeg', 'side', v => { G.cfg.side = v; syncNames(); });
+segBind('#fpSeg', 'fp', v => G.cfg.fp = v);
+function syncNames(){
+  if (G.cfg.mode === 'bot'){ const me = G.cfg.side; $('#nameR').value = me === 0 ? 'You' : 'Bot'; $('#nameD').value = me === 1 ? 'You' : 'Bot'; }
+  else { $('#nameR').value = 'Player 1'; $('#nameD').value = 'Player 2'; }
+}
+$('#startDraft').onclick = () => {
+  G.cfg.names = [$('#nameR').value.trim() || 'Radiant', $('#nameD').value.trim() || 'Dire'];
+  G.first = G.cfg.fp === 'coin' ? (Math.random() < 0.5 ? 0 : 1) : G.cfg.fp;
+  G.step = 0; G.picks = [[], []]; G.bans = [[], []]; G.used = {}; G.sel = null;
+  show('draft'); renderDraft(); maybeBot();
+};
+
+/* ---------- draft ---------- */
+function turn(){ if (G.step >= 24) return null; const [k, t] = DC.CM[G.step]; return { kind: k, team: t === 0 ? G.first : 1 - G.first }; }
+function isBot(team){ return G.cfg.mode === 'bot' && team !== G.cfg.side; }
+function phaseName(){ const s = Math.min(G.step, 23); return DC.PHASES.find(p => s >= p[0] && s <= p[1])[2]; }
+function suggestions(){
+  const tn = turn(); if (!tn) return [];
+  const mine = G.picks[tn.team], theirs = G.picks[1 - tn.team];
+  const list = [];
+  H.forEach(h => { if (G.used[h.i]) return; const v = tn.kind === 'pick' ? DC.pickValue(h.i, mine, theirs) : DC.pickValue(h.i, theirs, mine) + 0.04 * DC.contest(h.i); list.push({ h: h.i, v }); });
+  return list.sort((a, b) => b.v - a.v);
+}
+function renderDraft(){
+  const tn = turn();
+  $('#order').innerHTML = DC.CM.map((c, i) => { const team = c[1] === 0 ? G.first : 1 - G.first; return `<i class="t${team} ${c[0]} ${i < G.step ? 'done' : ''} ${i === G.step ? 'cur' : ''}" title="Turn ${i + 1}: ${TEAM[team]} ${c[0]}">${c[0] === 'pick' ? 'P' : 'B'}</i>`; }).join('');
+  $('#turn').innerHTML = tn
+    ? `<span class="ph">${phaseName()}</span><span class="act disp t${tn.team}">${TEAM[tn.team]} ${tn.kind === 'pick' ? 'picks' : 'bans'}</span><span class="cnt">${isBot(tn.team) ? 'Bot is choosing…' : 'Turn ' + (G.step + 1) + ' of 24'}</span>`
+    : `<span class="ph">Draft complete</span><span class="act disp">Locked in</span>`;
+  const ev = DC.evaluate(G.picks[0], G.picks[1]);
+  [0, 1].forEach(t => renderTeam(t, tn, ev));
+  renderGrid(); renderDetail();
+}
+function renderTeam(t, tn, ev){
+  const np = G.picks[t].length, nb = G.bans[t].length;
+  const pickNow = tn && tn.team === t && tn.kind === 'pick', banNow = tn && tn.team === t && tn.kind === 'ban';
+  let slots = '';
+  for (let i = 0; i < 5; i++){ const h = G.picks[t][i];
+    slots += h != null ? `<div class="slot">${mono(h)}<span class="nm">${esc(H[h].name)}</span></div>`
+      : `<div class="slot empty ${pickNow && i === np ? 'now' : ''}">${pickNow && i === np ? 'Picking' : ''}</div>`; }
+  let bans = G.bans[t].map(h => `<span class="ban" title="Banned">${esc(H[h].name)}</span>`).join('');
+  if (banNow) bans += '<span class="ban now">Banning</span>';
+  for (let i = nb + (banNow ? 1 : 0); i < 7; i++) bans += '<span class="ban open">&nbsp;&nbsp;&nbsp;</span>';
+  const p = t === 0 ? ev.overall : 1 - ev.overall;
+  const hasPicks = G.picks[0].length + G.picks[1].length > 0;
+  $('#team' + t).innerHTML = `<div class="head"><div><h2>${TEAM[t]}</h2><div class="who">${esc(G.cfg.names[t])}${G.first === t ? ' · first pick' : ''}</div></div>
+    <div class="wc">${hasPicks ? pct(p) : '—'}<small>draft win chance</small></div></div>
+    <div class="picks">${slots}</div><div class="bans" aria-label="${TEAM[t]} bans">${bans}</div>`;
+}
+function renderGrid(){
+  const tn = turn(); const f = G.filt;
+  let list = H.slice();
+  if (f.q) list = list.filter(h => h.name.toLowerCase().includes(f.q.toLowerCase()));
+  if (f.attr) list = list.filter(h => h.attr === f.attr);
+  if (f.role) list = list.filter(h => h.roles.includes(f.role));
+  const sug = suggestions(); const rank = {}; sug.forEach((s, i) => rank[s.h] = i);
+  if (f.sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
+  if (f.sort === 'wr') list.sort((a, b) => b.wr - a.wr);
+  if (f.sort === 'contest') list.sort((a, b) => DC.contest(b.i) - DC.contest(a.i));
+  if (f.sort === 'suggest') list.sort((a, b) => (rank[a.i] ?? 999) - (rank[b.i] ?? 999));
+  const humanTurn = tn && !isBot(tn.team);
+  $('#grid').innerHTML = list.map(h => { const top = humanTurn && rank[h.i] < 5;
+    return `<button class="tile${top ? ' top' : ''}" role="option" data-h="${h.i}" aria-pressed="${G.sel === h.i}" ${G.used[h.i] ? 'disabled' : ''} title="${esc(h.name)} · ${h.roles.join(', ')}${top ? ' · strong option this turn' : ''}">
+    <span class="attr ${h.attr}"></span><span class="nm">${esc(h.name)}</span><span class="wr">${top ? '★ ' : ''}${(h.rawWr * 100).toFixed(0)}%</span></button>`; }).join('');
+  $('#grid').querySelectorAll('.tile').forEach(b => { b.onclick = () => { G.sel = +b.dataset.h; renderGrid(); renderDetail(); }; b.ondblclick = () => { G.sel = +b.dataset.h; confirmSel(); }; });
+}
+function stageBar(label, w){
+  const d = w - 0.5; const width = Math.min(50, Math.abs(d) * 500);
+  return `<div class="sb"><span class="ink2">${label}</span><span class="bar"><span class="fill" style="${d >= 0 ? 'left:50%' : 'right:50%'};width:${width}%;background:${d >= 0 ? 'var(--rad)' : 'var(--dire)'}"></span></span><span class="v">${(w * 100).toFixed(1)}%</span></div>`;
+}
+function renderDetail(){
+  const tn = turn(); const el = $('#detail');
+  const sug = suggestions().slice(0, 5);
+  const humanTurn = tn && !isBot(tn.team);
+  const sugHtml = humanTurn ? `<div><div class="sh">${tn.kind === 'pick' ? 'Strong picks now' : 'Strong bans now'}</div><div class="sugg">${sug.map(s => `<button class="chip" data-h="${s.h}"><span class="attr ${H[s.h].attr}"></span>${esc(H[s.h].name)}</button>`).join('')}</div></div>` : '';
+  if (G.sel == null){
+    el.innerHTML = `<div><h3>Choose a hero</h3><p class="sub">Click a hero for its pro record. Double-click, or press Enter, to lock it in. A star marks the five strongest options for this turn.</p></div>${sugHtml}
+      <p class="note">Stage strength uses pro games that ended before 30 minutes (early), between 30 and 42 (mid) and after 42 (late).</p>`;
+  } else {
+    const h = H[G.sel]; const team = tn ? tn.team : 0;
+    const forPick = !tn || tn.kind === 'pick';
+    const allies = G.picks[forPick ? team : 1 - team], enemies = G.picks[forPick ? 1 - team : team];
+    const vsL = enemies.map(e => ({ e, v: DC.vs(h.i, e) })).sort((a, b) => b.v - a.v);
+    const syL = allies.map(a => ({ a, v: DC.syn(h.i, a) })).sort((a, b) => b.v - a.v);
+    const all = enemies.length ? [] : H.filter(x => x.i !== h.i).map(x => ({ e: x.i, v: DC.vs(h.i, x.i) })).sort((a, b) => b.v - a.v);
+    const verb = tn ? (tn.kind === 'pick' ? 'Pick' : 'Ban') : '';
+    const persp = tn && tn.kind === 'ban' ? `Worth to ${TEAM[1 - team]} if left open` : `Worth to ${TEAM[team]}`;
+    const row = (name, v) => `<div><span>${name}</span><span class="v ${v >= 0 ? 'pos' : 'neg'}">${pi(v)}</span></div>`;
+    el.innerHTML = `<div style="display:flex;gap:12px;align-items:center">${mono(h.i)}<div style="min-width:0"><h3>${esc(h.name)}</h3><div class="sub">${{str:'Strength',agi:'Agility',int:'Intelligence',all:'Universal'}[h.attr]} · ${h.atk === 'M' ? 'Melee' : 'Ranged'} · ${h.roles.join(', ')}</div></div></div>
+      <div class="facts"><div><b>${(h.rawWr * 100).toFixed(1)}%</b><span>Pro win rate</span></div><div><b>${h.g.toLocaleString()}</b><span>Picks</span></div><div><b>${h.bans.toLocaleString()}</b><span>Bans</span></div><div><b>${Math.round(DC.contest(h.i) * 100)}%</b><span>Contested</span></div></div>
+      ${tn && humanTurn ? `<div class="cta"><button class="btn go" id="confirm" ${G.used[h.i] ? 'disabled' : ''}>${verb} ${esc(h.name)}</button><span class="val">${persp}: <b class="num">${pp(DC.pickValue(h.i, allies, enemies))}</b> points</span></div>` : ''}
+      <div><div class="sh">Strength by game length</div><div class="sbars">${stageBar('Early', h.stageWr[0])}${stageBar('Mid', h.stageWr[1])}${stageBar('Late', h.stageWr[2])}</div></div>
+      ${enemies.length ? `<div><div class="sh">Against the enemy draft</div><div class="rl">${vsL.map(x => row('vs ' + esc(H[x.e].name), x.v)).join('')}</div></div>`
+        : `<div class="cols2" style="gap:18px"><div><div class="sh">Beats</div><div class="rl">${all.slice(0, 4).map(x => row(esc(H[x.e].name), x.v)).join('')}</div></div><div><div class="sh">Loses to</div><div class="rl">${all.slice(-4).reverse().map(x => row(esc(H[x.e].name), x.v)).join('')}</div></div></div>`}
+      ${syL.length ? `<div><div class="sh">With allies</div><div class="rl">${syL.map(x => row('+ ' + esc(H[x.a].name), x.v)).join('')}</div></div>` : ''}
+      ${sugHtml}
+      <p class="note">Points are win-rate points above or below what the two heroes' own records predict, pulled toward zero when the pro sample is small.</p>`;
+    const c = $('#confirm'); if (c) c.onclick = confirmSel;
+  }
+  renderBar();
+  el.querySelectorAll('.chip').forEach(b => b.onclick = () => { G.sel = +b.dataset.h; renderGrid(); renderDetail(); });
+}
+function renderBar(){
+  const tn = turn(); const b = $('#mbar');
+  const on = G.screen === 'draft' && tn && !isBot(tn.team) && G.sel != null && !G.used[G.sel];
+  b.hidden = !on; if (!on) return;
+  $('#mbarTxt').textContent = H[G.sel].name + ' · ' + (H[G.sel].rawWr * 100).toFixed(1) + '% pro win';
+  $('#mbarBtn').textContent = (tn.kind === 'pick' ? 'Pick ' : 'Ban ') + H[G.sel].name;
+  $('#mbarBtn').onclick = confirmSel;
+}
+function act(h){
+  const tn = turn(); if (!tn || G.used[h]) return;
+  G.used[h] = 1; (tn.kind === 'pick' ? G.picks : G.bans)[tn.team].push(h);
+  G.step++; G.sel = null;
+  if (G.step >= 24){ renderDraft(); setTimeout(showPreview, 600); return; }
+  renderDraft(); maybeBot();
+}
+function confirmSel(){ const tn = turn(); if (G.sel == null || !tn || isBot(tn.team)) return; act(G.sel); }
+function maybeBot(){
+  const tn = turn(); if (!tn || !isBot(tn.team)) return;
+  clearTimeout(botTimer);
+  botTimer = setTimeout(() => {
+    const r = DC.rng((Date.now() ^ (G.step * 2654435761)) >>> 0);
+    act(DC.botChoose(tn.kind, G.picks[tn.team], G.picks[1 - tn.team], G.used, G.cfg.lvl, r));
+  }, 650 + Math.random() * 500);
+}
+$('#search').oninput = e => { G.filt.q = e.target.value; renderGrid(); };
+segBind('#attrSeg', 'attr', v => { G.filt.attr = v; renderGrid(); });
+$('#roleSel').onchange = e => { G.filt.role = e.target.value; renderGrid(); };
+$('#sortSel').onchange = e => { G.filt.sort = e.target.value; renderGrid(); };
+
+/* ---------- draft read ---------- */
+function showPreview(){
+  const R = G.picks[0], D = G.picks[1];
+  const ev = DC.evaluate(R, D);
+  const fav = ev.overall >= 0.5 ? 0 : 1;
+  const lu = t => `<div class="lu t${t}"><div class="head"><h2>${TEAM[t]}</h2><div class="who ink2" style="font-size:13px">${esc(G.cfg.names[t])}</div></div>${G.picks[t].map(h => `<div class="hrow">${mono(h, 1)}<span>${esc(H[h].name)}</span><span class="r">${H[h].roles.slice(0, 2).join(', ')}</span></div>`).join('')}</div>`;
+  const pv = v => `<td class="m ${v >= 0 ? 'pos' : 'neg'}">${pp(v)}</td>`;
+  const rows = [0, 1, 2].map(s => { const st = ev.stages[s], p = st.p; return `<tr>
+    <td class="stg"><b>${STG[s]}</b><span>${['0:00 – 15:00','15:00 – 30:00','30:00 – end'][s]}</span></td>
+    <td class="p rad">${pct(p)}</td><td><div class="split"><i style="width:${p * 100}%;background:var(--rad)"></i><i style="width:${(1 - p) * 100}%;background:var(--dire)"></i></div></td><td class="p dire" style="text-align:left">${pct(1 - p)}</td>
+    ${pv(st.parts.hero)}${pv(st.parts.matchup)}${pv(st.parts.synergy)}${pv(st.parts.comp)}</tr>`; }).join('');
+  const edges = ev.pairs.slice(0, 6).map(x => { const w = x.v >= 0; return `<div><span><span class="${w ? 'rad' : 'dire'}">${esc(H[w ? x.a : x.b].name)}</span> over ${esc(H[w ? x.b : x.a].name)}</span><span class="v">${pi(Math.abs(x.v))}</span></div>`; }).join('');
+  const pairs = ev.synR.slice(0, 3).map(x => `<div><span class="rad">${esc(H[x.a].name)} + ${esc(H[x.b].name)}</span><span class="v ${x.v >= 0 ? 'pos' : 'neg'}">${pi(x.v)}</span></div>`).join('')
+    + ev.synD.slice(0, 3).map(x => `<div><span class="dire">${esc(H[x.a].name)} + ${esc(H[x.b].name)}</span><span class="v ${x.v >= 0 ? 'pos' : 'neg'}">${pi(x.v)}</span></div>`).join('');
+  $('#preview').innerHTML = `<div style="display:flex;flex-direction:column;gap:26px">
+    <div class="versus">${lu(0)}<div class="mid"><span class="lab">Draft favors</span><span class="big ${fav ? 'dire' : 'rad'}">${pct(Math.max(ev.overall, 1 - ev.overall))}</span><span class="disp ${fav ? 'dire' : 'rad'}" style="font-size:24px">${TEAM[fav]}</span></div>${lu(1)}</div>
+    <div><h2 style="font-size:30px;margin-bottom:8px">Win chance by stage</h2><div class="tablewrap"><table class="ftab">
+      <thead><tr><th>Stage</th><th>Radiant</th><th></th><th style="text-align:left">Dire</th><th>Hero strength</th><th>Counters</th><th>Synergy</th><th>Team shape</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="note" style="margin-top:8px">Factor columns are win-rate points from Radiant's side; negative favors Dire. Team shape costs points for missing a support, a carry, an initiator or reliable disables.</p></div>
+    <div class="cols2"><div><div class="sh">Biggest head-to-head edges</div><div class="rl">${edges}</div></div><div><div class="sh">Best teammate pairs</div><div class="rl">${pairs}</div></div></div>
+    <div class="go-row"><p>The draft sets the odds. Gold leads, Aegis, Shards and match-day form decide each fight, so the weaker draft still wins its share.</p><button class="btn go" id="goMatch">Start the match</button></div>
+  </div>`;
+  $('#goMatch').onclick = () => startMatch((Math.random() * 4294967295) >>> 0);
+  show('preview');
+}
+
+/* ---------- map ---------- */
+const P0 = { tw: { top: [[95,420],[100,585],[110,705]], mid: [[420,580],[335,665],[268,732]], bot: [[580,905],[415,900],[300,890]] },
+  rax: { top: [[82,752],[132,752]], mid: [[228,742],[258,772]], bot: [[248,868],[248,915]] }, t4: [[168,808],[192,832]], anc: [115,885] };
+function mir(p){ return [1000 - p[0], 1000 - p[1]]; }
+const POS = [P0, { tw: { top: P0.tw.bot.map(mir), mid: P0.tw.mid.map(mir), bot: P0.tw.top.map(mir) }, rax: { top: P0.rax.bot.map(mir), mid: P0.rax.mid.map(mir), bot: P0.rax.top.map(mir) }, t4: P0.t4.map(mir), anc: mir(P0.anc) }];
+const PIT = { day: [300, 330], night: [700, 670] };
+const TORM = [[640, 790], [360, 210]];
+const PLACE = { 'top lane': [[95,300],[200,95]], 'mid lane': [[460,540],[540,460]], 'bot lane': [[800,905],[905,700]], 'the jungle': [[330,560],[670,440]], 'the river': [[420,420],[580,580]] };
+const COL = ['#72b55c', '#e0623f'];
+function mapBase(){
+  // territory split along the river: Radiant bottom-left, Dire top-right
+  return `<rect width="1000" height="1000" fill="#151d17"/>
+  <path d="M0,0 L1000,0 L1000,1000 Z" fill="#1d1614"/>
+  <path d="M0,0 L1000,1000" stroke="#0f1317" stroke-width="2"/>
+  <path d="M40,240 C 250,330 380,420 500,500 S 760,690 770,960" fill="none" stroke="#1d3a46" stroke-width="54" stroke-linecap="round"/>
+  <g fill="none" stroke="#2c3630" stroke-width="18" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M120,860 L95,95 L880,110"/><path d="M150,850 L850,150"/><path d="M140,885 L905,905 L890,120"/></g>
+  <g font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="800" font-size="40" letter-spacing="2">
+    <text x="36" y="978" fill="#72b55c" opacity=".55">RADIANT</text><text x="964" y="52" fill="#e0623f" opacity=".55" text-anchor="end">DIRE</text></g>`;
+}
+function renderMap(fr){
+  let s = mapBase();
+  [0, 1].forEach(t => {
+    const sd = fr ? fr.side[t] : null; const col = COL[t];
+    const sq = (p, size, up) => `<rect x="${p[0] - size / 2}" y="${p[1] - size / 2}" width="${size}" height="${size}" fill="${up ? col : '#0f1317'}" stroke="${up ? '#0f1317' : col}" stroke-width="${up ? 3 : 2}" opacity="${up ? 1 : .55}"/>`;
+    DC.LANES.forEach(l => {
+      POS[t].tw[l].forEach((p, i) => { s += sq(p, 30, sd ? sd.tw[l][i] : 1); });
+      POS[t].rax[l].forEach((p, i) => { const up = sd ? sd.rax[l][i] : 1; s += `<rect x="${p[0] - 18}" y="${p[1] - 8}" width="36" height="16" fill="${up ? col : '#0f1317'}" stroke="${col}" stroke-width="2" opacity="${up ? .9 : .5}"/>`; });
+    });
+    POS[t].t4.forEach((p, i) => { s += sq(p, 26, sd ? sd.t4[i] : 1); });
+    const a = POS[t].anc, up = sd ? sd.anc : 1;
+    s += `<rect x="${a[0] - 30}" y="${a[1] - 30}" width="60" height="60" transform="rotate(45 ${a[0]} ${a[1]})" fill="${up ? col : '#0f1317'}" stroke="${up ? '#e6e9e3' : col}" stroke-width="4"/>`;
+  });
+  const day = fr ? fr.day : true;
+  const pit = day ? PIT.day : PIT.night, other = day ? PIT.night : PIT.day;
+  const alive = fr ? fr.rosh.alive : true;
+  s += `<circle cx="${other[0]}" cy="${other[1]}" r="20" fill="none" stroke="#6b5a33" stroke-width="3" stroke-dasharray="5 6"/>`;
+  s += `<circle cx="${pit[0]}" cy="${pit[1]}" r="24" fill="${alive ? '#d6a442' : '#0f1317'}" stroke="#d6a442" stroke-width="4"/>`;
+  if (fr && !alive && fr.rosh.respawn) s += `<text x="${pit[0]}" y="${pit[1] - 34}" text-anchor="middle" font-size="24" font-weight="700" fill="#d6a442" font-family="Chivo Mono, monospace">${fr.rosh.respawn[0]}–${fr.rosh.respawn[1]}</text>`;
+  TORM.forEach((p, i) => { const up = fr ? fr.torm[i].alive : false; s += `<path d="M${p[0]},${p[1] - 26} L${p[0] + 24},${p[1] + 16} L${p[0] - 24},${p[1] + 16} Z" fill="${up ? '#5f9fd8' : '#0f1317'}" stroke="#5f9fd8" stroke-width="3" opacity="${up ? 1 : .6}"/>`; });
+  s += '<g id="flashes"></g>';
+  $('#map').innerHTML = s;
+}
+function flash(e){
+  const g = $('#flashes'); if (!g) return;
+  let p;
+  if (e.place && PLACE[e.place]){ const [a, b] = PLACE[e.place]; const r = Math.random(); p = [a[0] + (b[0] - a[0]) * r, a[1] + (b[1] - a[1]) * r]; }
+  else if (e.type === 'rosh' || e.place === 'Roshan’s lair'){ const f = M.frames[Math.max(0, e.t - 1)]; p = f && !f.day ? PIT.night : PIT.day; }
+  else return;
+  const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); c.setAttribute('r', e.type === 'fight' ? 46 : 24);
+  c.setAttribute('fill', 'none'); c.setAttribute('stroke', COL[e.team === 1 ? 1 : 0]); c.setAttribute('stroke-width', '6');
+  g.appendChild(c);
+  if (c.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) c.animate([{ opacity: 1, transform: 'scale(.5)' }, { opacity: 0, transform: 'scale(1.4)' }], { duration: 1200, easing: 'cubic-bezier(.22,1,.36,1)' });
+  c.style.transformOrigin = p[0] + 'px ' + p[1] + 'px'; c.style.transformBox = 'view-box';
+  setTimeout(() => c.remove(), 1200);
+}
+
+/* ---------- match playback ---------- */
+const CHECK = [15 * 60, 30 * 60];
+function evSec(e){ return (e.t - 1) * 60 + e.sec; }
+function endSec(){ const a = M.events.find(e => e.type === 'ancient'); return a ? evSec(a) : M.endT * 60; }
+function startMatch(seed){
+  G.seed = seed; G.clock = 0; G.paused = false; G.shown = [];
+  $('#pauseBtn').textContent = 'Pause';
+  M = DC.simulate(G.picks[0], G.picks[1], seed);
+  $('#feed').innerHTML = ''; renderMap(null); show('match'); updateMatch(true);
+  addFeed({ t: 1, sec: 0, type: 'start', team: -1, text: 'Horn sounds. Creeps are out.' });
+  startLoop();
+}
+function frameAt(sec){ const i = Math.min(M.frames.length - 1, Math.max(0, Math.ceil(sec / 60) - 1)); return M.frames[i]; }
+function startLoop(){ stopLoop(); lastTs = performance.now(); timer = requestAnimationFrame(tick); }
+function stopLoop(){ if (timer) cancelAnimationFrame(timer); timer = null; }
+function tick(ts){
+  const dt = Math.max(0, Math.min(0.25, (ts - lastTs) / 1000)); lastTs = Math.max(lastTs, ts);
+  if (!G.paused){
+    const before = G.clock; const end = endSec();
+    let next = before + dt * 60 * G.speed;
+    const cp = CHECK.find(c => before < c && next >= c && c < end);
+    if (cp != null) next = cp;
+    if (next >= end) next = end;
+    G.clock = next; flushEvents(before, next); updateMatch(Math.floor(before / 60) !== Math.floor(next / 60));
+    if (cp != null && next === cp){ stageReport(cp === CHECK[0] ? 0 : 1); timer = null; return; }
+    if (next >= end){ stageReport(G.clock > 1800 ? 2 : G.clock > 900 ? 1 : 0, true); timer = null; return; }
+  }
+  timer = requestAnimationFrame(tick);
+}
+function flushEvents(a, b, quiet){ M.events.forEach((e, i) => { const s = evSec(e); if (s > a && s <= b && !G.shown[i]){ G.shown[i] = 1; addFeed(e, quiet); if (!quiet) try { flash(e); } catch (_) {} } }); }
+function addFeed(e, quiet){
+  const big = ['fight','rosh','rax','ancient','fb','torm'].includes(e.type);
+  const obj = ['rosh','torm','roshup','tormup','aegis'].includes(e.type);
+  const d = document.createElement('div'); d.className = `ev t${e.team} ${big ? 'big' : ''} ${obj ? 'obj' : ''} ${quiet ? '' : 'fresh'}`;
+  d.innerHTML = `<span class="ts">${e.type === 'start' ? '0:00' : mmss(evSec(e))}</span><span class="bar"></span><span class="tx">${esc(e.text)}</span>`;
+  const f = $('#feed'); f.prepend(d); while (f.children.length > 160) f.lastChild.remove();
+}
+function freshSides(){ const s = () => ({ tw: { top: [1,1,1], mid: [1,1,1], bot: [1,1,1] }, t4: [1,1], rax: { top: [1,1], mid: [1,1], bot: [1,1] }, anc: 1 }); return [s(), s()]; }
+function updateMatch(full){
+  const early = G.clock < 60; const f = early ? null : frameAt(G.clock);
+  const k = killsUpTo(G.clock);
+  $('#kR').textContent = k[0]; $('#kD').textContent = k[1];
+  $('#clock').textContent = mmss(G.clock);
+  $('#stgLabel').textContent = STG[G.clock < 900 ? 0 : G.clock < 1800 ? 1 : 2];
+  const day = Math.floor(G.clock / 300) % 2 === 0;
+  $('#dayNight').textContent = (day ? 'Day' : 'Night') + ', Roshan ' + (day ? 'top' : 'bottom');
+  if (full) renderMap(f);
+  const side = (t, v) => `<span class="${t ? 'dire' : 'rad'} num">${v}</span>`;
+  if (f){
+    $('#roshTxt').innerHTML = (f.rosh.alive ? 'Alive' : `Respawns ${f.rosh.respawn[0]}:00 to ${f.rosh.respawn[1]}:00`) + ` · kills ${side(0, f.rosh.kills[0])}–${side(1, f.rosh.kills[1])}` + (f.aegis ? ` · Aegis <span class="${f.aegis.team ? 'dire' : 'rad'}">${TEAM[f.aegis.team]}</span>` : '');
+    $('#tormTxt').innerHTML = G.clock < 1200 ? 'Spawn at 20:00' : `${f.torm.filter(x => x.alive).length} of 2 up · Shards ${side(0, f.shards[0])}–${side(1, f.shards[1])}`;
+    const l = f.lead; $('#leadTxt').innerHTML = Math.abs(l) < 300 ? 'Even' : `<span class="${l > 0 ? 'rad' : 'dire'}">${TEAM[l > 0 ? 0 : 1]} +${(Math.abs(l) / 1000).toFixed(1)}k</span>`;
+    $('#structTxt').innerHTML = `Towers ${side(0, DC.towersUp(f.side[0]))}–${side(1, DC.towersUp(f.side[1]))} · Barracks ${side(0, DC.raxUp(f.side[0]))}–${side(1, DC.raxUp(f.side[1]))}`;
+  } else { $('#roshTxt').textContent = 'Alive'; $('#tormTxt').textContent = 'Spawn at 20:00'; $('#leadTxt').textContent = 'Even'; $('#structTxt').innerHTML = 'Towers 11–11 · Barracks 6–6'; }
+  if (full || !f) renderKDA(f);
+  renderChart();
+}
+function killsUpTo(sec){
+  const m = Math.max(0, Math.floor(sec / 60));
+  if (m >= M.frames.length) return M.frames[M.frames.length - 1].kills;
+  const base = m >= 1 ? M.frames[m - 1].kills : [0, 0];
+  const next = M.frames[m].kills; const frac = (sec - m * 60) / 60;
+  return [base[0] + Math.floor((next[0] - base[0]) * frac), base[1] + Math.floor((next[1] - base[1]) * frac)];
+}
+function renderKDA(f){
+  [0, 1].forEach(t => {
+    $('#kda' + t).innerHTML = `<thead><tr><th><span class="tt ${t ? 'dire' : 'rad'}">${TEAM[t]}</span></th><th>K</th><th>D</th><th>A</th></tr></thead><tbody>` + G.picks[t].map(h => { const x = f ? f.kda[h] : [0,0,0]; return `<tr><td class="n">${mono(h, 1)}${esc(H[h].name)}</td><td class="v">${x[0]}</td><td class="v">${x[1]}</td><td class="v">${x[2]}</td></tr>`; }).join('') + '</tbody>';
+  });
+}
+function renderChart(){
+  const lim = G.clock;
+  const total = Math.max(45, M.endT); const W = 600, Hh = 150;
+  const X = t => t / total * W, Y = p => 8 + (1 - p) * (Hh - 16);
+  const fr = M.frames.filter(f => f.t * 60 <= lim + 0.5);
+  const pts = [[0, M.ev.stages[0].p]].concat(fr.map(f => [f.t, f.p]));
+  const maxLead = Math.max(5000, ...M.frames.map(f => Math.abs(f.lead)));
+  const L = l => Hh / 2 - l / maxLead * (Hh / 2 - 8);
+  let s = `<line x1="0" x2="${W}" y1="${Y(0.5)}" y2="${Y(0.5)}" stroke="#3a4650" stroke-dasharray="3 4"/>`;
+  [15, 30, 45].forEach(m => { if (m < total) s += `<line x1="${X(m)}" x2="${X(m)}" y1="0" y2="${Hh}" stroke="#283139"/><text x="${X(m) + 4}" y="14" fill="#86919a" font-size="11" font-family="Chivo Mono, monospace">${m}:00</text>`; });
+  const leadPts = [[0, 0]].concat(fr.map(f => [f.t, f.lead]));
+  if (leadPts.length > 1){
+    const area = `M${X(0)},${Hh / 2} ` + leadPts.map(p => `L${X(p[0])},${L(p[1])}`).join(' ') + ` L${X(leadPts[leadPts.length - 1][0])},${Hh / 2} Z`;
+    s += `<clipPath id="cTop"><rect width="${W}" height="${Hh / 2}"/></clipPath><clipPath id="cBot"><rect y="${Hh / 2}" width="${W}" height="${Hh / 2}"/></clipPath>`;
+    s += `<path d="${area}" fill="#72b55c" opacity=".22" clip-path="url(#cTop)"/><path d="${area}" fill="#e0623f" opacity=".22" clip-path="url(#cBot)"/>`;
+  }
+  if (pts.length > 1){
+    s += `<polyline points="${pts.map(p => X(p[0]) + ',' + Y(p[1])).join(' ')}" fill="none" stroke="#d6a442" stroke-width="2.2" vector-effect="non-scaling-stroke"/>`;
+    const lp = pts[pts.length - 1]; s += `<circle cx="${X(lp[0])}" cy="${Y(lp[1])}" r="3.5" fill="#d6a442"/><text x="${Math.min(W - 40, X(lp[0]) + 6)}" y="${Math.max(12, Y(lp[1]) - 6)}" fill="#d6a442" font-size="12" font-family="Chivo Mono, monospace" font-weight="700">${pct(lp[1])}</text>`;
+  }
+  $('#chart').innerHTML = s;
+}
+segBind('#speedSeg', 'speed', v => G.speed = v);
+$('#pauseBtn').onclick = () => { G.paused = !G.paused; $('#pauseBtn').textContent = G.paused ? 'Resume' : 'Pause'; };
+$('#skipBtn').onclick = () => { if (!M) return; const end = endSec(); const target = CHECK.find(c => c > G.clock && c < end); const before = G.clock; G.clock = (target != null ? target : end) - 0.001; flushEvents(before, G.clock, true); updateMatch(true); G.paused = false; $('#pauseBtn').textContent = 'Pause'; if (!timer) startLoop(); };
+
+/* ---------- check-in reports ---------- */
+function stageReport(s, final){
+  const from = s === 0 ? 0 : s === 1 ? 900 : 1800;
+  const to = G.clock; const f = frameAt(to);
+  const startFr = from === 0 ? null : M.frames[from / 60 - 1];
+  const k0 = startFr ? startFr.kills : [0, 0];
+  const sk = [f.kills[0] - k0[0], f.kills[1] - k0[1]];
+  const evs = M.events.filter(e => { const x = evSec(e); return x > from && x <= to; });
+  const keyTypes = ['fb', 'fight', 'rosh', 'rax', 'torm', 'ancient', 'tower'];
+  const key = evs.filter(e => keyTypes.includes(e.type)).sort((a, b) => keyTypes.indexOf(a.type) - keyTypes.indexOf(b.type) || evSec(a) - evSec(b)).slice(0, 7).sort((a, b) => evSec(a) - evSec(b));
+  const ev = M.ev; const lead = f.lead;
+  const cell = (a, b) => `<td class="${a > b ? 'lead' : ''}">${a}</td><td class="${b > a ? 'lead' : ''}">${b}</td>`;
+  const tw = [DC.towersUp(f.side[0]), DC.towersUp(f.side[1])], rx = [DC.raxUp(f.side[0]), DC.raxUp(f.side[1])];
+  const table = `<table class="score"><thead><tr><th></th><th class="t0">Radiant</th><th class="t1">Dire</th></tr></thead><tbody>
+    <tr><td>Kills, ${STG[s].toLowerCase()}</td>${cell(sk[0], sk[1])}</tr>
+    <tr><td>Kills, total</td>${cell(f.kills[0], f.kills[1])}</tr>
+    <tr><td>Net worth lead</td><td class="${lead >= 300 ? 'lead' : 'dim'}">${lead >= 300 ? '+' + (lead / 1000).toFixed(1) + 'k' : '—'}</td><td class="${lead <= -300 ? 'lead' : 'dim'}">${lead <= -300 ? '+' + (-lead / 1000).toFixed(1) + 'k' : '—'}</td></tr>
+    <tr><td>Towers standing (of 11)</td>${cell(tw[0], tw[1])}</tr>
+    <tr><td>Barracks standing (of 6)</td>${cell(rx[0], rx[1])}</tr>
+    <tr><td>Roshan kills</td>${cell(f.rosh.kills[0], f.rosh.kills[1])}</tr>
+    <tr><td>Aghanim's Shards from Tormentors</td>${cell(f.shards[0], f.shards[1])}</tr>
+  </tbody></table>`;
+  const status = final ? '' : `<div class="status">
+    <span><b>Roshan:</b> ${f.rosh.alive ? 'alive in the ' + (f.day ? 'top' : 'bottom') + ' lair' : `respawns between ${f.rosh.respawn[0]}:00 and ${f.rosh.respawn[1]}:00`}${f.aegis ? `. Aegis held by ${TEAM[f.aegis.team]} until ${f.aegis.until}:00` : ''}</span>
+    <span><b>Tormentors:</b> ${to < 1200 ? 'spawn at 20:00 on both sides' : f.torm.map((x, i) => (i ? 'Dire' : 'Radiant') + ' side ' + (x.alive ? 'up' : 'back at ' + x.spawn + ':00')).join(', ')}</span></div>`;
+  let outlook = '';
+  if (!final){
+    const nextS = s + 1, p = ev.stages[nextS].p, fv = p >= 0.5 ? 0 : 1;
+    const heroes = G.picks[fv].map(h => ({ h, v: DC.stageWr(h, nextS) - 0.5 })).sort((a, b) => b.v - a.v).slice(0, 2);
+    const shift = (ev.stages[nextS].p - ev.stages[s].p) * (fv ? -1 : 1);
+    const live = f.p >= 0.5 ? 0 : 1;
+    outlook = `<p class="outlook"><strong>${STG[nextS]}</strong>The draft favors ${TEAM[fv]} ${pct(Math.max(p, 1 - p))} in this phase${Math.abs(shift) >= 0.01 ? `, ${shift > 0 ? 'up' : 'down'} ${Math.round(Math.abs(shift) * 100)} points on the ${STG[s].toLowerCase()}` : ''}. ${heroes.map(x => esc(H[x.h].name)).join(' and ')} ${heroes.length > 1 ? 'have' : 'has'} strong pro records in ${['short','30 to 42 minute','long'][nextS]} games. With the map as it stands, ${TEAM[live]} wins ${pct(Math.max(f.p, 1 - f.p))} of the time.</p>`;
+  }
+  let head;
+  if (final){
+    const w = M.winner;
+    const mvp = G.picks[w].map(h => ({ h, x: f.kda[h], sc: f.kda[h][0] * 2 + f.kda[h][2] - f.kda[h][1] * 1.5 })).sort((a, b) => b.sc - a.sc)[0];
+    head = `<div><div class="when">Final · ${mmss(endSec())}</div><h2 id="repTitle" class="winner t${w}">${TEAM[w]} victory</h2></div>
+      <p class="ink2" style="max-width:44ch">${esc(G.cfg.names[w])} takes it. The draft read gave ${TEAM[w]} ${pct(w ? 1 - ev.overall : ev.overall)}. Player of the game: <b style="color:var(--ink)">${esc(H[mvp.h].name)}</b>, <span class="num">${mvp.x.join('/')}</span>.</p>`;
+  } else {
+    head = `<div><div class="when">Check-in ${s + 1} of 3 · ${mmss(from)} to ${mmss(to)}</div><h2 id="repTitle">${STG[s]}</h2></div>`;
+  }
+  const moments = `<div class="moments"><div class="sh">Key moments</div>${key.length ? key.map(e => `<div class="ev t${e.team} ${['fight','rosh','rax','ancient','fb','torm'].includes(e.type) ? 'big' : ''}"><span class="ts">${mmss(evSec(e))}</span><span class="bar"></span><span class="tx">${esc(e.text)}</span></div>`).join('') : '<p class="ink2">A quiet stretch. Both sides farmed.</p>'}</div>`;
+  const mini = `<div><svg viewBox="0 0 1000 1000" aria-label="Map at ${mmss(to)}">${$('#map').innerHTML.replace('id="flashes"', '')}</svg>${status}</div>`;
+  const btns = final
+    ? `<div class="iact"><button class="btn" id="rematch">Replay this draft</button><button class="btn go" id="again">New draft</button></div>`
+    : `<div class="iact"><button class="btn go" id="cont">Play the ${STG[s + 1].toLowerCase()}</button></div>`;
+  $('#report').innerHTML = `<div class="ihead">${head}</div><div class="ibody"><div style="display:flex;flex-direction:column;gap:22px;min-width:0">${table}${outlook}</div>${mini}</div>${moments}${btns}`;
+  $('#overlay').hidden = false; $('#overlay').scrollTop = 0;
+  const c = $('#cont'); if (c){ c.focus({ preventScroll: true }); c.onclick = () => { $('#overlay').hidden = true; G.clock += 0.001; startLoop(); }; }
+  const r = $('#rematch'); if (r) r.onclick = () => { $('#overlay').hidden = true; startMatch((Math.random() * 4294967295) >>> 0); };
+  const a = $('#again'); if (a){ a.focus({ preventScroll: true }); a.onclick = () => { $('#overlay').hidden = true; show('setup'); }; }
+}
+
+/* ---------- boot + live-update hooks ---------- */
+function start(data){
+  if (data && data.G){
+    G = data.G;
+    if (G.screen === 'draft'){ show('draft'); renderDraft(); maybeBot(); return; }
+    if (G.screen === 'preview'){ showPreview(); return; }
+    if (G.screen === 'match' && G.seed){
+      M = DC.simulate(G.picks[0], G.picks[1], G.seed); show('match');
+      G.shown = []; $('#feed').innerHTML = ''; flushEvents(-1, G.clock, true); updateMatch(true);
+      const end = endSec();
+      if (G.clock >= end) stageReport(G.clock > 1800 ? 2 : G.clock > 900 ? 1 : 0, true);
+      else if (CHECK.includes(Math.round(G.clock))) stageReport(CHECK.indexOf(Math.round(G.clock)));
+      else startLoop();
+      return;
+    }
+  }
+  show('setup');
+}
+window.claude?.hot?.snapshot?.(() => ({ G }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && G.screen === 'draft' && G.sel != null && document.activeElement?.id !== 'search') confirmSel(); });
+</script>
+
+</body>
+</html>

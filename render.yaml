@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: draft-clash
+    runtime: static
+    buildCommand: python3 build.py
+    staticPublishPath: ./public
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN

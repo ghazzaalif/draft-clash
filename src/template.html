@@ -1,0 +1,827 @@
+<title>Draft Clash</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Chivo:wght@400;500;700&family=Chivo+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a tournament broadcast draft board. Hard edges, flat team-colour fields, ruled tables instead of cards.
+   Radiant always reads left, Dire always reads right, on every screen. */
+:root{
+  --ground:#0f1317; --deck:#151b21; --deck-2:#1c242b; --rule:#283139; --rule-2:#3a4650;
+  --ink:#e6e9e3; --ink-2:#a7b0b4; --ink-3:#86919a;
+  --rad:#72b55c; --rad-field:#1d3018; --rad-ink:#0e1a0a;
+  --dire:#e0623f; --dire-field:#3a1a12; --dire-ink:#1f0b05;
+  --gold:#d6a442; --gold-field:#2e2512;
+  --str:#cc7650; --agi:#93bb52; --int:#5f9fd8; --all:#ab8fd4;
+  --f-display:"Big Shoulders Display","Oswald","Arial Narrow",Impact,sans-serif;
+  --f-ui:"Chivo","Segoe UI",system-ui,sans-serif;
+  --f-num:"Chivo Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:2px;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 28px}
+*{box-sizing:border-box}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+h1,h2,h3,.disp{font-family:var(--f-display);font-weight:800;line-height:.95;margin:0;text-transform:uppercase;letter-spacing:.005em;text-wrap:balance}
+p{margin:0}
+.rad{color:var(--rad)} .dire{color:var(--dire)} .gold{color:var(--gold)} .ink2{color:var(--ink-2)} .ink3{color:var(--ink-3)}
+.label{font-size:13px;color:var(--ink-2);font-weight:500}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:10px}
+.wordmark{font-family:var(--f-display);font-weight:900;font-size:24px;text-transform:uppercase;letter-spacing:.02em;display:flex;gap:10px;align-items:baseline}
+.wordmark small{font-family:var(--f-ui);font-weight:500;font-size:13px;color:var(--ink-3);text-transform:none;letter-spacing:0}
+.btn{border:1px solid var(--rule-2);background:var(--deck-2);padding:9px 16px;border-radius:var(--r);font-weight:700;transition:border-color .15s,background .15s}
+.btn:hover{border-color:var(--ink-2)}
+.btn.go{background:var(--gold);color:#1b1407;border-color:var(--gold);font-family:var(--f-display);font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:8px 22px}
+.btn.go:hover{background:#e2b257}
+.btn.go:disabled{opacity:.4;cursor:not-allowed}
+.btn.quiet{background:transparent}
+.btn.sm{padding:5px 11px;font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--rule-2);border-radius:var(--r);overflow:hidden;flex-wrap:wrap}
+.seg button{background:transparent;border:0;padding:7px 13px;font-weight:500;color:var(--ink-2);font-size:14px}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--ground);font-weight:700}
+
+/* attribute glyph + monogram */
+.attr{display:inline-block;width:9px;height:9px;flex:0 0 9px}
+.attr.str{background:var(--str)} .attr.agi{background:var(--agi)} .attr.int{background:var(--int)} .attr.all{background:var(--all)}
+.mono{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:17px;color:#0d1012;border-radius:var(--r)}
+.mono.str{background:var(--str)} .mono.agi{background:var(--agi)} .mono.int{background:var(--int)} .mono.all{background:var(--all)}
+.mono.sm{width:26px;height:26px;flex-basis:26px;font-size:14px}
+
+/* ---------- setup ---------- */
+.intro{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:40px;align-items:end;padding-top:18px}
+.logo{font-size:clamp(64px,11vw,140px);font-weight:900;line-height:.82;letter-spacing:-.005em}
+.logo span{display:block}
+.logo .r{color:var(--rad)} .logo .d{color:var(--dire)}
+.lede{font-size:17px;line-height:1.55;color:var(--ink-2);max-width:56ch;margin-top:20px}
+.lede b{color:var(--ink);font-weight:500}
+.form{border-top:2px solid var(--ink);display:flex;flex-direction:column}
+.form .row{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule)}
+.form .row[hidden]{display:none}
+.namerow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.namerow input{width:100%;background:var(--deck);border:1px solid var(--rule-2);border-radius:var(--r);padding:7px 10px}
+.namerow input:first-child{border-left:3px solid var(--rad)} .namerow input:last-child{border-right:3px solid var(--dire);text-align:right}
+.form .act{padding-top:16px;display:flex;justify-content:flex-end}
+.flow{margin-top:8px}
+.flow h2{font-size:28px;margin-bottom:14px}
+.track{display:grid;grid-template-columns:1.2fr .8fr 1fr 1fr 1fr;border-top:1px solid var(--rule-2)}
+.track > div{padding:12px 16px 0 0;position:relative;display:flex;flex-direction:column;gap:4px}
+.track > div::before{content:"";position:absolute;top:-5px;left:0;width:9px;height:9px;background:var(--ground);border:2px solid var(--ink-2)}
+.track > div.cp::before{background:var(--gold);border-color:var(--gold)}
+.track .t{font-family:var(--f-num);font-size:13px;color:var(--ink-3)}
+.track b{font-weight:700;font-size:15px}
+.track p{font-size:14px;color:var(--ink-2);max-width:30ch}
+.source{font-size:13.5px;color:var(--ink-3);max-width:90ch;border-top:1px solid var(--rule);padding-top:12px}
+
+/* ---------- draft board ---------- */
+.board{display:grid;grid-template-columns:minmax(0,1fr) 220px minmax(0,1fr);border:1px solid var(--rule)}
+.tb{display:flex;flex-direction:column;min-width:0}
+.tb .head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px}
+.tb.t0 .head{background:var(--rad-field)} .tb.t1 .head{background:var(--dire-field);flex-direction:row-reverse}
+.tb .head h2{font-size:32px}
+.tb.t0 h2{color:var(--rad)} .tb.t1 h2{color:var(--dire)}
+.tb .who{font-size:13px;color:var(--ink-2)}
+.tb.t1 .who{text-align:right}
+.tb .wc{font-family:var(--f-num);font-size:26px;font-weight:700}
+.tb.t1 .wc{order:-1}
+.tb .wc small{display:block;font-family:var(--f-ui);font-size:12px;font-weight:500;color:var(--ink-2);text-align:inherit}
+.picks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--rule)}
+.slot{min-height:84px;padding:10px 8px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:6px;justify-content:flex-end;min-width:0}
+.tb.t1 .slot{border-right:0;border-left:1px solid var(--rule)}
+.slot .nm{font-size:13px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.slot.empty{color:var(--ink-3);font-size:13px;justify-content:center;align-items:center}
+.slot.now{background:var(--gold-field);color:var(--gold);font-weight:700;box-shadow:inset 0 -3px 0 var(--gold)}
+.bans{display:flex;gap:4px;padding:8px;border-top:1px solid var(--rule);flex-wrap:wrap;min-height:42px;align-items:center}
+.tb.t1 .bans{justify-content:flex-end}
+.ban{font-size:12.5px;padding:3px 7px;border:1px solid var(--rule-2);color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--dire);white-space:nowrap;border-radius:var(--r)}
+.ban.now{border-color:var(--gold);color:var(--gold);text-decoration:none;font-weight:700}
+.ban.open{border-style:dashed;text-decoration:none;color:var(--rule-2)}
+.turn{border-inline:1px solid var(--rule);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 10px;text-align:center}
+.turn .ph{font-size:13px;color:var(--ink-2)}
+.turn .act{font-size:42px}
+.turn .act.t0{color:var(--rad)} .turn .act.t1{color:var(--dire)}
+.turn .cnt{font-family:var(--f-num);font-size:13px;color:var(--ink-3)}
+.order{grid-column:1/-1;display:grid;grid-template-columns:repeat(24,minmax(0,1fr));border-top:1px solid var(--rule)}
+.order i{height:22px;display:grid;place-items:center;font-style:normal;font-family:var(--f-num);font-size:10px;color:var(--ink-3);border-right:1px solid var(--rule)}
+.order i:last-child{border-right:0}
+.order i.pick.t0{background:var(--rad-field);color:var(--rad)} .order i.pick.t1{background:var(--dire-field);color:var(--dire)}
+.order i.ban.t0{color:var(--rad)} .order i.ban.t1{color:var(--dire)}
+.order i.done{opacity:.4}
+.order i.cur{background:var(--gold);color:#1b1407;font-weight:700;opacity:1}
+
+.pool{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:24px;align-items:start}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.filters input{flex:1 1 170px;min-width:0;background:var(--deck);border:1px solid var(--rule-2);border-radius:var(--r);padding:7px 10px}
+.filters select{background:var(--deck);border:1px solid var(--rule-2);border-radius:var(--r);padding:7px 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);max-height:540px;overflow:auto;scrollbar-color:var(--rule-2) transparent}
+.tile{display:flex;align-items:center;gap:8px;padding:8px 9px;background:var(--ground);border:0;text-align:left;min-width:0;position:relative}
+.tile:hover{background:var(--deck-2)}
+.tile[aria-pressed="true"]{background:var(--gold-field);box-shadow:inset 0 0 0 1px var(--gold)}
+.tile:disabled{cursor:not-allowed;background:var(--ground)}
+.tile:disabled .nm,.tile:disabled .wr{color:var(--rule-2);text-decoration:line-through}
+.tile:disabled .attr{opacity:.25}
+.tile .nm{font-size:14px;line-height:1.15;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile .wr{font-family:var(--f-num);font-size:12px;color:var(--ink-3)}
+.tile.top .wr{color:var(--gold)}
+.sheet{position:sticky;top:12px;border-top:2px solid var(--ink);display:flex;flex-direction:column;gap:16px;padding-top:14px}
+.sheet h3{font-size:38px}
+.sheet .sub{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-block:1px solid var(--rule)}
+.facts div{padding:8px 0;display:flex;flex-direction:column}
+.facts div+div{padding-left:10px;border-left:1px solid var(--rule)}
+.facts b{font-family:var(--f-num);font-size:17px;font-weight:700}
+.facts span{font-size:12px;color:var(--ink-3)}
+.sbars{display:flex;flex-direction:column;gap:6px}
+.sb{display:grid;grid-template-columns:40px minmax(0,1fr) 54px;gap:10px;align-items:center;font-size:13px}
+.sb .bar{height:10px;background:var(--deck-2);position:relative}
+.sb .bar::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--ink-3)}
+.sb .fill{position:absolute;top:0;bottom:0}
+.sb .v{font-family:var(--f-num);text-align:right}
+.sh{font-family:var(--f-display);font-size:19px;font-weight:800;text-transform:uppercase;margin-bottom:4px}
+.rl{display:flex;flex-direction:column;font-size:14px}
+.rl > div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--rule)}
+.rl .v{font-family:var(--f-num);font-size:13px}
+.pos{color:var(--rad)} .neg{color:var(--dire)}
+.cta{display:flex;flex-direction:column;gap:8px}
+.cta .val{font-size:13px;color:var(--ink-2)}
+.sugg{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--rule-2);background:transparent;border-radius:var(--r);padding:4px 9px;font-size:13px;display:inline-flex;gap:6px;align-items:center}
+.chip:hover{border-color:var(--gold);color:var(--gold)}
+.note{font-size:12.5px;color:var(--ink-3);line-height:1.5}
+.mbar{display:none}
+@media (max-width:760px){
+  .mbar{position:fixed;left:0;right:0;bottom:0;z-index:15;display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--deck);border-top:1px solid var(--rule-2);
+    padding:10px max(16px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+  .mbar[hidden]{display:none}
+  .mbar .who{font-size:13px;color:var(--ink-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #draft{padding-bottom:70px}
+}
+
+/* ---------- preview ---------- */
+.versus{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);border:1px solid var(--rule)}
+.lu .head{padding:10px 14px}
+.lu.t0 .head{background:var(--rad-field)} .lu.t1 .head{background:var(--dire-field);text-align:right}
+.lu h2{font-size:30px}
+.lu.t0 h2{color:var(--rad)} .lu.t1 h2{color:var(--dire)}
+.lu .hrow{display:flex;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid var(--rule)}
+.lu.t1 .hrow{flex-direction:row-reverse;text-align:right}
+.lu .hrow .r{margin-inline-start:auto;font-size:12.5px;color:var(--ink-3)}
+.lu.t1 .hrow .r{margin-inline-start:0;margin-inline-end:auto}
+.mid{border-inline:1px solid var(--rule);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 24px;gap:4px;text-align:center}
+.mid .big{font-family:var(--f-num);font-size:56px;font-weight:700;line-height:1}
+.mid .lab{font-size:13px;color:var(--ink-2)}
+table{border-collapse:collapse;width:100%}
+.ftab th,.ftab td{padding:10px 8px;border-bottom:1px solid var(--rule);text-align:right;font-weight:400;vertical-align:middle}
+.ftab th{font-size:12.5px;color:var(--ink-3);font-weight:500}
+.ftab th:first-child,.ftab td:first-child{text-align:left}
+.ftab td.p{font-family:var(--f-num);font-size:18px;font-weight:700}
+.ftab td.m{font-family:var(--f-num);font-size:13px}
+.ftab .stg b{font-family:var(--f-display);font-size:20px;font-weight:800;text-transform:uppercase;display:block;line-height:1}
+.ftab .stg span{font-size:12.5px;color:var(--ink-3)}
+.split{height:12px;display:flex;min-width:120px}
+.split i{display:block;height:100%}
+.tablewrap{overflow-x:auto}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.go-row{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:14px}
+.go-row p{font-size:14px;color:var(--ink-2);max-width:68ch}
+
+/* ---------- match ---------- */
+.scorebug{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:stretch;border:1px solid var(--rule)}
+.scorebug .s{display:flex;align-items:center;gap:14px;padding:8px 16px}
+.scorebug .s.t0{background:var(--rad-field)} .scorebug .s.t1{background:var(--dire-field);justify-content:flex-end}
+.scorebug .k{font-family:var(--f-num);font-size:46px;font-weight:700;line-height:1}
+.scorebug .s.t0 .k{color:var(--rad)} .scorebug .s.t1 .k{color:var(--dire)}
+.scorebug .tn{font-family:var(--f-display);font-size:26px;font-weight:800;text-transform:uppercase}
+.scorebug .clk{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 26px;min-width:170px}
+.scorebug .clk b{font-family:var(--f-num);font-size:34px;font-weight:700;line-height:1.05}
+.scorebug .clk .stg{font-size:13px;font-weight:700;color:var(--gold)}
+.scorebug .clk .dn{font-size:12px;color:var(--ink-3)}
+.arena{display:grid;grid-template-columns:minmax(0,460px) minmax(0,1fr);gap:24px;align-items:start}
+.mapcol{display:flex;flex-direction:column;gap:10px}
+.mapcol svg{width:100%;height:auto;display:block;aspect-ratio:1;max-width:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px}
+dl.obj{margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);border-top:1px solid var(--rule)}
+dl.obj dt,dl.obj dd{margin:0;padding:7px 0;border-bottom:1px solid var(--rule);font-size:14px}
+dl.obj dt{color:var(--ink-3);padding-right:18px}
+.feedcol{display:flex;flex-direction:column;gap:14px;min-width:0}
+.ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.feed{height:320px;overflow:auto;border-block:1px solid var(--rule);display:flex;flex-direction:column;scrollbar-color:var(--rule-2) transparent}
+.ev{display:grid;grid-template-columns:46px 4px minmax(0,1fr);gap:10px;align-items:stretch;padding:5px 0;border-bottom:1px solid #ffffff0a;font-size:14px}
+.ev.fresh{animation:in .6s ease-out}
+@keyframes in{from{background:#d6a44222}to{background:transparent}}
+.ev .ts{font-family:var(--f-num);font-size:12.5px;color:var(--ink-3);padding-top:2px}
+.ev .bar{background:var(--rule-2)}
+.ev.t0 .bar{background:var(--rad)} .ev.t1 .bar{background:var(--dire)}
+.ev.big .tx{font-weight:700}
+.ev.obj .tx{color:var(--gold)}
+.chart .label{margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.chart svg{width:100%;height:auto;display:block}
+.kdas{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.kda th,.kda td{padding:6px 6px;border-bottom:1px solid var(--rule);font-size:14px;text-align:right;font-weight:400}
+.kda th{font-size:12.5px;color:var(--ink-3);font-weight:500}
+.kda td:first-child,.kda th:first-child{text-align:left}
+.kda td.n{display:flex;align-items:center;gap:8px}
+.kda td.v{font-family:var(--f-num);font-size:13px}
+.kda .tt{font-family:var(--f-display);font-size:20px;font-weight:800;text-transform:uppercase}
+
+/* intermission */
+.inter{position:fixed;inset:0;background:var(--ground);overflow:auto;z-index:20;
+  padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheetwrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.ihead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:12px}
+.ihead .when{font-family:var(--f-num);font-size:14px;color:var(--ink-2)}
+.ihead h2{font-size:clamp(44px,8vw,76px)}
+.ihead .winner.t0{color:var(--rad)} .ihead .winner.t1{color:var(--dire)}
+.ibody{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:28px;align-items:start}
+.score th,.score td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:right}
+.score th{font-family:var(--f-display);font-size:22px;font-weight:800;text-transform:uppercase}
+.score th.t0{color:var(--rad)} .score th.t1{color:var(--dire)}
+.score td{font-family:var(--f-num);font-size:20px;font-weight:700}
+.score td:first-child,.score th:first-child{text-align:left;font-family:var(--f-ui);font-size:14px;font-weight:500;color:var(--ink-2)}
+.score td.lead:nth-child(2){color:var(--rad)} .score td.lead:nth-child(3){color:var(--dire)}
+.score td.dim{color:var(--ink-3);font-weight:500}
+.ibody svg{width:100%;height:auto;aspect-ratio:1;display:block}
+.status{font-size:14px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.status b{color:var(--ink);font-weight:500}
+.outlook{font-size:16px;line-height:1.55;max-width:72ch}
+.outlook strong{font-family:var(--f-display);font-size:21px;font-weight:800;text-transform:uppercase;margin-right:6px;color:var(--gold)}
+.moments .ev{font-size:14.5px}
+.iact{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:16px}
+.foot{font-size:12.5px;color:var(--ink-3);border-top:1px solid var(--rule);padding-top:10px}
+
+@media (max-width:1020px){
+  .pool{grid-template-columns:1fr}
+  .sheet{position:static}
+  .arena{grid-template-columns:1fr}
+  .mapcol{max-width:520px}
+  .intro{grid-template-columns:1fr;gap:24px}
+}
+@media (max-width:760px){
+  .board{grid-template-columns:1fr}
+  .turn{border-inline:0;border-block:1px solid var(--rule);order:-1;flex-direction:row;flex-wrap:wrap;justify-content:space-between}
+  .turn .act{font-size:30px}
+  .order{order:-1}
+  .order i{font-size:0;height:12px}
+  .tb.t1 .head{flex-direction:row}
+  .tb.t1 .wc{order:0}
+  .tb.t1 .who{text-align:left}
+  .tb.t1 .slot{border-left:0;border-right:1px solid var(--rule)}
+  .tb.t1 .bans{justify-content:flex-start}
+  .slot{min-height:64px;padding:6px 5px}
+  .slot .mono{width:26px;height:26px;flex-basis:26px;font-size:14px}
+  .slot .nm{font-size:12px}
+  .versus{grid-template-columns:1fr}
+  .mid{border-inline:0;border-block:1px solid var(--rule);flex-direction:row;gap:12px}
+  .mid .big{font-size:40px}
+  .lu.t1 .head{text-align:left} .lu.t1 .hrow{flex-direction:row;text-align:left} .lu.t1 .hrow .r{margin-inline-start:auto;margin-inline-end:0}
+  .cols2,.kdas{grid-template-columns:1fr}
+  .ibody{grid-template-columns:1fr}
+  .ibody svg{max-width:300px}
+  .track{grid-template-columns:1fr;border-top:0;border-left:1px solid var(--rule-2);margin-left:5px}
+  .track > div{padding:0 0 14px 18px}
+  .track > div::before{top:4px;left:-6px}
+  .scorebug .k{font-size:32px} .scorebug .tn{font-size:18px}
+  .scorebug .clk{min-width:0;padding:6px 10px} .scorebug .clk b{font-size:24px}
+  .scorebug .s{padding:8px 10px;gap:8px}
+  .form .row{grid-template-columns:1fr;gap:6px}
+  .facts{grid-template-columns:1fr 1fr} .facts div:nth-child(3){padding-left:0;border-left:0}
+  .grid{max-height:400px;grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="topbar">
+    <div class="wordmark">Draft Clash <small id="crumb">Captains Mode</small></div>
+    <div id="topActions"></div>
+  </header>
+
+  <!-- SETUP -->
+  <section id="setup" style="display:flex;flex-direction:column;gap:36px">
+    <div class="intro">
+      <div>
+        <h1 class="logo"><span class="r">Draft</span><span class="d">Clash</span></h1>
+        <p class="lede">Ban and pick five heroes in Captains Mode against a bot or a friend. The match then plays itself, scored on <b>20,330 professional games</b> from the past year, and stops at 15:00, at 30:00 and at the end so you can read the map.</p>
+      </div>
+      <div class="form">
+        <div class="row"><span class="label">Opponent</span>
+          <div class="seg" id="modeSeg"><button data-v="bot" aria-pressed="true">Bot</button><button data-v="pvp" aria-pressed="false">Friend, same screen</button></div></div>
+        <div class="row" id="lvlField"><span class="label">Bot level</span>
+          <div class="seg" id="lvlSeg"><button data-v="0" aria-pressed="false">Easy</button><button data-v="1" aria-pressed="true">Normal</button><button data-v="2" aria-pressed="false">Hard</button></div></div>
+        <div class="row" id="sideField"><span class="label">You play</span>
+          <div class="seg" id="sideSeg"><button data-v="0" aria-pressed="true">Radiant</button><button data-v="1" aria-pressed="false">Dire</button></div></div>
+        <div class="row"><span class="label">First pick</span>
+          <div class="seg" id="fpSeg"><button data-v="0" aria-pressed="true">Radiant</button><button data-v="1" aria-pressed="false">Dire</button><button data-v="coin" aria-pressed="false">Coin toss</button></div></div>
+        <div class="row"><span class="label">Captains</span>
+          <div class="namerow"><input id="nameR" maxlength="18" value="You" aria-label="Radiant captain name"><input id="nameD" maxlength="18" value="Bot" aria-label="Dire captain name"></div></div>
+        <div class="act"><button class="btn go" id="startDraft">Start the draft</button></div>
+      </div>
+    </div>
+    <div class="flow">
+      <h2>How a match runs</h2>
+      <div class="track">
+        <div><span class="t">24 turns</span><b>Captains Mode draft</b><p>14 bans and 10 picks in tournament order. First pick bans first.</p></div>
+        <div><span class="t">before 0:00</span><b>Draft read</b><p>Win chance per stage, with the reasons.</p></div>
+        <div class="cp"><span class="t">0:00 – 15:00</span><b>Early game</b><p>Laning, first blood, first towers. Check-in at 15:00.</p></div>
+        <div class="cp"><span class="t">15:00 – 30:00</span><b>Mid game</b><p>Teamfights, Roshan, Tormentors from 20:00. Check-in at 30:00.</p></div>
+        <div class="cp"><span class="t">30:00 – end</span><b>Late game</b><p>High ground, barracks, Aegis fights. Final report when an Ancient falls.</p></div>
+      </div>
+    </div>
+    <p class="source">Hero win rates by game length (under 30, 30 to 42, over 42 minutes), head-to-head records and teammate records for all 127 heroes come from OpenDota's public pro-match data, 30 Oct 2025 to 30 Oct 2026. The draft sets the odds; gold leads, Aegis, Shards and match-day form decide each fight.</p>
+  </section>
+
+  <!-- DRAFT -->
+  <section id="draft" hidden style="display:flex;flex-direction:column;gap:22px">
+    <div class="board" id="board">
+      <div class="tb t0" id="team0"></div>
+      <div class="turn" id="turn"></div>
+      <div class="tb t1" id="team1"></div>
+      <div class="order" id="order"></div>
+    </div>
+    <div class="pool">
+      <div>
+        <div class="filters">
+          <input id="search" placeholder="Search heroes" aria-label="Search heroes">
+          <div class="seg" id="attrSeg"><button data-v="" aria-pressed="true">All</button><button data-v="str" aria-pressed="false">Str</button><button data-v="agi" aria-pressed="false">Agi</button><button data-v="int" aria-pressed="false">Int</button><button data-v="all" aria-pressed="false">Uni</button></div>
+          <select id="roleSel" aria-label="Filter by role"><option value="">Any role</option><option>Carry</option><option>Support</option><option>Initiator</option><option>Disabler</option><option>Nuker</option><option>Durable</option><option>Escape</option><option>Pusher</option></select>
+          <select id="sortSel" aria-label="Sort heroes"><option value="name">A–Z</option><option value="suggest">Best for this turn</option><option value="wr">Pro win rate</option><option value="contest">Most contested</option></select>
+        </div>
+        <div class="grid" id="grid" role="listbox" aria-label="Heroes"></div>
+      </div>
+      <aside class="sheet" id="detail"></aside>
+    </div>
+  </section>
+
+  <!-- PREVIEW -->
+  <section id="preview" hidden></section>
+
+  <!-- MATCH -->
+  <section id="match" hidden style="display:flex;flex-direction:column;gap:22px">
+    <div class="scorebug">
+      <div class="s t0"><span class="tn">Radiant</span><span class="k" id="kR">0</span></div>
+      <div class="clk"><span class="stg" id="stgLabel">Early game</span><b id="clock">0:00</b><span class="dn" id="dayNight">Day</span></div>
+      <div class="s t1"><span class="k" id="kD">0</span><span class="tn">Dire</span></div>
+    </div>
+    <div class="arena">
+      <div class="mapcol">
+        <svg id="map" viewBox="0 0 1000 1000" role="img" aria-label="Minimap with towers, barracks, Roshan and Tormentors"></svg>
+        <div class="legend"><span><i style="background:var(--ink-2)"></i>Tower</span><span><i style="background:var(--ink-2);height:6px"></i>Barracks</span><span><i style="background:var(--ink-2);transform:rotate(45deg)"></i>Ancient</span><span><i style="background:var(--gold);border-radius:50%"></i>Roshan</span><span><i style="background:var(--int);clip-path:polygon(50% 0,100% 100%,0 100%)"></i>Tormentor</span></div>
+        <dl class="obj">
+          <dt>Net worth</dt><dd id="leadTxt">Even</dd>
+          <dt>Structures</dt><dd id="structTxt"></dd>
+          <dt>Roshan</dt><dd id="roshTxt">Alive</dd>
+          <dt>Tormentors</dt><dd id="tormTxt">Spawn at 20:00</dd>
+        </dl>
+      </div>
+      <div class="feedcol">
+        <div class="ctl">
+          <div class="seg" id="speedSeg"><button data-v="0.5" aria-pressed="false">0.5×</button><button data-v="1" aria-pressed="true">1×</button><button data-v="2" aria-pressed="false">2×</button><button data-v="4" aria-pressed="false">4×</button></div>
+          <div style="display:flex;gap:8px"><button class="btn sm" id="pauseBtn">Pause</button><button class="btn sm" id="skipBtn">Skip to check-in</button></div>
+        </div>
+        <div class="feed" id="feed" aria-live="polite"></div>
+        <div class="chart"><div class="label"><span><span class="gold">━</span> Radiant win chance</span><span><span class="rad">▮</span><span class="dire">▮</span> Net worth lead</span></div><svg id="chart" viewBox="0 0 600 150" preserveAspectRatio="none" style="aspect-ratio:600/150"></svg></div>
+      </div>
+    </div>
+    <div class="kdas"><table class="kda" id="kda0"></table><table class="kda" id="kda1"></table></div>
+  </section>
+  <p class="foot">Data: OpenDota public pro matches, 30 Oct 2025 – 30 Oct 2026. The simulation is a model built on those numbers, not a prediction service.</p>
+</div>
+<div class="mbar" id="mbar" hidden><span class="who" id="mbarTxt"></span><button class="btn go" id="mbarBtn">Pick</button></div>
+<div class="inter" id="overlay" hidden><div class="sheetwrap" id="report" role="dialog" aria-modal="true" aria-labelledby="repTitle"></div></div>
+
+<script>
+/*__ENGINE__*/
+</script>
+<script>
+DC.load(`/*__HEROES__*/`, `/*__VS__*/`, `/*__SY__*/`);
+const H = DC.heroes();
+const $ = s => document.querySelector(s);
+const TEAM = ['Radiant', 'Dire'];
+const STG = ['Early game', 'Mid game', 'Late game'];
+const pct = p => Math.round(p * 100) + '%';
+const pp = v => (v >= 0 ? '+' : '−') + Math.abs(v * 100).toFixed(1);
+const pi = v => (v >= 0 ? '+' : '−') + Math.round(Math.abs(v * 100));
+const mmss = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+function initials(h){ const n = H[h].name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean); return (n.length > 1 ? n.slice(0, 2).map(w => w[0]).join('') : n[0].slice(0, 2)).toUpperCase(); }
+function mono(h, sm){ return `<span class="mono ${H[h].attr}${sm ? ' sm' : ''}" aria-hidden="true">${initials(h)}</span>`; }
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---------- state ---------- */
+let G = { screen: 'setup', cfg: { mode: 'bot', lvl: 1, side: 0, fp: 0, names: ['You', 'Bot'] },
+  step: 0, first: 0, picks: [[], []], bans: [[], []], used: {}, sel: null, filt: { q: '', attr: '', role: '', sort: 'name' },
+  seed: 0, clock: 0, speed: 1, paused: false, shown: [] };
+let M = null;
+let timer = null, lastTs = 0, botTimer = null;
+
+function show(id){ ['setup','draft','preview','match'].forEach(s => $('#' + s).hidden = s !== id); G.screen = id; $('.topbar').hidden = id === 'setup'; $('.foot').hidden = id === 'setup'; renderTop(); renderBar(); window.scrollTo(0, 0); }
+function renderTop(){
+  const a = $('#topActions');
+  a.innerHTML = G.screen === 'setup' ? '' : '<button class="btn sm quiet" id="newGame">New game</button>';
+  const b = $('#newGame'); if (b) b.onclick = () => { stopLoop(); clearTimeout(botTimer); $('#overlay').hidden = true; show('setup'); };
+  $('#crumb').textContent = { setup: 'Captains Mode', draft: 'Draft', preview: 'Draft read', match: 'Match' }[G.screen];
+}
+
+/* ---------- setup ---------- */
+function segBind(id, key, after){
+  $(id).querySelectorAll('button').forEach(b => b.onclick = () => {
+    $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    let v = b.dataset.v; if (key !== 'mode' && key !== 'fp' && key !== 'attr') v = +v; if (key === 'fp' && v !== 'coin') v = +v;
+    after(v);
+  });
+}
+segBind('#modeSeg', 'mode', v => { G.cfg.mode = v; $('#lvlField').hidden = v !== 'bot'; $('#sideField').hidden = v !== 'bot'; syncNames(); });
+segBind('#lvlSeg', 'lvl', v => G.cfg.lvl = v);
+segBind('#sideSeg', 'side', v => { G.cfg.side = v; syncNames(); });
+segBind('#fpSeg', 'fp', v => G.cfg.fp = v);
+function syncNames(){
+  if (G.cfg.mode === 'bot'){ const me = G.cfg.side; $('#nameR').value = me === 0 ? 'You' : 'Bot'; $('#nameD').value = me === 1 ? 'You' : 'Bot'; }
+  else { $('#nameR').value = 'Player 1'; $('#nameD').value = 'Player 2'; }
+}
+$('#startDraft').onclick = () => {
+  G.cfg.names = [$('#nameR').value.trim() || 'Radiant', $('#nameD').value.trim() || 'Dire'];
+  G.first = G.cfg.fp === 'coin' ? (Math.random() < 0.5 ? 0 : 1) : G.cfg.fp;
+  G.step = 0; G.picks = [[], []]; G.bans = [[], []]; G.used = {}; G.sel = null;
+  show('draft'); renderDraft(); maybeBot();
+};
+
+/* ---------- draft ---------- */
+function turn(){ if (G.step >= 24) return null; const [k, t] = DC.CM[G.step]; return { kind: k, team: t === 0 ? G.first : 1 - G.first }; }
+function isBot(team){ return G.cfg.mode === 'bot' && team !== G.cfg.side; }
+function phaseName(){ const s = Math.min(G.step, 23); return DC.PHASES.find(p => s >= p[0] && s <= p[1])[2]; }
+function suggestions(){
+  const tn = turn(); if (!tn) return [];
+  const mine = G.picks[tn.team], theirs = G.picks[1 - tn.team];
+  const list = [];
+  H.forEach(h => { if (G.used[h.i]) return; const v = tn.kind === 'pick' ? DC.pickValue(h.i, mine, theirs) : DC.pickValue(h.i, theirs, mine) + 0.04 * DC.contest(h.i); list.push({ h: h.i, v }); });
+  return list.sort((a, b) => b.v - a.v);
+}
+function renderDraft(){
+  const tn = turn();
+  $('#order').innerHTML = DC.CM.map((c, i) => { const team = c[1] === 0 ? G.first : 1 - G.first; return `<i class="t${team} ${c[0]} ${i < G.step ? 'done' : ''} ${i === G.step ? 'cur' : ''}" title="Turn ${i + 1}: ${TEAM[team]} ${c[0]}">${c[0] === 'pick' ? 'P' : 'B'}</i>`; }).join('');
+  $('#turn').innerHTML = tn
+    ? `<span class="ph">${phaseName()}</span><span class="act disp t${tn.team}">${TEAM[tn.team]} ${tn.kind === 'pick' ? 'picks' : 'bans'}</span><span class="cnt">${isBot(tn.team) ? 'Bot is choosing…' : 'Turn ' + (G.step + 1) + ' of 24'}</span>`
+    : `<span class="ph">Draft complete</span><span class="act disp">Locked in</span>`;
+  const ev = DC.evaluate(G.picks[0], G.picks[1]);
+  [0, 1].forEach(t => renderTeam(t, tn, ev));
+  renderGrid(); renderDetail();
+}
+function renderTeam(t, tn, ev){
+  const np = G.picks[t].length, nb = G.bans[t].length;
+  const pickNow = tn && tn.team === t && tn.kind === 'pick', banNow = tn && tn.team === t && tn.kind === 'ban';
+  let slots = '';
+  for (let i = 0; i < 5; i++){ const h = G.picks[t][i];
+    slots += h != null ? `<div class="slot">${mono(h)}<span class="nm">${esc(H[h].name)}</span></div>`
+      : `<div class="slot empty ${pickNow && i === np ? 'now' : ''}">${pickNow && i === np ? 'Picking' : ''}</div>`; }
+  let bans = G.bans[t].map(h => `<span class="ban" title="Banned">${esc(H[h].name)}</span>`).join('');
+  if (banNow) bans += '<span class="ban now">Banning</span>';
+  for (let i = nb + (banNow ? 1 : 0); i < 7; i++) bans += '<span class="ban open">&nbsp;&nbsp;&nbsp;</span>';
+  const p = t === 0 ? ev.overall : 1 - ev.overall;
+  const hasPicks = G.picks[0].length + G.picks[1].length > 0;
+  $('#team' + t).innerHTML = `<div class="head"><div><h2>${TEAM[t]}</h2><div class="who">${esc(G.cfg.names[t])}${G.first === t ? ' · first pick' : ''}</div></div>
+    <div class="wc">${hasPicks ? pct(p) : '—'}<small>draft win chance</small></div></div>
+    <div class="picks">${slots}</div><div class="bans" aria-label="${TEAM[t]} bans">${bans}</div>`;
+}
+function renderGrid(){
+  const tn = turn(); const f = G.filt;
+  let list = H.slice();
+  if (f.q) list = list.filter(h => h.name.toLowerCase().includes(f.q.toLowerCase()));
+  if (f.attr) list = list.filter(h => h.attr === f.attr);
+  if (f.role) list = list.filter(h => h.roles.includes(f.role));
+  const sug = suggestions(); const rank = {}; sug.forEach((s, i) => rank[s.h] = i);
+  if (f.sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
+  if (f.sort === 'wr') list.sort((a, b) => b.wr - a.wr);
+  if (f.sort === 'contest') list.sort((a, b) => DC.contest(b.i) - DC.contest(a.i));
+  if (f.sort === 'suggest') list.sort((a, b) => (rank[a.i] ?? 999) - (rank[b.i] ?? 999));
+  const humanTurn = tn && !isBot(tn.team);
+  $('#grid').innerHTML = list.map(h => { const top = humanTurn && rank[h.i] < 5;
+    return `<button class="tile${top ? ' top' : ''}" role="option" data-h="${h.i}" aria-pressed="${G.sel === h.i}" ${G.used[h.i] ? 'disabled' : ''} title="${esc(h.name)} · ${h.roles.join(', ')}${top ? ' · strong option this turn' : ''}">
+    <span class="attr ${h.attr}"></span><span class="nm">${esc(h.name)}</span><span class="wr">${top ? '★ ' : ''}${(h.rawWr * 100).toFixed(0)}%</span></button>`; }).join('');
+  $('#grid').querySelectorAll('.tile').forEach(b => { b.onclick = () => { G.sel = +b.dataset.h; renderGrid(); renderDetail(); }; b.ondblclick = () => { G.sel = +b.dataset.h; confirmSel(); }; });
+}
+function stageBar(label, w){
+  const d = w - 0.5; const width = Math.min(50, Math.abs(d) * 500);
+  return `<div class="sb"><span class="ink2">${label}</span><span class="bar"><span class="fill" style="${d >= 0 ? 'left:50%' : 'right:50%'};width:${width}%;background:${d >= 0 ? 'var(--rad)' : 'var(--dire)'}"></span></span><span class="v">${(w * 100).toFixed(1)}%</span></div>`;
+}
+function renderDetail(){
+  const tn = turn(); const el = $('#detail');
+  const sug = suggestions().slice(0, 5);
+  const humanTurn = tn && !isBot(tn.team);
+  const sugHtml = humanTurn ? `<div><div class="sh">${tn.kind === 'pick' ? 'Strong picks now' : 'Strong bans now'}</div><div class="sugg">${sug.map(s => `<button class="chip" data-h="${s.h}"><span class="attr ${H[s.h].attr}"></span>${esc(H[s.h].name)}</button>`).join('')}</div></div>` : '';
+  if (G.sel == null){
+    el.innerHTML = `<div><h3>Choose a hero</h3><p class="sub">Click a hero for its pro record. Double-click, or press Enter, to lock it in. A star marks the five strongest options for this turn.</p></div>${sugHtml}
+      <p class="note">Stage strength uses pro games that ended before 30 minutes (early), between 30 and 42 (mid) and after 42 (late).</p>`;
+  } else {
+    const h = H[G.sel]; const team = tn ? tn.team : 0;
+    const forPick = !tn || tn.kind === 'pick';
+    const allies = G.picks[forPick ? team : 1 - team], enemies = G.picks[forPick ? 1 - team : team];
+    const vsL = enemies.map(e => ({ e, v: DC.vs(h.i, e) })).sort((a, b) => b.v - a.v);
+    const syL = allies.map(a => ({ a, v: DC.syn(h.i, a) })).sort((a, b) => b.v - a.v);
+    const all = enemies.length ? [] : H.filter(x => x.i !== h.i).map(x => ({ e: x.i, v: DC.vs(h.i, x.i) })).sort((a, b) => b.v - a.v);
+    const verb = tn ? (tn.kind === 'pick' ? 'Pick' : 'Ban') : '';
+    const persp = tn && tn.kind === 'ban' ? `Worth to ${TEAM[1 - team]} if left open` : `Worth to ${TEAM[team]}`;
+    const row = (name, v) => `<div><span>${name}</span><span class="v ${v >= 0 ? 'pos' : 'neg'}">${pi(v)}</span></div>`;
+    el.innerHTML = `<div style="display:flex;gap:12px;align-items:center">${mono(h.i)}<div style="min-width:0"><h3>${esc(h.name)}</h3><div class="sub">${{str:'Strength',agi:'Agility',int:'Intelligence',all:'Universal'}[h.attr]} · ${h.atk === 'M' ? 'Melee' : 'Ranged'} · ${h.roles.join(', ')}</div></div></div>
+      <div class="facts"><div><b>${(h.rawWr * 100).toFixed(1)}%</b><span>Pro win rate</span></div><div><b>${h.g.toLocaleString()}</b><span>Picks</span></div><div><b>${h.bans.toLocaleString()}</b><span>Bans</span></div><div><b>${Math.round(DC.contest(h.i) * 100)}%</b><span>Contested</span></div></div>
+      ${tn && humanTurn ? `<div class="cta"><button class="btn go" id="confirm" ${G.used[h.i] ? 'disabled' : ''}>${verb} ${esc(h.name)}</button><span class="val">${persp}: <b class="num">${pp(DC.pickValue(h.i, allies, enemies))}</b> points</span></div>` : ''}
+      <div><div class="sh">Strength by game length</div><div class="sbars">${stageBar('Early', h.stageWr[0])}${stageBar('Mid', h.stageWr[1])}${stageBar('Late', h.stageWr[2])}</div></div>
+      ${enemies.length ? `<div><div class="sh">Against the enemy draft</div><div class="rl">${vsL.map(x => row('vs ' + esc(H[x.e].name), x.v)).join('')}</div></div>`
+        : `<div class="cols2" style="gap:18px"><div><div class="sh">Beats</div><div class="rl">${all.slice(0, 4).map(x => row(esc(H[x.e].name), x.v)).join('')}</div></div><div><div class="sh">Loses to</div><div class="rl">${all.slice(-4).reverse().map(x => row(esc(H[x.e].name), x.v)).join('')}</div></div></div>`}
+      ${syL.length ? `<div><div class="sh">With allies</div><div class="rl">${syL.map(x => row('+ ' + esc(H[x.a].name), x.v)).join('')}</div></div>` : ''}
+      ${sugHtml}
+      <p class="note">Points are win-rate points above or below what the two heroes' own records predict, pulled toward zero when the pro sample is small.</p>`;
+    const c = $('#confirm'); if (c) c.onclick = confirmSel;
+  }
+  renderBar();
+  el.querySelectorAll('.chip').forEach(b => b.onclick = () => { G.sel = +b.dataset.h; renderGrid(); renderDetail(); });
+}
+function renderBar(){
+  const tn = turn(); const b = $('#mbar');
+  const on = G.screen === 'draft' && tn && !isBot(tn.team) && G.sel != null && !G.used[G.sel];
+  b.hidden = !on; if (!on) return;
+  $('#mbarTxt').textContent = H[G.sel].name + ' · ' + (H[G.sel].rawWr * 100).toFixed(1) + '% pro win';
+  $('#mbarBtn').textContent = (tn.kind === 'pick' ? 'Pick ' : 'Ban ') + H[G.sel].name;
+  $('#mbarBtn').onclick = confirmSel;
+}
+function act(h){
+  const tn = turn(); if (!tn || G.used[h]) return;
+  G.used[h] = 1; (tn.kind === 'pick' ? G.picks : G.bans)[tn.team].push(h);
+  G.step++; G.sel = null;
+  if (G.step >= 24){ renderDraft(); setTimeout(showPreview, 600); return; }
+  renderDraft(); maybeBot();
+}
+function confirmSel(){ const tn = turn(); if (G.sel == null || !tn || isBot(tn.team)) return; act(G.sel); }
+function maybeBot(){
+  const tn = turn(); if (!tn || !isBot(tn.team)) return;
+  clearTimeout(botTimer);
+  botTimer = setTimeout(() => {
+    const r = DC.rng((Date.now() ^ (G.step * 2654435761)) >>> 0);
+    act(DC.botChoose(tn.kind, G.picks[tn.team], G.picks[1 - tn.team], G.used, G.cfg.lvl, r));
+  }, 650 + Math.random() * 500);
+}
+$('#search').oninput = e => { G.filt.q = e.target.value; renderGrid(); };
+segBind('#attrSeg', 'attr', v => { G.filt.attr = v; renderGrid(); });
+$('#roleSel').onchange = e => { G.filt.role = e.target.value; renderGrid(); };
+$('#sortSel').onchange = e => { G.filt.sort = e.target.value; renderGrid(); };
+
+/* ---------- draft read ---------- */
+function showPreview(){
+  const R = G.picks[0], D = G.picks[1];
+  const ev = DC.evaluate(R, D);
+  const fav = ev.overall >= 0.5 ? 0 : 1;
+  const lu = t => `<div class="lu t${t}"><div class="head"><h2>${TEAM[t]}</h2><div class="who ink2" style="font-size:13px">${esc(G.cfg.names[t])}</div></div>${G.picks[t].map(h => `<div class="hrow">${mono(h, 1)}<span>${esc(H[h].name)}</span><span class="r">${H[h].roles.slice(0, 2).join(', ')}</span></div>`).join('')}</div>`;
+  const pv = v => `<td class="m ${v >= 0 ? 'pos' : 'neg'}">${pp(v)}</td>`;
+  const rows = [0, 1, 2].map(s => { const st = ev.stages[s], p = st.p; return `<tr>
+    <td class="stg"><b>${STG[s]}</b><span>${['0:00 – 15:00','15:00 – 30:00','30:00 – end'][s]}</span></td>
+    <td class="p rad">${pct(p)}</td><td><div class="split"><i style="width:${p * 100}%;background:var(--rad)"></i><i style="width:${(1 - p) * 100}%;background:var(--dire)"></i></div></td><td class="p dire" style="text-align:left">${pct(1 - p)}</td>
+    ${pv(st.parts.hero)}${pv(st.parts.matchup)}${pv(st.parts.synergy)}${pv(st.parts.comp)}</tr>`; }).join('');
+  const edges = ev.pairs.slice(0, 6).map(x => { const w = x.v >= 0; return `<div><span><span class="${w ? 'rad' : 'dire'}">${esc(H[w ? x.a : x.b].name)}</span> over ${esc(H[w ? x.b : x.a].name)}</span><span class="v">${pi(Math.abs(x.v))}</span></div>`; }).join('');
+  const pairs = ev.synR.slice(0, 3).map(x => `<div><span class="rad">${esc(H[x.a].name)} + ${esc(H[x.b].name)}</span><span class="v ${x.v >= 0 ? 'pos' : 'neg'}">${pi(x.v)}</span></div>`).join('')
+    + ev.synD.slice(0, 3).map(x => `<div><span class="dire">${esc(H[x.a].name)} + ${esc(H[x.b].name)}</span><span class="v ${x.v >= 0 ? 'pos' : 'neg'}">${pi(x.v)}</span></div>`).join('');
+  $('#preview').innerHTML = `<div style="display:flex;flex-direction:column;gap:26px">
+    <div class="versus">${lu(0)}<div class="mid"><span class="lab">Draft favors</span><span class="big ${fav ? 'dire' : 'rad'}">${pct(Math.max(ev.overall, 1 - ev.overall))}</span><span class="disp ${fav ? 'dire' : 'rad'}" style="font-size:24px">${TEAM[fav]}</span></div>${lu(1)}</div>
+    <div><h2 style="font-size:30px;margin-bottom:8px">Win chance by stage</h2><div class="tablewrap"><table class="ftab">
+      <thead><tr><th>Stage</th><th>Radiant</th><th></th><th style="text-align:left">Dire</th><th>Hero strength</th><th>Counters</th><th>Synergy</th><th>Team shape</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="note" style="margin-top:8px">Factor columns are win-rate points from Radiant's side; negative favors Dire. Team shape costs points for missing a support, a carry, an initiator or reliable disables.</p></div>
+    <div class="cols2"><div><div class="sh">Biggest head-to-head edges</div><div class="rl">${edges}</div></div><div><div class="sh">Best teammate pairs</div><div class="rl">${pairs}</div></div></div>
+    <div class="go-row"><p>The draft sets the odds. Gold leads, Aegis, Shards and match-day form decide each fight, so the weaker draft still wins its share.</p><button class="btn go" id="goMatch">Start the match</button></div>
+  </div>`;
+  $('#goMatch').onclick = () => startMatch((Math.random() * 4294967295) >>> 0);
+  show('preview');
+}
+
+/* ---------- map ---------- */
+const P0 = { tw: { top: [[95,420],[100,585],[110,705]], mid: [[420,580],[335,665],[268,732]], bot: [[580,905],[415,900],[300,890]] },
+  rax: { top: [[82,752],[132,752]], mid: [[228,742],[258,772]], bot: [[248,868],[248,915]] }, t4: [[168,808],[192,832]], anc: [115,885] };
+function mir(p){ return [1000 - p[0], 1000 - p[1]]; }
+const POS = [P0, { tw: { top: P0.tw.bot.map(mir), mid: P0.tw.mid.map(mir), bot: P0.tw.top.map(mir) }, rax: { top: P0.rax.bot.map(mir), mid: P0.rax.mid.map(mir), bot: P0.rax.top.map(mir) }, t4: P0.t4.map(mir), anc: mir(P0.anc) }];
+const PIT = { day: [300, 330], night: [700, 670] };
+const TORM = [[640, 790], [360, 210]];
+const PLACE = { 'top lane': [[95,300],[200,95]], 'mid lane': [[460,540],[540,460]], 'bot lane': [[800,905],[905,700]], 'the jungle': [[330,560],[670,440]], 'the river': [[420,420],[580,580]] };
+const COL = ['#72b55c', '#e0623f'];
+function mapBase(){
+  // territory split along the river: Radiant bottom-left, Dire top-right
+  return `<rect width="1000" height="1000" fill="#151d17"/>
+  <path d="M0,0 L1000,0 L1000,1000 Z" fill="#1d1614"/>
+  <path d="M0,0 L1000,1000" stroke="#0f1317" stroke-width="2"/>
+  <path d="M40,240 C 250,330 380,420 500,500 S 760,690 770,960" fill="none" stroke="#1d3a46" stroke-width="54" stroke-linecap="round"/>
+  <g fill="none" stroke="#2c3630" stroke-width="18" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M120,860 L95,95 L880,110"/><path d="M150,850 L850,150"/><path d="M140,885 L905,905 L890,120"/></g>
+  <g font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="800" font-size="40" letter-spacing="2">
+    <text x="36" y="978" fill="#72b55c" opacity=".55">RADIANT</text><text x="964" y="52" fill="#e0623f" opacity=".55" text-anchor="end">DIRE</text></g>`;
+}
+function renderMap(fr){
+  let s = mapBase();
+  [0, 1].forEach(t => {
+    const sd = fr ? fr.side[t] : null; const col = COL[t];
+    const sq = (p, size, up) => `<rect x="${p[0] - size / 2}" y="${p[1] - size / 2}" width="${size}" height="${size}" fill="${up ? col : '#0f1317'}" stroke="${up ? '#0f1317' : col}" stroke-width="${up ? 3 : 2}" opacity="${up ? 1 : .55}"/>`;
+    DC.LANES.forEach(l => {
+      POS[t].tw[l].forEach((p, i) => { s += sq(p, 30, sd ? sd.tw[l][i] : 1); });
+      POS[t].rax[l].forEach((p, i) => { const up = sd ? sd.rax[l][i] : 1; s += `<rect x="${p[0] - 18}" y="${p[1] - 8}" width="36" height="16" fill="${up ? col : '#0f1317'}" stroke="${col}" stroke-width="2" opacity="${up ? .9 : .5}"/>`; });
+    });
+    POS[t].t4.forEach((p, i) => { s += sq(p, 26, sd ? sd.t4[i] : 1); });
+    const a = POS[t].anc, up = sd ? sd.anc : 1;
+    s += `<rect x="${a[0] - 30}" y="${a[1] - 30}" width="60" height="60" transform="rotate(45 ${a[0]} ${a[1]})" fill="${up ? col : '#0f1317'}" stroke="${up ? '#e6e9e3' : col}" stroke-width="4"/>`;
+  });
+  const day = fr ? fr.day : true;
+  const pit = day ? PIT.day : PIT.night, other = day ? PIT.night : PIT.day;
+  const alive = fr ? fr.rosh.alive : true;
+  s += `<circle cx="${other[0]}" cy="${other[1]}" r="20" fill="none" stroke="#6b5a33" stroke-width="3" stroke-dasharray="5 6"/>`;
+  s += `<circle cx="${pit[0]}" cy="${pit[1]}" r="24" fill="${alive ? '#d6a442' : '#0f1317'}" stroke="#d6a442" stroke-width="4"/>`;
+  if (fr && !alive && fr.rosh.respawn) s += `<text x="${pit[0]}" y="${pit[1] - 34}" text-anchor="middle" font-size="24" font-weight="700" fill="#d6a442" font-family="Chivo Mono, monospace">${fr.rosh.respawn[0]}–${fr.rosh.respawn[1]}</text>`;
+  TORM.forEach((p, i) => { const up = fr ? fr.torm[i].alive : false; s += `<path d="M${p[0]},${p[1] - 26} L${p[0] + 24},${p[1] + 16} L${p[0] - 24},${p[1] + 16} Z" fill="${up ? '#5f9fd8' : '#0f1317'}" stroke="#5f9fd8" stroke-width="3" opacity="${up ? 1 : .6}"/>`; });
+  s += '<g id="flashes"></g>';
+  $('#map').innerHTML = s;
+}
+function flash(e){
+  const g = $('#flashes'); if (!g) return;
+  let p;
+  if (e.place && PLACE[e.place]){ const [a, b] = PLACE[e.place]; const r = Math.random(); p = [a[0] + (b[0] - a[0]) * r, a[1] + (b[1] - a[1]) * r]; }
+  else if (e.type === 'rosh' || e.place === 'Roshan’s lair'){ const f = M.frames[Math.max(0, e.t - 1)]; p = f && !f.day ? PIT.night : PIT.day; }
+  else return;
+  const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); c.setAttribute('r', e.type === 'fight' ? 46 : 24);
+  c.setAttribute('fill', 'none'); c.setAttribute('stroke', COL[e.team === 1 ? 1 : 0]); c.setAttribute('stroke-width', '6');
+  g.appendChild(c);
+  if (c.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) c.animate([{ opacity: 1, transform: 'scale(.5)' }, { opacity: 0, transform: 'scale(1.4)' }], { duration: 1200, easing: 'cubic-bezier(.22,1,.36,1)' });
+  c.style.transformOrigin = p[0] + 'px ' + p[1] + 'px'; c.style.transformBox = 'view-box';
+  setTimeout(() => c.remove(), 1200);
+}
+
+/* ---------- match playback ---------- */
+const CHECK = [15 * 60, 30 * 60];
+function evSec(e){ return (e.t - 1) * 60 + e.sec; }
+function endSec(){ const a = M.events.find(e => e.type === 'ancient'); return a ? evSec(a) : M.endT * 60; }
+function startMatch(seed){
+  G.seed = seed; G.clock = 0; G.paused = false; G.shown = [];
+  $('#pauseBtn').textContent = 'Pause';
+  M = DC.simulate(G.picks[0], G.picks[1], seed);
+  $('#feed').innerHTML = ''; renderMap(null); show('match'); updateMatch(true);
+  addFeed({ t: 1, sec: 0, type: 'start', team: -1, text: 'Horn sounds. Creeps are out.' });
+  startLoop();
+}
+function frameAt(sec){ const i = Math.min(M.frames.length - 1, Math.max(0, Math.ceil(sec / 60) - 1)); return M.frames[i]; }
+function startLoop(){ stopLoop(); lastTs = performance.now(); timer = requestAnimationFrame(tick); }
+function stopLoop(){ if (timer) cancelAnimationFrame(timer); timer = null; }
+function tick(ts){
+  const dt = Math.max(0, Math.min(0.25, (ts - lastTs) / 1000)); lastTs = Math.max(lastTs, ts);
+  if (!G.paused){
+    const before = G.clock; const end = endSec();
+    let next = before + dt * 60 * G.speed;
+    const cp = CHECK.find(c => before < c && next >= c && c < end);
+    if (cp != null) next = cp;
+    if (next >= end) next = end;
+    G.clock = next; flushEvents(before, next); updateMatch(Math.floor(before / 60) !== Math.floor(next / 60));
+    if (cp != null && next === cp){ stageReport(cp === CHECK[0] ? 0 : 1); timer = null; return; }
+    if (next >= end){ stageReport(G.clock > 1800 ? 2 : G.clock > 900 ? 1 : 0, true); timer = null; return; }
+  }
+  timer = requestAnimationFrame(tick);
+}
+function flushEvents(a, b, quiet){ M.events.forEach((e, i) => { const s = evSec(e); if (s > a && s <= b && !G.shown[i]){ G.shown[i] = 1; addFeed(e, quiet); if (!quiet) try { flash(e); } catch (_) {} } }); }
+function addFeed(e, quiet){
+  const big = ['fight','rosh','rax','ancient','fb','torm'].includes(e.type);
+  const obj = ['rosh','torm','roshup','tormup','aegis'].includes(e.type);
+  const d = document.createElement('div'); d.className = `ev t${e.team} ${big ? 'big' : ''} ${obj ? 'obj' : ''} ${quiet ? '' : 'fresh'}`;
+  d.innerHTML = `<span class="ts">${e.type === 'start' ? '0:00' : mmss(evSec(e))}</span><span class="bar"></span><span class="tx">${esc(e.text)}</span>`;
+  const f = $('#feed'); f.prepend(d); while (f.children.length > 160) f.lastChild.remove();
+}
+function freshSides(){ const s = () => ({ tw: { top: [1,1,1], mid: [1,1,1], bot: [1,1,1] }, t4: [1,1], rax: { top: [1,1], mid: [1,1], bot: [1,1] }, anc: 1 }); return [s(), s()]; }
+function updateMatch(full){
+  const early = G.clock < 60; const f = early ? null : frameAt(G.clock);
+  const k = killsUpTo(G.clock);
+  $('#kR').textContent = k[0]; $('#kD').textContent = k[1];
+  $('#clock').textContent = mmss(G.clock);
+  $('#stgLabel').textContent = STG[G.clock < 900 ? 0 : G.clock < 1800 ? 1 : 2];
+  const day = Math.floor(G.clock / 300) % 2 === 0;
+  $('#dayNight').textContent = (day ? 'Day' : 'Night') + ', Roshan ' + (day ? 'top' : 'bottom');
+  if (full) renderMap(f);
+  const side = (t, v) => `<span class="${t ? 'dire' : 'rad'} num">${v}</span>`;
+  if (f){
+    $('#roshTxt').innerHTML = (f.rosh.alive ? 'Alive' : `Respawns ${f.rosh.respawn[0]}:00 to ${f.rosh.respawn[1]}:00`) + ` · kills ${side(0, f.rosh.kills[0])}–${side(1, f.rosh.kills[1])}` + (f.aegis ? ` · Aegis <span class="${f.aegis.team ? 'dire' : 'rad'}">${TEAM[f.aegis.team]}</span>` : '');
+    $('#tormTxt').innerHTML = G.clock < 1200 ? 'Spawn at 20:00' : `${f.torm.filter(x => x.alive).length} of 2 up · Shards ${side(0, f.shards[0])}–${side(1, f.shards[1])}`;
+    const l = f.lead; $('#leadTxt').innerHTML = Math.abs(l) < 300 ? 'Even' : `<span class="${l > 0 ? 'rad' : 'dire'}">${TEAM[l > 0 ? 0 : 1]} +${(Math.abs(l) / 1000).toFixed(1)}k</span>`;
+    $('#structTxt').innerHTML = `Towers ${side(0, DC.towersUp(f.side[0]))}–${side(1, DC.towersUp(f.side[1]))} · Barracks ${side(0, DC.raxUp(f.side[0]))}–${side(1, DC.raxUp(f.side[1]))}`;
+  } else { $('#roshTxt').textContent = 'Alive'; $('#tormTxt').textContent = 'Spawn at 20:00'; $('#leadTxt').textContent = 'Even'; $('#structTxt').innerHTML = 'Towers 11–11 · Barracks 6–6'; }
+  if (full || !f) renderKDA(f);
+  renderChart();
+}
+function killsUpTo(sec){
+  const m = Math.max(0, Math.floor(sec / 60));
+  if (m >= M.frames.length) return M.frames[M.frames.length - 1].kills;
+  const base = m >= 1 ? M.frames[m - 1].kills : [0, 0];
+  const next = M.frames[m].kills; const frac = (sec - m * 60) / 60;
+  return [base[0] + Math.floor((next[0] - base[0]) * frac), base[1] + Math.floor((next[1] - base[1]) * frac)];
+}
+function renderKDA(f){
+  [0, 1].forEach(t => {
+    $('#kda' + t).innerHTML = `<thead><tr><th><span class="tt ${t ? 'dire' : 'rad'}">${TEAM[t]}</span></th><th>K</th><th>D</th><th>A</th></tr></thead><tbody>` + G.picks[t].map(h => { const x = f ? f.kda[h] : [0,0,0]; return `<tr><td class="n">${mono(h, 1)}${esc(H[h].name)}</td><td class="v">${x[0]}</td><td class="v">${x[1]}</td><td class="v">${x[2]}</td></tr>`; }).join('') + '</tbody>';
+  });
+}
+function renderChart(){
+  const lim = G.clock;
+  const total = Math.max(45, M.endT); const W = 600, Hh = 150;
+  const X = t => t / total * W, Y = p => 8 + (1 - p) * (Hh - 16);
+  const fr = M.frames.filter(f => f.t * 60 <= lim + 0.5);
+  const pts = [[0, M.ev.stages[0].p]].concat(fr.map(f => [f.t, f.p]));
+  const maxLead = Math.max(5000, ...M.frames.map(f => Math.abs(f.lead)));
+  const L = l => Hh / 2 - l / maxLead * (Hh / 2 - 8);
+  let s = `<line x1="0" x2="${W}" y1="${Y(0.5)}" y2="${Y(0.5)}" stroke="#3a4650" stroke-dasharray="3 4"/>`;
+  [15, 30, 45].forEach(m => { if (m < total) s += `<line x1="${X(m)}" x2="${X(m)}" y1="0" y2="${Hh}" stroke="#283139"/><text x="${X(m) + 4}" y="14" fill="#86919a" font-size="11" font-family="Chivo Mono, monospace">${m}:00</text>`; });
+  const leadPts = [[0, 0]].concat(fr.map(f => [f.t, f.lead]));
+  if (leadPts.length > 1){
+    const area = `M${X(0)},${Hh / 2} ` + leadPts.map(p => `L${X(p[0])},${L(p[1])}`).join(' ') + ` L${X(leadPts[leadPts.length - 1][0])},${Hh / 2} Z`;
+    s += `<clipPath id="cTop"><rect width="${W}" height="${Hh / 2}"/></clipPath><clipPath id="cBot"><rect y="${Hh / 2}" width="${W}" height="${Hh / 2}"/></clipPath>`;
+    s += `<path d="${area}" fill="#72b55c" opacity=".22" clip-path="url(#cTop)"/><path d="${area}" fill="#e0623f" opacity=".22" clip-path="url(#cBot)"/>`;
+  }
+  if (pts.length > 1){
+    s += `<polyline points="${pts.map(p => X(p[0]) + ',' + Y(p[1])).join(' ')}" fill="none" stroke="#d6a442" stroke-width="2.2" vector-effect="non-scaling-stroke"/>`;
+    const lp = pts[pts.length - 1]; s += `<circle cx="${X(lp[0])}" cy="${Y(lp[1])}" r="3.5" fill="#d6a442"/><text x="${Math.min(W - 40, X(lp[0]) + 6)}" y="${Math.max(12, Y(lp[1]) - 6)}" fill="#d6a442" font-size="12" font-family="Chivo Mono, monospace" font-weight="700">${pct(lp[1])}</text>`;
+  }
+  $('#chart').innerHTML = s;
+}
+segBind('#speedSeg', 'speed', v => G.speed = v);
+$('#pauseBtn').onclick = () => { G.paused = !G.paused; $('#pauseBtn').textContent = G.paused ? 'Resume' : 'Pause'; };
+$('#skipBtn').onclick = () => { if (!M) return; const end = endSec(); const target = CHECK.find(c => c > G.clock && c < end); const before = G.clock; G.clock = (target != null ? target : end) - 0.001; flushEvents(before, G.clock, true); updateMatch(true); G.paused = false; $('#pauseBtn').textContent = 'Pause'; if (!timer) startLoop(); };
+
+/* ---------- check-in reports ---------- */
+function stageReport(s, final){
+  const from = s === 0 ? 0 : s === 1 ? 900 : 1800;
+  const to = G.clock; const f = frameAt(to);
+  const startFr = from === 0 ? null : M.frames[from / 60 - 1];
+  const k0 = startFr ? startFr.kills : [0, 0];
+  const sk = [f.kills[0] - k0[0], f.kills[1] - k0[1]];
+  const evs = M.events.filter(e => { const x = evSec(e); return x > from && x <= to; });
+  const keyTypes = ['fb', 'fight', 'rosh', 'rax', 'torm', 'ancient', 'tower'];
+  const key = evs.filter(e => keyTypes.includes(e.type)).sort((a, b) => keyTypes.indexOf(a.type) - keyTypes.indexOf(b.type) || evSec(a) - evSec(b)).slice(0, 7).sort((a, b) => evSec(a) - evSec(b));
+  const ev = M.ev; const lead = f.lead;
+  const cell = (a, b) => `<td class="${a > b ? 'lead' : ''}">${a}</td><td class="${b > a ? 'lead' : ''}">${b}</td>`;
+  const tw = [DC.towersUp(f.side[0]), DC.towersUp(f.side[1])], rx = [DC.raxUp(f.side[0]), DC.raxUp(f.side[1])];
+  const table = `<table class="score"><thead><tr><th></th><th class="t0">Radiant</th><th class="t1">Dire</th></tr></thead><tbody>
+    <tr><td>Kills, ${STG[s].toLowerCase()}</td>${cell(sk[0], sk[1])}</tr>
+    <tr><td>Kills, total</td>${cell(f.kills[0], f.kills[1])}</tr>
+    <tr><td>Net worth lead</td><td class="${lead >= 300 ? 'lead' : 'dim'}">${lead >= 300 ? '+' + (lead / 1000).toFixed(1) + 'k' : '—'}</td><td class="${lead <= -300 ? 'lead' : 'dim'}">${lead <= -300 ? '+' + (-lead / 1000).toFixed(1) + 'k' : '—'}</td></tr>
+    <tr><td>Towers standing (of 11)</td>${cell(tw[0], tw[1])}</tr>
+    <tr><td>Barracks standing (of 6)</td>${cell(rx[0], rx[1])}</tr>
+    <tr><td>Roshan kills</td>${cell(f.rosh.kills[0], f.rosh.kills[1])}</tr>
+    <tr><td>Aghanim's Shards from Tormentors</td>${cell(f.shards[0], f.shards[1])}</tr>
+  </tbody></table>`;
+  const status = final ? '' : `<div class="status">
+    <span><b>Roshan:</b> ${f.rosh.alive ? 'alive in the ' + (f.day ? 'top' : 'bottom') + ' lair' : `respawns between ${f.rosh.respawn[0]}:00 and ${f.rosh.respawn[1]}:00`}${f.aegis ? `. Aegis held by ${TEAM[f.aegis.team]} until ${f.aegis.until}:00` : ''}</span>
+    <span><b>Tormentors:</b> ${to < 1200 ? 'spawn at 20:00 on both sides' : f.torm.map((x, i) => (i ? 'Dire' : 'Radiant') + ' side ' + (x.alive ? 'up' : 'back at ' + x.spawn + ':00')).join(', ')}</span></div>`;
+  let outlook = '';
+  if (!final){
+    const nextS = s + 1, p = ev.stages[nextS].p, fv = p >= 0.5 ? 0 : 1;
+    const heroes = G.picks[fv].map(h => ({ h, v: DC.stageWr(h, nextS) - 0.5 })).sort((a, b) => b.v - a.v).slice(0, 2);
+    const shift = (ev.stages[nextS].p - ev.stages[s].p) * (fv ? -1 : 1);
+    const live = f.p >= 0.5 ? 0 : 1;
+    outlook = `<p class="outlook"><strong>${STG[nextS]}</strong>The draft favors ${TEAM[fv]} ${pct(Math.max(p, 1 - p))} in this phase${Math.abs(shift) >= 0.01 ? `, ${shift > 0 ? 'up' : 'down'} ${Math.round(Math.abs(shift) * 100)} points on the ${STG[s].toLowerCase()}` : ''}. ${heroes.map(x => esc(H[x.h].name)).join(' and ')} ${heroes.length > 1 ? 'have' : 'has'} strong pro records in ${['short','30 to 42 minute','long'][nextS]} games. With the map as it stands, ${TEAM[live]} wins ${pct(Math.max(f.p, 1 - f.p))} of the time.</p>`;
+  }
+  let head;
+  if (final){
+    const w = M.winner;
+    const mvp = G.picks[w].map(h => ({ h, x: f.kda[h], sc: f.kda[h][0] * 2 + f.kda[h][2] - f.kda[h][1] * 1.5 })).sort((a, b) => b.sc - a.sc)[0];
+    head = `<div><div class="when">Final · ${mmss(endSec())}</div><h2 id="repTitle" class="winner t${w}">${TEAM[w]} victory</h2></div>
+      <p class="ink2" style="max-width:44ch">${esc(G.cfg.names[w])} takes it. The draft read gave ${TEAM[w]} ${pct(w ? 1 - ev.overall : ev.overall)}. Player of the game: <b style="color:var(--ink)">${esc(H[mvp.h].name)}</b>, <span class="num">${mvp.x.join('/')}</span>.</p>`;
+  } else {
+    head = `<div><div class="when">Check-in ${s + 1} of 3 · ${mmss(from)} to ${mmss(to)}</div><h2 id="repTitle">${STG[s]}</h2></div>`;
+  }
+  const moments = `<div class="moments"><div class="sh">Key moments</div>${key.length ? key.map(e => `<div class="ev t${e.team} ${['fight','rosh','rax','ancient','fb','torm'].includes(e.type) ? 'big' : ''}"><span class="ts">${mmss(evSec(e))}</span><span class="bar"></span><span class="tx">${esc(e.text)}</span></div>`).join('') : '<p class="ink2">A quiet stretch. Both sides farmed.</p>'}</div>`;
+  const mini = `<div><svg viewBox="0 0 1000 1000" aria-label="Map at ${mmss(to)}">${$('#map').innerHTML.replace('id="flashes"', '')}</svg>${status}</div>`;
+  const btns = final
+    ? `<div class="iact"><button class="btn" id="rematch">Replay this draft</button><button class="btn go" id="again">New draft</button></div>`
+    : `<div class="iact"><button class="btn go" id="cont">Play the ${STG[s + 1].toLowerCase()}</button></div>`;
+  $('#report').innerHTML = `<div class="ihead">${head}</div><div class="ibody"><div style="display:flex;flex-direction:column;gap:22px;min-width:0">${table}${outlook}</div>${mini}</div>${moments}${btns}`;
+  $('#overlay').hidden = false; $('#overlay').scrollTop = 0;
+  const c = $('#cont'); if (c){ c.focus({ preventScroll: true }); c.onclick = () => { $('#overlay').hidden = true; G.clock += 0.001; startLoop(); }; }
+  const r = $('#rematch'); if (r) r.onclick = () => { $('#overlay').hidden = true; startMatch((Math.random() * 4294967295) >>> 0); };
+  const a = $('#again'); if (a){ a.focus({ preventScroll: true }); a.onclick = () => { $('#overlay').hidden = true; show('setup'); }; }
+}
+
+/* ---------- boot + live-update hooks ---------- */
+function start(data){
+  if (data && data.G){
+    G = data.G;
+    if (G.screen === 'draft'){ show('draft'); renderDraft(); maybeBot(); return; }
+    if (G.screen === 'preview'){ showPreview(); return; }
+    if (G.screen === 'match' && G.seed){
+      M = DC.simulate(G.picks[0], G.picks[1], G.seed); show('match');
+      G.shown = []; $('#feed').innerHTML = ''; flushEvents(-1, G.clock, true); updateMatch(true);
+      const end = endSec();
+      if (G.clock >= end) stageReport(G.clock > 1800 ? 2 : G.clock > 900 ? 1 : 0, true);
+      else if (CHECK.includes(Math.round(G.clock))) stageReport(CHECK.indexOf(Math.round(G.clock)));
+      else startLoop();
+      return;
+    }
+  }
+  show('setup');
+}
+window.claude?.hot?.snapshot?.(() => ({ G }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && G.screen === 'draft' && G.sel != null && document.activeElement?.id !== 'search') confirmSel(); });
+</script>
