@@ -1,4 +1,5 @@
 """Builds public/index.html from src/ and data/. Run: python3 build.py"""
+import os
 from pathlib import Path
 root = Path(__file__).parent
 page = (root / 'src/template.html').read_text()
@@ -8,7 +9,8 @@ vs = (root / 'data/vs.txt').read_text().replace('\n', '')
 syn = (root / 'data/syn.txt').read_text().replace('\n', '')
 assert '</script' not in engine
 body = (page.replace('/*__ENGINE__*/', engine).replace('/*__HEROES__*/', heroes)
-            .replace('/*__VS__*/', vs).replace('/*__SY__*/', syn))
+            .replace('/*__VS__*/', vs).replace('/*__SY__*/', syn)
+            .replace('__DC_SERVER__', os.environ.get('DC_SERVER', 'wss://draft-clash-rooms.onrender.com')))
 shell = """<!doctype html>
 <html lang="en">
 <head>

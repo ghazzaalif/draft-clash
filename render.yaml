@@ -1,4 +1,5 @@
 services:
+  # The game page (static)
   - type: web
     name: draft-clash
     runtime: static
@@ -8,3 +9,12 @@ services:
       - path: /*
         name: X-Frame-Options
         value: SAMEORIGIN
+  # Room server for online host/join play (WebSocket)
+  - type: web
+    name: draft-clash-rooms
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /health
