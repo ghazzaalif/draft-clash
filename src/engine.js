@@ -1,5 +1,5 @@
 /* ===== Draft Clash engine: data model, draft scoring, match simulation ===== */
-var DRAFTW = 0.5, FORMW = 0.4; // calibrated so draft win% matches simulated outcomes
+var DRAFTW = 0.42, FORMW = 0.4; // calibrated so draft win% matches simulated outcomes
 var DC = (function(){
 const ALPH='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const META = { matches: 20330, from: 'Oct 2025', to: 'Oct 2026', avgMin: 34.9, avgKills: 58.8, radiantWin: 0.521 };
@@ -91,11 +91,17 @@ function teamPosValue(T){ // a positioned team's own strength, stage-weighted li
   for (let s = 0; s < 3; s++){ let x = 0; for (let p = 0; p < 5; p++){ const h = T[p]; x += stageWr(h, s) - 0.5 + POSW[s][p] * (H[h].posAdj[p] + fitPen(h, p)); } v += [0.3, 0.4, 0.3][s] * x; }
   return v;
 }
-// best position order for five heroes (perm[p] = index of the hero at position p+1)
+// "Pro positions": the most likely assignment given how often pros play each hero at each position
+// (product of shares). Win-rate value only breaks near-ties.
 function bestOrder(T){
   if (T.length !== 5) return T.slice();
   let best = null, bv = -1e9;
-  PERMS.forEach(function(perm){ const o = perm.map(function(i){ return T[i]; }); const v = teamPosValue(o); if (v > bv){ bv = v; best = o; } });
+  PERMS.forEach(function(perm){
+    const o = perm.map(function(i){ return T[i]; });
+    let v = 0; for (let p = 0; p < 5; p++) v += Math.log(share(o[p], p));
+    v += 2 * teamPosValue(o);
+    if (v > bv){ bv = v; best = o; }
+  });
   return best;
 }
 // how well a partial team can still cover distinct positions (sum of best shares)
