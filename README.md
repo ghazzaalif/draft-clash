@@ -14,9 +14,9 @@ Hero portraits are Valve's official Dota 2 images, loaded from Valve's CDN (the 
 
 ## Data
 
-All numbers come from OpenDota's public pro-match data for 30 Oct 2025 to 30 Oct 2026 (20,330 matches, 127 heroes):
+All numbers follow the live patch, **7.41f** (released 15 Sep 2026). Hero data comes from OpenDota's public pro-match data for patch 7.41 only: 8,881 matches from 24 Mar to 30 Oct 2026, 127 heroes. Games are weighted toward the live letter patch: 7.41f ×1.0 (954 matches), 7.41e ×0.6, 7.41d ×0.35, 7.41 to 7.41c ×0.15; older patches are left out. Counts in the data files are these weighted counts (about 2,760 match-equivalents).
 
-- `data/heroes.csv`: id, name, attribute, melee/ranged, roles, pro picks, wins, bans, and games:wins by game length (under 30, 30–42, over 42 minutes), internal name.
+- `data/heroes.csv`: id, name, attribute, melee/ranged, roles, weighted picks, wins, bans, weighted games:wins by game length (under 30, 30–42, over 42 minutes), internal name, then unweighted picks and bans on 7.41 and games and wins on 7.41f (for display).
 - `data/positions.csv`: hero id, then pro games:wins at positions 1–5. Position comes from each player's lane (safe, mid, off) and farm order within that lane: the higher-GPM safe laner is position 1, the other is 5; the higher-GPM offlaner is 3, the other is 4. Teams that did not play a 2-1-2 lane setup are left out (91% of hero-games are classified).
 - `data/vs.txt`, `data/syn.txt`: head-to-head and teammate values for every hero pair (upper triangle, one character per pair). Each value is the pair's win rate minus what the two heroes' own win rates predict, shrunk with 25 pseudo-games, in win-rate points (`ALPH.indexOf(c) - 31`).
 
@@ -24,7 +24,7 @@ All numbers come from OpenDota's public pro-match data for 30 Oct 2025 to 30 Oct
 
 - **Draft score per stage**: hero strength by game length, head-to-head counters, teammate synergy and team-shape penalties, combined into a win chance for early, mid and late game.
 - **Positions**: off-role heroes (under 15% of their pro games at that position) lose up to 6 points, and a hero's pro win rate at its position adds or removes up to 2; both count more for supports early and carries late. Lane matchups count in the early and mid game.
-- **Simulation**: a laning phase to 10:00 where kills happen between the heroes laning against each other, then each lane is won, lost or even; then minute-by-minute fights, kill credit by role, gold lead, tower → barracks → tier 4 → Ancient, Roshan (8–11 min respawn; Aegis, Cheese, Refresher Shard) and Tormentors (from 20:00; Aghanim's Shard). Calibrated so a draft rated 60% wins about 60% of simulated games; games average about 35.4 minutes and 58 kills, close to the pro averages of 34.9 minutes and 58.8 kills.
+- **Simulation**: a laning phase to 10:00 where kills happen between the heroes laning against each other, then each lane is won, lost or even; then minute-by-minute fights, kill credit by role, gold lead, tower → barracks → tier 4 → Ancient, Roshan and the Tormentor on 7.41f rules: Roshan respawns 8–11 minutes after dying and drops the Aegis every time, plus Roshan's Banner on the second kill and Cheese and a Refresher Shard from the third; he starts in the top pit and from 15:00 swaps pits at each day/night change. One Tormentor spawns at 20:00 in the bottom corner, always on the side away from Roshan, and returns 10 minutes after it dies; its Aghanim's Shard goes to a low-net-worth hero without one. Calibrated so a draft rated 60% wins about 60% of simulated games; games average about 39.6 minutes and 58.5 kills, with about one in five ending before 30:00, close to the weighted 7.41 pro averages of 38.7 minutes and 58.7 kills (23% under 30:00).
 
 ## Build and run
 

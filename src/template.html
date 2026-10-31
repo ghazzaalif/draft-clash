@@ -34,6 +34,7 @@ p{margin:0}
 .wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:10px}
 .wordmark{font-family:var(--f-display);font-weight:900;font-size:24px;text-transform:uppercase;letter-spacing:.02em;display:flex;gap:10px;align-items:baseline}
+.wordmark .pv{font-family:var(--f-num);font-size:12px;font-weight:700;color:var(--gold);letter-spacing:0;text-transform:none}
 .wordmark small{font-family:var(--f-ui);font-weight:500;font-size:13px;color:var(--ink-3);text-transform:none;letter-spacing:0}
 .btn{border:1px solid var(--rule-2);background:var(--deck-2);padding:9px 16px;border-radius:var(--r);font-weight:700;transition:border-color .15s,background .15s}
 .btn:hover{border-color:var(--ink-2)}
@@ -99,6 +100,7 @@ p{margin:0}
 .track .t{font-family:var(--f-num);font-size:13px;color:var(--ink-3)}
 .track b{font-weight:700;font-size:15px}
 .track p{font-size:14px;color:var(--ink-2);max-width:30ch}
+.source .patch{display:inline-block;background:var(--gold);color:#1b1407;font-family:var(--f-num);font-size:12px;padding:1px 7px;margin-right:8px;border-radius:var(--r)}
 .source{font-size:13.5px;color:var(--ink-3);max-width:90ch;border-top:1px solid var(--rule);padding-top:12px}
 
 /* ---------- draft board ---------- */
@@ -397,7 +399,7 @@ dl.obj dt{color:var(--ink-3);padding-right:18px}
 
 <div class="wrap">
   <header class="topbar">
-    <div class="wordmark">Draft Clash <small id="crumb">Captains Mode</small></div>
+    <div class="wordmark">Draft Clash <small id="crumb">Captains Mode</small> <span class="pv" title="Hero data and map timings follow this patch">7.41f</span></div>
     <div id="topActions"></div>
   </header>
   <div class="netbar" id="netbar" hidden></div>
@@ -407,7 +409,7 @@ dl.obj dt{color:var(--ink-3);padding-right:18px}
     <div class="intro">
       <div>
         <h1 class="logo"><span class="r">Draft</span><span class="d">Clash</span></h1>
-        <p class="lede">Ban and pick five heroes in Captains Mode against a bot, a friend on the same screen, or a friend online. The match then plays itself, scored on <b>20,330 professional games</b> from the past year, and stops at 15:00, at 30:00 and at the end so you can read the map.</p>
+        <p class="lede">Ban and pick five heroes in Captains Mode against a bot, a friend on the same screen, or a friend online. The match then plays itself, scored on <b>8,881 pro games from patch 7.41</b>, weighted toward the live 7.41f, and stops at 15:00, at 30:00 and at the end so you can read the map.</p>
       </div>
       <div class="sidecol">
       <div class="form" id="setupForm">
@@ -446,11 +448,11 @@ dl.obj dt{color:var(--ink-3);padding-right:18px}
         <div><span class="t">24 turns</span><b>Captains Mode draft</b><p>14 bans and 10 picks in tournament order. First pick bans first.</p></div>
         <div><span class="t">before 0:00</span><b>Positions and draft read</b><p>Set positions 1 to 5, which also sets the lanes. Then see the win chance per stage.</p></div>
         <div class="cp"><span class="t">0:00 – 15:00</span><b>Early game</b><p>Laning, first blood, first towers. Check-in at 15:00.</p></div>
-        <div class="cp"><span class="t">15:00 – 30:00</span><b>Mid game</b><p>Teamfights, Roshan, Tormentors from 20:00. Check-in at 30:00.</p></div>
+        <div class="cp"><span class="t">15:00 – 30:00</span><b>Mid game</b><p>Teamfights, Roshan, the Tormentor from 20:00. Check-in at 30:00.</p></div>
         <div class="cp"><span class="t">30:00 – end</span><b>Late game</b><p>High ground, barracks, Aegis fights. Final report when an Ancient falls.</p></div>
       </div>
     </div>
-    <p class="source">Hero win rates by game length (under 30, 30 to 42, over 42 minutes), head-to-head records and teammate records for all 127 heroes come from OpenDota's public pro-match data, 30 Oct 2025 to 30 Oct 2026. The draft sets the odds; gold leads, Aegis, Shards and match-day form decide each fight.</p>
+    <p class="source"><b class="patch">Patch 7.41f</b> Hero win rates by game length, positions, head-to-head and teammate records for all 127 heroes come from OpenDota's public pro-match data for patch 7.41 only (24 Mar to 30 Oct 2026, 8,881 matches). Games on the live 7.41f count fully; earlier 7.41 updates count less (7.41e ×0.6, 7.41d ×0.35, 7.41 to 7.41c ×0.15) and older patches not at all. Roshan and Tormentor timings follow 7.41f. The draft sets the odds; gold leads, Aegis, Shards and match-day form decide each fight.</p>
   </section>
 
   <!-- DRAFT -->
@@ -490,13 +492,13 @@ dl.obj dt{color:var(--ink-3);padding-right:18px}
     </div>
     <div class="arena">
       <div class="mapcol">
-        <svg id="map" viewBox="0 0 1000 1000" role="img" aria-label="Minimap with towers, barracks, Roshan and Tormentors"></svg>
+        <svg id="map" viewBox="0 0 1000 1000" role="img" aria-label="Minimap with towers, barracks, Roshan and the Tormentor"></svg>
         <div class="legend"><span><i style="background:var(--ink-2)"></i>Tower</span><span><i style="background:var(--ink-2);height:6px"></i>Barracks</span><span><i style="background:var(--ink-2);transform:rotate(45deg)"></i>Ancient</span><span><i style="background:var(--gold);border-radius:50%"></i>Roshan</span><span><i style="background:var(--int);clip-path:polygon(50% 0,100% 100%,0 100%)"></i>Tormentor</span></div>
         <dl class="obj">
           <dt>Net worth</dt><dd id="leadTxt">Even</dd>
           <dt>Structures</dt><dd id="structTxt"></dd>
           <dt>Roshan</dt><dd id="roshTxt">Alive</dd>
-          <dt>Tormentors</dt><dd id="tormTxt">Spawn at 20:00</dd>
+          <dt>Tormentor</dt><dd id="tormTxt">Spawns at 20:00</dd>
         </dl>
       </div>
       <div class="feedcol">
@@ -510,7 +512,7 @@ dl.obj dt{color:var(--ink-3);padding-right:18px}
     </div>
     <div class="kdas"><table class="kda" id="kda0"></table><table class="kda" id="kda1"></table></div>
   </section>
-  <p class="foot">Data: OpenDota public pro matches, 30 Oct 2025 – 30 Oct 2026. The simulation is a model built on those numbers, not a prediction service.</p>
+  <p class="foot">Patch 7.41f. Data: OpenDota public pro matches on patch 7.41 (24 Mar – 30 Oct 2026), weighted toward 7.41f. The simulation is a model built on those numbers, not a prediction service.</p>
 </div>
 <div class="mbar" id="mbar" hidden><span class="who" id="mbarTxt"></span><button class="btn go" id="mbarBtn">Pick</button></div>
 <div class="inter" id="overlay" hidden><div class="sheetwrap" id="report" role="dialog" aria-modal="true" aria-labelledby="repTitle"></div></div>
@@ -666,7 +668,8 @@ function renderDetail(){
     const persp = tn && tn.kind === 'ban' ? `Worth to ${TEAM[1 - team]} if left open` : `Worth to ${TEAM[team]}`;
     const row = (name, v) => `<div><span>${name}</span><span class="v ${v >= 0 ? 'pos' : 'neg'}">${pi(v)}</span></div>`;
     el.innerHTML = `${art(h.i, 'art', 1)}<div style="display:flex;gap:12px;align-items:center"><div style="min-width:0"><h3>${esc(h.name)}</h3><div class="sub">${{str:'Strength',agi:'Agility',int:'Intelligence',all:'Universal'}[h.attr]} · ${h.atk === 'M' ? 'Melee' : 'Ranged'} · ${h.roles.join(', ')}</div></div></div>
-      <div class="facts"><div><b>${(h.rawWr * 100).toFixed(1)}%</b><span>Pro win rate</span></div><div><b>${h.g.toLocaleString()}</b><span>Picks</span></div><div><b>${h.bans.toLocaleString()}</b><span>Bans</span></div><div><b>${Math.round(DC.contest(h.i) * 100)}%</b><span>Contested</span></div></div>
+      <div class="facts"><div><b>${(h.rawWr * 100).toFixed(1)}%</b><span>Win rate, 7.41</span></div><div><b>${h.g741.toLocaleString()}</b><span>Picks, 7.41</span></div><div><b>${h.bans741.toLocaleString()}</b><span>Bans, 7.41</span></div><div><b>${Math.round(DC.contest(h.i) * 100)}%</b><span>Contested</span></div></div>
+      <p class="note" style="margin-top:-8px">${h.gLatest ? `On 7.41f alone: ${h.gLatest} games, ${Math.round(100 * h.wLatest / h.gLatest)}% won.` : 'Not picked in pro games on 7.41f yet.'} Win rate weights 7.41f games most.</p>
       ${tn && humanTurn ? `<div class="cta"><button class="btn go" id="confirm" ${G.used[h.i] ? 'disabled' : ''}>${verb} ${esc(h.name)}</button><span class="val">${persp}: <b class="num">${pp(DC.pickValue(h.i, allies, enemies))}</b> points</span></div>` : ''}
       <div><div class="sh">Strength by game length</div><div class="sbars">${stageBar('Early', h.stageWr[0])}${stageBar('Mid', h.stageWr[1])}${stageBar('Late', h.stageWr[2])}</div></div>
       ${enemies.length ? `<div><div class="sh">Against the enemy draft</div><div class="rl">${vsL.map(x => row('vs ' + esc(H[x.e].name), x.v)).join('')}</div></div>`
@@ -683,7 +686,7 @@ function renderBar(){
   const tn = turn(); const b = $('#mbar');
   const on = G.screen === 'draft' && tn && canAct(tn.team) && G.sel != null && !G.used[G.sel];
   b.hidden = !on; if (!on) return;
-  $('#mbarTxt').textContent = H[G.sel].name + ' · ' + (H[G.sel].rawWr * 100).toFixed(1) + '% pro win';
+  $('#mbarTxt').textContent = H[G.sel].name + ' · ' + (H[G.sel].rawWr * 100).toFixed(1) + '% win on 7.41';
   $('#mbarBtn').textContent = (tn.kind === 'pick' ? 'Pick ' : 'Ban ') + H[G.sel].name;
   $('#mbarBtn').onclick = confirmSel;
 }
@@ -875,13 +878,14 @@ function renderMap(fr){
     const a = POS[t].anc, up = sd ? sd.anc : 1;
     s += `<rect x="${a[0] - 30}" y="${a[1] - 30}" width="60" height="60" transform="rotate(45 ${a[0]} ${a[1]})" fill="${up ? col : '#0f1317'}" stroke="${up ? '#e6e9e3' : col}" stroke-width="4"/>`;
   });
-  const day = fr ? fr.day : true;
-  const pit = day ? PIT.day : PIT.night, other = day ? PIT.night : PIT.day;
+  const top = fr ? fr.roshTop : true; // 7.41: top pit until 15:00, then swaps at each day/night change
+  const pit = top ? PIT.day : PIT.night, other = top ? PIT.night : PIT.day;
   const alive = fr ? fr.rosh.alive : true;
   s += `<circle cx="${other[0]}" cy="${other[1]}" r="20" fill="none" stroke="#6b5a33" stroke-width="3" stroke-dasharray="5 6"/>`;
   s += `<circle cx="${pit[0]}" cy="${pit[1]}" r="24" fill="${alive ? '#d6a442' : '#0f1317'}" stroke="#d6a442" stroke-width="4"/>`;
   if (fr && !alive && fr.rosh.respawn) s += `<text x="${pit[0]}" y="${pit[1] - 34}" text-anchor="middle" font-size="24" font-weight="700" fill="#d6a442" font-family="Chivo Mono, monospace">${fr.rosh.respawn[0]}–${fr.rosh.respawn[1]}</text>`;
-  TORM.forEach((p, i) => { const up = fr ? fr.torm[i].alive : false; s += `<path d="M${p[0]},${p[1] - 26} L${p[0] + 24},${p[1] + 16} L${p[0] - 24},${p[1] + 16} Z" fill="${up ? '#5f9fd8' : '#0f1317'}" stroke="#5f9fd8" stroke-width="3" opacity="${up ? 1 : .6}"/>`; });
+  { const p = TORM[top ? 0 : 1], up = fr ? fr.torm.alive : false; // one Tormentor, in the corner away from Roshan
+    s += `<path d="M${p[0]},${p[1] - 26} L${p[0] + 24},${p[1] + 16} L${p[0] - 24},${p[1] + 16} Z" fill="${up ? '#5f9fd8' : '#0f1317'}" stroke="#5f9fd8" stroke-width="3" opacity="${up ? 1 : .6}"/>`; }
   s += '<g id="flashes"></g>';
   $('#map').innerHTML = s;
 }
@@ -889,7 +893,7 @@ function flash(e){
   const g = $('#flashes'); if (!g) return;
   let p;
   if (e.place && PLACE[e.place]){ const [a, b] = PLACE[e.place]; const r = Math.random(); p = [a[0] + (b[0] - a[0]) * r, a[1] + (b[1] - a[1]) * r]; }
-  else if (e.type === 'rosh' || e.place === 'Roshan’s lair'){ const f = M.frames[Math.max(0, e.t - 1)]; p = f && !f.day ? PIT.night : PIT.day; }
+  else if (e.type === 'rosh' || e.place === 'Roshan’s pit'){ const f = M.frames[Math.max(0, e.t - 1)]; p = f && !f.roshTop ? PIT.night : PIT.day; }
   else return;
   const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); c.setAttribute('r', e.type === 'fight' ? 46 : 24);
@@ -944,16 +948,16 @@ function updateMatch(full){
   $('#kR').textContent = k[0]; $('#kD').textContent = k[1];
   $('#clock').textContent = mmss(G.clock);
   $('#stgLabel').textContent = STG[G.clock < 900 ? 0 : G.clock < 1800 ? 1 : 2];
-  const day = Math.floor(G.clock / 300) % 2 === 0;
-  $('#dayNight').textContent = (day ? 'Day' : 'Night') + ', Roshan ' + (day ? 'top' : 'bottom');
+  const day = Math.floor(G.clock / 300) % 2 === 0, mt = Math.floor(G.clock / 60);
+  $('#dayNight').textContent = (day ? 'Day' : 'Night') + ', Roshan ' + (DC.roshTop(mt) ? 'top' : 'bottom');
   if (full) renderMap(f);
   const side = (t, v) => `<span class="${t ? 'dire' : 'rad'} num">${v}</span>`;
   if (f){
     $('#roshTxt').innerHTML = (f.rosh.alive ? 'Alive' : `Respawns ${f.rosh.respawn[0]}:00 to ${f.rosh.respawn[1]}:00`) + ` · kills ${side(0, f.rosh.kills[0])}–${side(1, f.rosh.kills[1])}` + (f.aegis ? ` · Aegis <span class="${f.aegis.team ? 'dire' : 'rad'}">${TEAM[f.aegis.team]}</span>` : '');
-    $('#tormTxt').innerHTML = G.clock < 1200 ? 'Spawn at 20:00' : `${f.torm.filter(x => x.alive).length} of 2 up · Shards ${side(0, f.shards[0])}–${side(1, f.shards[1])}`;
+    $('#tormTxt').innerHTML = G.clock < 1200 ? 'Spawns at 20:00' : `${f.torm.alive ? 'Up, ' + (f.roshTop ? 'bottom' : 'top') + ' corner' : 'Back at ' + f.torm.spawn + ':00'} · Shards ${side(0, f.shards[0])}–${side(1, f.shards[1])}`;
     const l = f.lead; $('#leadTxt').innerHTML = Math.abs(l) < 300 ? 'Even' : `<span class="${l > 0 ? 'rad' : 'dire'}">${TEAM[l > 0 ? 0 : 1]} +${(Math.abs(l) / 1000).toFixed(1)}k</span>`;
     $('#structTxt').innerHTML = `Towers ${side(0, DC.towersUp(f.side[0]))}–${side(1, DC.towersUp(f.side[1]))} · Barracks ${side(0, DC.raxUp(f.side[0]))}–${side(1, DC.raxUp(f.side[1]))}`;
-  } else { $('#roshTxt').textContent = 'Alive'; $('#tormTxt').textContent = 'Spawn at 20:00'; $('#leadTxt').textContent = 'Even'; $('#structTxt').innerHTML = 'Towers 11–11 · Barracks 6–6'; }
+  } else { $('#roshTxt').textContent = 'Alive'; $('#tormTxt').textContent = 'Spawns at 20:00'; $('#leadTxt').textContent = 'Even'; $('#structTxt').innerHTML = 'Towers 11–11 · Barracks 6–6'; }
   if (full || !f) renderKDA(f);
   renderChart();
 }
@@ -1015,11 +1019,11 @@ function stageReport(s, final){
     <tr><td>Towers standing (of 11)</td>${cell(tw[0], tw[1])}</tr>
     <tr><td>Barracks standing (of 6)</td>${cell(rx[0], rx[1])}</tr>
     <tr><td>Roshan kills</td>${cell(f.rosh.kills[0], f.rosh.kills[1])}</tr>
-    <tr><td>Aghanim's Shards from Tormentors</td>${cell(f.shards[0], f.shards[1])}</tr>
+    <tr><td>Aghanim's Shards from the Tormentor</td>${cell(f.shards[0], f.shards[1])}</tr>
   </tbody></table>`;
   const status = final ? '' : `<div class="status">
-    <span><b>Roshan:</b> ${f.rosh.alive ? 'alive in the ' + (f.day ? 'top' : 'bottom') + ' lair' : `respawns between ${f.rosh.respawn[0]}:00 and ${f.rosh.respawn[1]}:00`}${f.aegis ? `. Aegis held by ${TEAM[f.aegis.team]} until ${f.aegis.until}:00` : ''}</span>
-    <span><b>Tormentors:</b> ${to < 1200 ? 'spawn at 20:00 on both sides' : f.torm.map((x, i) => (i ? 'Dire' : 'Radiant') + ' side ' + (x.alive ? 'up' : 'back at ' + x.spawn + ':00')).join(', ')}</span></div>`;
+    <span><b>Roshan:</b> ${f.rosh.alive ? 'alive in the ' + (f.roshTop ? 'top' : 'bottom') + ' pit' : `respawns between ${f.rosh.respawn[0]}:00 and ${f.rosh.respawn[1]}:00`}${f.aegis ? `. Aegis held by ${TEAM[f.aegis.team]} until ${f.aegis.until}:00` : ''}</span>
+    <span><b>Tormentor:</b> ${to < 1200 ? 'spawns at 20:00 in the bottom corner' : f.torm.alive ? 'up in the ' + (f.roshTop ? 'bottom' : 'top') + ' corner' : 'back at ' + f.torm.spawn + ':00'}</span></div>`;
   let outlook = '';
   if (!final){
     const nextS = s + 1, p = ev.stages[nextS].p, fv = p >= 0.5 ? 0 : 1;

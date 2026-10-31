@@ -1,127 +1,127 @@
-1,Anti-Mage,agi,M,Carry|Escape|Nuker,660,322,1310,254:125;286:142;120:55,antimage
-2,Axe,str,M,Initiator|Durable|Disabler|Carry,2638,1332,2360,1049:527;1035:532;554:273,axe
-3,Bane,all,R,Support|Disabler|Nuker|Durable,1110,601,1974,259:140;466:268;385:193,bane
-4,Bloodseeker,agi,M,Carry|Disabler|Nuker|Initiator,218,109,325,96:44;69:32;53:33,bloodseeker
-5,Crystal Maiden,int,R,Support|Disabler|Nuker,1753,864,151,997:487;644:334;112:43,crystal_maiden
-6,Drow Ranger,agi,R,Carry|Disabler|Pusher,1097,543,1893,374:191;436:210;287:142,drow_ranger
-7,Earthshaker,str,M,Support|Initiator|Disabler|Nuker,737,335,511,257:114;295:144;185:77,earthshaker
-8,Juggernaut,agi,M,Carry|Pusher|Escape,1541,792,1200,728:357;609:336;204:99,juggernaut
-9,Mirana,agi,R,Carry|Support|Escape|Nuker|Disabler,1025,534,387,276:135;445:222;304:177,mirana
-10,Morphling,agi,R,Carry|Escape|Durable|Nuker|Disabler,1171,562,1649,511:209;496:264;164:89,morphling
-11,Shadow Fiend,agi,R,Carry|Nuker,4677,2341,4522,2197:1152;1821:903;659:286,nevermore
-12,Phantom Lancer,agi,M,Carry|Escape|Pusher|Nuker,677,310,1230,290:110;267:137;120:63,phantom_lancer
-13,Puck,int,R,Initiator|Disabler|Escape|Nuker,2337,1177,6160,593:294;1037:499;707:384,puck
-14,Pudge,str,M,Disabler|Initiator|Durable|Nuker,2412,1215,653,1172:601;997:492;243:122,pudge
-15,Razor,agi,R,Carry|Durable|Nuker|Pusher,1484,730,1820,521:252;655:332;308:146,razor
-16,Sand King,all,M,Initiator|Disabler|Support|Nuker|Escape,1047,498,3764,248:111;501:240;298:147,sand_king
-17,Storm Spirit,int,R,Carry|Escape|Nuker|Initiator|Disabler,2709,1349,3745,893:419;1159:582;657:348,storm_spirit
-18,Sven,str,M,Carry|Disabler|Initiator|Durable|Nuker,1041,500,530,415:181;422:214;204:105,sven
-19,Tiny,str,M,Carry|Nuker|Pusher|Initiator|Durable|Disabler,3431,1696,3409,995:544;1513:745;923:407,tiny
-20,Vengeful Spirit,agi,R,Support|Initiator|Disabler|Nuker|Escape,993,482,360,518:253;378:183;97:46,vengefulspirit
-21,Windranger,all,R,Carry|Support|Disabler|Escape|Nuker,3362,1710,6371,1123:559;1378:706;861:445,windrunner
-22,Zeus,int,R,Nuker|Carry,1418,671,1414,727:336;553:265;138:70,zuus
-23,Kunkka,str,M,Carry|Support|Disabler|Initiator|Durable|Nuker,1000,521,530,364:180;439:237;197:104,kunkka
-25,Lina,int,R,Support|Carry|Nuker|Disabler,1745,841,1253,893:431;612:297;240:113,lina
-26,Lion,int,R,Support|Disabler|Nuker|Initiator,3289,1625,795,1398:627;1348:716;543:282,lion
-27,Shadow Shaman,int,R,Support|Pusher|Disabler|Nuker|Initiator,2046,1007,744,884:422;826:414;336:171,shadow_shaman
-28,Slardar,str,M,Carry|Durable|Initiator|Disabler|Escape,2656,1341,3506,909:437;1132:598;615:306,slardar
-29,Tidehunter,str,M,Initiator|Durable|Disabler|Nuker|Carry,2769,1334,2339,1039:492;1120:562;610:280,tidehunter
-30,Witch Doctor,int,R,Support|Nuker|Disabler,1114,546,1049,413:198;457:226;244:122,witch_doctor
-31,Lich,int,R,Support|Nuker,1882,896,526,736:321;784:380;362:195,lich
-32,Riki,agi,M,Carry|Escape|Disabler,197,88,332,77:34;80:34;40:20,riki
-33,Enigma,all,R,Disabler|Initiator|Pusher,571,326,2442,141:90;247:133;183:103,enigma
-34,Tinker,int,R,Carry|Nuker|Pusher,560,246,3107,201:86;247:112;112:48,tinker
-35,Sniper,agi,R,Carry|Nuker,1635,866,1316,888:485;614:314;133:67,sniper
-36,Necrophos,int,R,Carry|Nuker|Durable|Disabler,1327,658,2024,509:260;519:249;299:149,necrolyte
-37,Warlock,int,R,Support|Initiator|Disabler,2630,1247,1823,1023:484;1118:529;489:234,warlock
-38,Beastmaster,all,M,Initiator|Disabler|Durable|Nuker,2333,1198,5855,819:473;968:475;546:250,beastmaster
-39,Queen of Pain,int,R,Carry|Nuker|Escape,2891,1404,4752,1080:521;1199:564;612:319,queenofpain
-40,Venomancer,all,R,Support|Nuker|Initiator|Pusher|Disabler,1116,576,4368,363:211;514:254;239:111,venomancer
-41,Faceless Void,agi,M,Carry|Initiator|Disabler|Escape|Durable,972,475,1540,299:124;455:240;218:111,faceless_void
-42,Wraith King,str,M,Carry|Support|Durable|Disabler|Initiator,645,314,643,331:166;269:129;45:19,skeleton_king
-43,Death Prophet,all,R,Carry|Pusher|Nuker|Disabler,737,334,1945,340:157;260:122;137:55,death_prophet
-44,Phantom Assassin,agi,M,Carry|Escape,603,269,252,293:113;247:126;63:30,phantom_assassin
-45,Pugna,int,R,Nuker|Pusher,873,438,1025,340:180;362:189;171:69,pugna
-46,Templar Assassin,agi,R,Carry|Escape,2154,1054,2422,984:504;867:391;303:159,templar_assassin
-47,Viper,agi,R,Carry|Durable|Initiator|Disabler,1761,868,5155,566:291;743:371;452:206,viper
-48,Luna,agi,R,Carry|Nuker|Pusher,2338,1139,748,1039:502;990:498;309:139,luna
-49,Dragon Knight,str,M,Carry|Pusher|Durable|Disabler|Initiator|Nuker,2861,1377,2098,1245:588;1099:533;517:256,dragon_knight
-50,Dazzle,all,R,Support|Nuker|Disabler,971,493,1659,319:169;413:207;239:117,dazzle
-51,Clockwerk,str,M,Initiator|Disabler|Durable|Nuker,1846,954,1869,498:278;795:399;553:277,rattletrap
-52,Leshrac,int,R,Carry|Support|Nuker|Pusher|Disabler,976,498,957,371:186;397:199;208:113,leshrac
-53,Nature's Prophet,all,R,Carry|Pusher|Escape|Nuker,1621,830,3852,586:321;691:341;344:168,furion
-54,Lifestealer,str,M,Carry|Durable|Escape|Disabler,1630,789,2094,551:248;743:360;336:181,life_stealer
-55,Dark Seer,int,M,Initiator|Escape|Disabler,828,400,1079,213:101;337:168;278:131,dark_seer
-56,Clinkz,agi,R,Carry|Escape|Pusher,1209,636,1894,448:229;471:240;290:167,clinkz
-57,Omniknight,str,M,Support|Durable|Nuker,469,240,259,219:117;176:84;74:39,omniknight
-58,Enchantress,int,R,Support|Pusher|Durable|Disabler,1077,575,1039,312:186;471:234;294:155,enchantress
-59,Huskar,str,R,Carry|Durable|Initiator,973,517,4992,412:232;414:214;147:71,huskar
-60,Night Stalker,str,M,Carry|Initiator|Durable|Disabler|Nuker,907,435,1293,317:155;386:180;204:100,night_stalker
-61,Broodmother,agi,M,Carry|Pusher|Escape|Nuker,420,235,883,187:118;171:89;62:28,broodmother
-62,Bounty Hunter,agi,M,Escape|Nuker,658,363,1310,229:132;281:148;148:83,bounty_hunter
-63,Weaver,agi,R,Carry|Escape,1262,568,2114,439:198;550:248;273:122,weaver
-64,Jakiro,int,R,Support|Nuker|Pusher|Disabler,3880,1937,4328,1364:712;1692:791;824:434,jakiro
-65,Batrider,all,R,Initiator|Disabler|Escape,1682,886,5795,439:239;792:417;451:230,batrider
-66,Chen,int,R,Support|Pusher,717,413,1586,242:164;313:163;162:86,chen
-67,Spectre,agi,M,Carry|Durable|Escape,306,135,1000,92:35;132:55;82:45,spectre
-68,Ancient Apparition,int,R,Support|Disabler|Nuker,972,467,1122,374:181;393:177;205:109,ancient_apparition
-69,Doom,str,M,Carry|Disabler|Initiator|Durable|Nuker,1773,932,3179,487:236;785:428;501:268,doom_bringer
-70,Ursa,agi,M,Carry|Durable|Disabler,2265,1082,4463,896:402;900:431;469:249,ursa
-71,Spirit Breaker,str,M,Carry|Initiator|Disabler|Durable|Escape,2092,1067,1390,848:435;932:475;312:157,spirit_breaker
-72,Gyrocopter,agi,R,Carry|Nuker|Disabler,1840,897,1757,660:315;810:399;370:183,gyrocopter
-73,Alchemist,str,M,Carry|Support|Durable|Disabler|Initiator|Nuker,902,482,1857,284:144;401:212;217:126,alchemist
-74,Invoker,int,R,Carry|Nuker|Disabler|Escape|Pusher,2517,1292,2851,1012:473;1036:559;469:260,invoker
-75,Silencer,int,R,Carry|Support|Disabler|Initiator|Nuker,1552,736,1917,697:331;577:265;278:140,silencer
-76,Outworld Devourer,int,R,Carry|Nuker|Disabler,558,250,1518,235:94;207:99;116:57,obsidian_destroyer
-77,Lycan,str,M,Carry|Pusher|Durable|Escape,586,312,1335,201:125;240:124;145:63,lycan
-78,Brewmaster,all,M,Carry|Initiator|Durable|Disabler|Nuker,1035,523,3230,261:127;447:231;327:165,brewmaster
-79,Shadow Demon,int,R,Support|Disabler|Initiator|Nuker,2580,1373,4266,806:447;1171:614;603:312,shadow_demon
-80,Lone Druid,agi,R,Carry|Pusher|Durable,685,413,3898,181:114;313:170;191:129,lone_druid
-81,Chaos Knight,str,M,Carry|Disabler|Durable|Pusher|Initiator,739,351,107,413:198;286:134;40:19,chaos_knight
-82,Meepo,agi,M,Carry|Escape|Nuker|Disabler|Initiator|Pusher,276,137,793,122:59;122:64;32:14,meepo
-83,Treant Protector,str,M,Support|Initiator|Durable|Disabler|Escape,1436,872,4668,437:286;625:363;374:223,treant
-84,Ogre Magi,str,M,Support|Nuker|Disabler|Durable|Initiator,2842,1407,434,1594:767;1038:539;210:101,ogre_magi
-85,Undying,str,M,Support|Durable|Disabler|Nuker,1256,600,1623,370:177;541:252;345:171,undying
-86,Rubick,int,R,Support|Disabler|Nuker,4736,2428,2597,1944:1055;1925:926;867:447,rubick
-87,Disruptor,int,R,Support|Disabler|Nuker|Initiator,3448,1631,1516,1401:659;1493:715;554:257,disruptor
-88,Nyx Assassin,all,M,Disabler|Nuker|Initiator|Escape,1167,625,3249,342:174;552:302;273:149,nyx_assassin
-89,Naga Siren,agi,M,Carry|Support|Pusher|Disabler|Initiator|Escape,468,250,1397,140:72;201:103;127:75,naga_siren
-90,Keeper of the Light,int,R,Support|Nuker|Disabler,1416,789,2813,460:300;582:323;374:166,keeper_of_the_light
-91,Io,all,R,Support|Escape|Nuker,567,306,2129,206:109;246:132;115:65,wisp
-92,Visage,all,R,Support|Nuker|Durable|Disabler|Pusher,247,116,4132,100:46;109:48;38:22,visage
-93,Slark,agi,M,Carry|Escape|Disabler|Nuker,1065,535,1990,378:193;457:220;230:122,slark
-94,Medusa,agi,R,Carry|Disabler|Durable,848,371,2116,357:139;340:157;151:75,medusa
-95,Troll Warlord,agi,R,Carry|Pusher|Disabler|Durable,804,382,1298,399:199;301:124;104:59,troll_warlord
-96,Centaur Warrunner,str,M,Durable|Initiator|Disabler|Nuker|Escape,2643,1337,2304,814:381;1200:604;629:352,centaur
-97,Magnus,all,M,Initiator|Disabler|Nuker|Escape,757,372,1536,338:153;291:149;128:70,magnataur
-98,Timbersaw,str,M,Nuker|Durable|Escape,2119,1044,3954,617:303;956:470;546:271,shredder
-99,Bristleback,str,M,Carry|Durable|Initiator|Nuker,1640,754,1539,607:272;717:329;316:153,bristleback
-100,Tusk,str,M,Initiator|Disabler|Nuker,3775,1887,2982,1179:595;1683:851;913:441,tusk
-101,Skywrath Mage,int,R,Support|Nuker|Disabler,2461,1157,1686,1043:482;980:469;438:206,skywrath_mage
-102,Abaddon,all,M,Support|Carry|Durable,1267,649,3887,454:256;557:277;256:116,abaddon
-103,Elder Titan,str,M,Initiator|Disabler|Nuker|Durable,133,57,99,39:16;60:23;34:18,elder_titan
-104,Legion Commander,str,M,Carry|Disabler|Initiator|Durable|Nuker,715,350,395,307:142;303:151;105:57,legion_commander
-105,Techies,all,R,Nuker|Disabler,1611,798,4319,524:275;631:317;456:206,techies
-106,Ember Spirit,agi,M,Carry|Escape|Nuker|Disabler|Initiator,3266,1748,4367,940:544;1404:743;922:461,ember_spirit
-107,Earth Spirit,str,M,Nuker|Escape|Disabler|Initiator|Durable,1298,686,1163,431:239;509:266;358:181,earth_spirit
-108,Underlord,str,M,Support|Nuker|Disabler|Durable|Escape,2092,966,2452,687:321;851:373;554:272,abyssal_underlord
-109,Terrorblade,agi,M,Carry|Pusher|Nuker,1433,718,2399,415:231;647:320;371:167,terrorblade
-110,Phoenix,str,R,Support|Nuker|Initiator|Escape|Disabler,2418,1283,2442,707:379;1100:594;611:310,phoenix
-111,Oracle,int,R,Support|Nuker|Disabler|Escape,463,229,814,180:87;187:90;96:52,oracle
-112,Winter Wyvern,int,R,Support|Disabler|Nuker,1210,604,1233,334:171;510:271;366:162,winter_wyvern
-113,Arc Warden,all,R,Carry|Escape|Nuker,206,104,1734,111:53;74:37;21:14,arc_warden
-114,Monkey King,agi,M,Carry|Escape|Disabler|Initiator,1302,703,1812,430:241;564:291;308:171,monkey_king
-119,Dark Willow,int,R,Support|Nuker|Disabler|Escape,2182,1041,1081,614:286;934:447;634:308,dark_willow
-120,Pangolier,all,M,Carry|Nuker|Disabler|Durable|Escape|Initiator,2634,1305,5108,736:381;1177:581;721:343,pangolier
-121,Grimstroke,int,R,Support|Nuker|Disabler|Escape,1126,577,513,384:187;483:255;259:135,grimstroke
-123,Hoodwink,agi,R,Support|Nuker|Escape|Disabler,3819,1928,2076,936:491;1655:835;1228:602,hoodwink
-126,Void Spirit,all,M,Carry|Escape|Nuker|Disabler,2018,946,5146,577:276;897:423;544:247,void_spirit
-128,Snapfire,all,R,Support|Nuker|Disabler|Escape,3551,1834,4563,1435:747;1460:769;656:318,snapfire
-129,Mars,str,M,Carry|Initiator|Disabler|Durable,3169,1477,2869,1160:542;1384:645;625:290,mars
-131,Ring Master,int,R,Support|Nuker|Escape|Disabler,2240,1091,1320,661:325;973:469;606:297,ringmaster
-135,Dawnbreaker,str,M,Carry|Durable,1851,907,2337,686:326;768:390;397:191,dawnbreaker
-136,Marci,all,M,Support|Carry|Initiator|Disabler|Escape,1184,598,4427,445:239;512:250;227:109,marci
-137,Primal Beast,str,M,Initiator|Durable|Disabler,1338,681,1571,401:192;614:313;323:176,primal_beast
-138,Muerta,int,R,Carry|Nuker|Disabler,1596,787,1460,498:240;664:336;434:211,muerta
-145,Kez,agi,M,Carry|Escape|Disabler,1817,960,2493,591:314;779:420;447:226,kez
-155,Largo,str,M,Durable|Disabler|Support,1619,881,2813,499:263;663:354;457:264,largo
+1,Anti-Mage,agi,M,Carry|Escape|Nuker,126.4,61.6,207.9,29.2:17.5;56.6:27.8;40.6:16.4,antimage,291,471,89,42
+2,Axe,str,M,Initiator|Durable|Disabler|Carry,340.2,162.6,343.7,76.1:35.7;146.1:72.3;118:54.7,axe,1162,1067,78,31
+3,Bane,all,R,Support|Disabler|Nuker|Durable,330.2,165.8,407.1,63.6:34.2;133.9:70.1;132.7:61.5,bane,756,1139,122,55
+4,Bloodseeker,agi,M,Carry|Disabler|Nuker|Initiator,24.6,14.2,36.4,6.3:3.7;9.6:4.6;8.7:6,bloodseeker,75,156,9,6
+5,Crystal Maiden,int,R,Support|Disabler|Nuker,119,56.3,11.3,47.1:23.1;50.9:26.6;21:6.7,crystal_maiden,538,50,27,10
+6,Drow Ranger,agi,R,Carry|Disabler|Pusher,189.6,89.6,337.9,43.1:20.2;80.3:38.4;66.2:31,drow_ranger,703,1217,16,7
+7,Earthshaker,str,M,Support|Initiator|Disabler|Nuker,146.2,67.2,112.3,24.7:12.9;57:29.5;64.5:24.9,earthshaker,284,174,88,41
+8,Juggernaut,agi,M,Carry|Pusher|Escape,99.9,54,64.7,31.5:15.3;46.6:27.4;21.9:11.3,juggernaut,339,248,36,17
+9,Mirana,agi,R,Carry|Support|Escape|Nuker|Disabler,446.7,228.2,191.4,79:36.8;187.2:89.8;180.6:101.7,mirana,739,283,222,109
+10,Morphling,agi,R,Carry|Escape|Durable|Nuker|Disabler,71.5,36.5,75.1,17.9:8.5;37.5:19;16.1:9,morphling,243,332,27,16
+11,Shadow Fiend,agi,R,Carry|Nuker,464.2,217.3,550.7,146.4:76;201.5:97.8;116.3:43.5,nevermore,1813,1777,31,10
+12,Phantom Lancer,agi,M,Carry|Escape|Pusher|Nuker,112.7,56.2,190.1,31:11.5;46.5:22.8;35.3:22,phantom_lancer,335,501,45,22
+13,Puck,int,R,Initiator|Disabler|Escape|Nuker,313.7,158.9,885.1,52.7:25.4;133.3:62.5;127.7:71,puck,1011,2913,85,44
+14,Pudge,str,M,Disabler|Initiator|Durable|Nuker,191.6,93.7,59.9,62.5:30.5;90.7:43.8;38.5:19.5,pudge,828,227,51,27
+15,Razor,agi,R,Carry|Durable|Nuker|Pusher,90.9,38.2,85.1,30.7:11.4;39.9:19.6;20.3:7.2,razor,459,443,7,1
+16,Sand King,all,M,Initiator|Disabler|Support|Nuker|Escape,144.3,68,306.9,22.7:10.2;69.3:32.7;52.4:25.2,sand_king,511,1573,54,27
+17,Storm Spirit,int,R,Carry|Escape|Nuker|Initiator|Disabler,334.4,163.9,418.1,61.4:25.6;147:69.8;126.1:68.5,storm_spirit,1180,1635,94,44
+18,Sven,str,M,Carry|Disabler|Initiator|Durable|Nuker,251.9,138.8,181.6,56.7:30.2;105.1:54.3;90.2:54.4,sven,479,254,155,88
+19,Tiny,str,M,Carry|Nuker|Pusher|Initiator|Durable|Disabler,443.7,213.3,449.9,91.2:51.8;184.6:93.1;167.9:68.4,tiny,1531,1477,123,54
+20,Vengeful Spirit,agi,R,Support|Initiator|Disabler|Nuker|Escape,93.4,43.7,36.7,28.7:11.3;48.5:24.4;16.3:8.1,vengefulspirit,392,143,6,2
+21,Windranger,all,R,Carry|Support|Disabler|Escape|Nuker,620.3,320.8,564.8,100.5:50.5;265.7:139.4;254.1:130.9,windrunner,1417,2293,341,181
+22,Zeus,int,R,Nuker|Carry,137.3,63.7,95.9,55.5:23.3;58.7:27;23.1:13.4,zuus,668,490,10,5
+23,Kunkka,str,M,Carry|Support|Disabler|Initiator|Durable|Nuker,106.6,54.4,57,33.9:16.4;49.1:26.2;23.7:11.8,kunkka,469,268,20,9
+25,Lina,int,R,Support|Carry|Nuker|Disabler,320.8,147.9,423.9,82.5:35.3;128.2:59.9;110.2:52.7,lina,910,900,78,29
+26,Lion,int,R,Support|Disabler|Nuker|Initiator,411,203,124.5,120.2:50.4;183.7:95.9;107.2:56.7,lion,1689,450,49,24
+27,Shadow Shaman,int,R,Support|Pusher|Disabler|Nuker|Initiator,158.7,76,59.2,62.5:24.9;69.8:36;26.5:15.1,shadow_shaman,774,272,11,7
+28,Slardar,str,M,Carry|Durable|Initiator|Disabler|Escape,300.1,143.5,318.1,74:35;130.1:67;96:41.5,slardar,1185,1412,60,28
+29,Tidehunter,str,M,Initiator|Durable|Disabler|Nuker|Carry,306.9,150.5,250.5,84.4:39.9;127.3:62.9;95.3:47.7,tidehunter,1373,1251,53,25
+30,Witch Doctor,int,R,Support|Nuker|Disabler,323,166.8,176,63.2:35.3;131.8:65.3;128:66.2,witch_doctor,629,440,217,112
+31,Lich,int,R,Support|Nuker,260.4,131.1,62,63:26.7;119.6:61.4;77.9:43,lich,1117,299,53,28
+32,Riki,agi,M,Carry|Escape|Disabler,15,6.5,36.2,4.5:1.7;7:3.2;3.5:1.6,riki,90,176,0,0
+33,Enigma,all,R,Disabler|Initiator|Pusher,181.7,107,741.5,34.8:25.2;74:39.4;72.9:42.5,enigma,320,1328,107,61
+34,Tinker,int,R,Carry|Nuker|Pusher,29.2,12.7,168,9.8:2.7;12.6:7.1;6.8:2.9,tinker,136,845,2,1
+35,Sniper,agi,R,Carry|Nuker,129.2,68.3,119.8,52.4:29.1;53.7:26.9;23.1:12.3,sniper,629,500,14,7
+36,Necrophos,int,R,Carry|Nuker|Durable|Disabler,329.8,159.4,696.4,64.9:31.5;138.5:64.1;126.5:63.9,necrolyte,825,1428,146,68
+37,Warlock,int,R,Support|Initiator|Disabler,133.6,64.4,62.8,44.9:23.2;61.6:26.8;27.2:14.5,warlock,591,323,36,17
+38,Beastmaster,all,M,Initiator|Disabler|Durable|Nuker,292.5,147,713.2,76.8:49.6;121.8:59.2;94:38.3,beastmaster,1069,2912,87,41
+39,Queen of Pain,int,R,Carry|Nuker|Escape,218.5,103.9,317.6,61.2:28.9;94.1:43.6;63.2:31.5,queenofpain,1132,1735,23,11
+40,Venomancer,all,R,Support|Nuker|Initiator|Pusher|Disabler,110.8,57.8,280.4,25.7:14.8;49.6:26;35.6:17.1,venomancer,603,1736,13,7
+41,Faceless Void,agi,M,Carry|Initiator|Disabler|Escape|Durable,102,49,185.5,25.4:10.6;49.3:24.3;27.4:14.1,faceless_void,518,883,8,4
+42,Wraith King,str,M,Carry|Support|Durable|Disabler|Initiator,67,29.4,41.8,26.7:11.6;32.1:15.3;8.3:2.6,skeleton_king,306,242,13,5
+43,Death Prophet,all,R,Carry|Pusher|Nuker|Disabler,95.7,43.3,152.5,29.4:14.3;32.6:13.9;33.8:15.1,death_prophet,329,793,35,16
+44,Phantom Assassin,agi,M,Carry|Escape,38.4,14.3,24.1,17.3:6.3;16.1:7;5.1:1,phantom_assassin,183,105,5,1
+45,Pugna,int,R,Nuker|Pusher,29.2,18.9,32.5,9.2:6.7;13.7:8.9;6.3:3.4,pugna,117,173,10,8
+46,Templar Assassin,agi,R,Carry|Escape,149.8,71.7,141.7,47.6:24.1;68.8:30.8;33.4:16.8,templar_assassin,605,610,34,15
+47,Viper,agi,R,Carry|Durable|Initiator|Disabler,199.5,96.7,566.6,42:21.1;86.7:46;70.8:29.6,viper,621,1824,82,41
+48,Luna,agi,R,Carry|Nuker|Pusher,291,141.7,142.5,80.9:40.4;143.7:67.3;66.5:34,luna,1164,537,67,27
+49,Dragon Knight,str,M,Carry|Pusher|Durable|Disabler|Initiator|Nuker,344,183.2,286.5,81.1:44;139.1:60.9;123.8:78.3,dragon_knight,629,376,260,141
+50,Dazzle,all,R,Support|Nuker|Disabler,213.3,104.9,229.4,38.8:18.5;85.3:43;89.3:43.5,dazzle,374,561,172,83
+51,Clockwerk,str,M,Initiator|Disabler|Durable|Nuker,384.3,196.4,376.3,69.9:37.5;159.9:81.1;154.6:77.8,rattletrap,1079,1331,97,46
+52,Leshrac,int,R,Carry|Support|Nuker|Pusher|Disabler,47.7,24.3,43.7,13.2:5.3;21.2:12.3;13.4:6.8,leshrac,232,252,7,4
+53,Nature's Prophet,all,R,Carry|Pusher|Escape|Nuker,359.4,189.4,615.2,74.8:48;146.2:75.8;138.5:65.7,furion,744,1463,196,106
+54,Lifestealer,str,M,Carry|Durable|Escape|Disabler,309,146.2,597,77.6:33.7;133.6:60.4;97.9:52.2,life_stealer,961,1544,106,50
+55,Dark Seer,int,M,Initiator|Escape|Disabler,290.9,138.7,420.1,49.5:18.9;115.6:59.1;125.8:60.8,dark_seer,514,753,153,68
+56,Clinkz,agi,R,Carry|Escape|Pusher,131.4,66.5,160.3,28.5:13.1;54.1:24.8;48.8:28.6,clinkz,407,524,43,22
+57,Omniknight,str,M,Support|Durable|Nuker,28.1,15.1,11.6,5.5:2.2;15.5:7.9;7.1:5.1,omniknight,110,53,6,5
+58,Enchantress,int,R,Support|Pusher|Durable|Disabler,180.5,96,153.6,35:21;78.5:38;67.1:37,enchantress,657,659,45,24
+59,Huskar,str,R,Carry|Durable|Initiator,84.8,45.3,544.1,29.4:18.3;36.4:19.8;19.1:7.2,huskar,332,2132,23,15
+60,Night Stalker,str,M,Carry|Initiator|Durable|Disabler|Nuker,141.3,70.7,214.7,41.6:24.8;61.2:27.9;38.6:18,night_stalker,522,702,31,20
+61,Broodmother,agi,M,Carry|Pusher|Escape|Nuker,29.3,15.1,33.8,6.6:3.9;12.6:8.6;10.1:2.6,broodmother,95,140,10,6
+62,Bounty Hunter,agi,M,Escape|Nuker,127.1,78,814,25.5:19.8;53.9:33.3;47.7:24.9,bounty_hunter,246,1002,74,43
+63,Weaver,agi,R,Carry|Escape,77.9,31.8,126.3,21.8:8.3;33.3:14.7;22.8:8.9,weaver,389,732,13,5
+64,Jakiro,int,R,Support|Nuker|Pusher|Disabler,194.5,92.3,60.3,56.6:23.6;88:42.7;50:26.1,jakiro,914,360,27,13
+65,Batrider,all,R,Initiator|Disabler|Escape,154.2,75.9,462.1,29.6:17.2;72:32;52.7:26.7,batrider,645,2637,34,13
+66,Chen,int,R,Support|Pusher,23.1,12.9,36.7,6.3:3.9;11.2:5.8;5.6:3.3,chen,139,221,0,0
+67,Spectre,agi,M,Carry|Durable|Escape,74.1,28.8,110,13.4:3.4;32.1:12.2;28.7:13.3,spectre,195,300,16,3
+68,Ancient Apparition,int,R,Support|Disabler|Nuker,59,30.6,52.2,13:5.4;27.9:13.7;18.2:11.5,ancient_apparition,200,228,21,13
+69,Doom,str,M,Carry|Disabler|Initiator|Durable|Nuker,430.2,225.9,862.6,74.4:39.3;187.5:98.7;168.4:87.9,doom_bringer,1316,2674,173,88
+70,Ursa,agi,M,Carry|Durable|Disabler,197.8,91.8,299.8,57.8:22.5;80.6:36.7;59.5:32.7,ursa,697,1095,80,41
+71,Spirit Breaker,str,M,Carry|Initiator|Disabler|Durable|Escape,257,127.9,176.1,87.1:44.3;112.2:54.9;57.8:28.8,spirit_breaker,1043,706,70,36
+72,Gyrocopter,agi,R,Carry|Nuker|Disabler,136.9,71.8,107.1,34:17.8;61.8:32.6;41.2:21.4,gyrocopter,374,278,72,41
+73,Alchemist,str,M,Carry|Support|Durable|Disabler|Initiator|Nuker,137.4,69.6,274.2,36.9:16.4;60.6:30.5;39.9:22.7,alchemist,668,1617,16,5
+74,Invoker,int,R,Carry|Nuker|Disabler|Escape|Pusher,327,176.2,591.3,81.5:41.4;138.4:77.3;107.2:57.5,invoker,1056,1541,101,60
+75,Silencer,int,R,Carry|Support|Disabler|Initiator|Nuker,165.2,77.9,206.9,48.2:21.6;66:30.8;51.1:25.6,silencer,753,940,26,14
+76,Outworld Devourer,int,R,Carry|Nuker|Disabler,157.7,69.7,396.2,34.8:10.5;62.4:27.4;60.5:31.8,obsidian_destroyer,266,731,119,52
+77,Lycan,str,M,Carry|Pusher|Durable|Escape,160,91.8,430.7,41.8:25.2;63.2:41;55:25.6,lycan,326,802,82,51
+78,Brewmaster,all,M,Carry|Initiator|Durable|Disabler|Nuker,255.8,138.6,582.8,52.8:32.7;106.7:64.3;96.4:41.7,brewmaster,497,1346,187,105
+79,Shadow Demon,int,R,Support|Disabler|Initiator|Nuker,168.7,86.9,180.9,37:16.4;76.4:38.6;55.4:32,shadow_demon,690,1029,39,25
+80,Lone Druid,agi,R,Carry|Pusher|Durable,239.1,139.4,1296.6,43.9:24.5;111.4:61.3;83.8:53.7,lone_druid,570,3377,120,71
+81,Chaos Knight,str,M,Carry|Disabler|Durable|Pusher|Initiator,55.3,25.6,15.7,22.6:10.6;25.1:12.1;7.6:3,chaos_knight,258,39,13,5
+82,Meepo,agi,M,Carry|Escape|Nuker|Disabler|Initiator|Pusher,32.6,17.7,80.3,11.3:6;15.7:9.1;5.7:2.7,meepo,149,342,3,3
+83,Treant Protector,str,M,Support|Initiator|Durable|Disabler|Escape,148.4,90.3,735,32.1:21.8;61.2:35.4;55.2:33.1,treant,644,1938,2,2
+84,Ogre Magi,str,M,Support|Nuker|Disabler|Durable|Initiator,161.1,80.7,11.8,64.1:33.4;75.7:37.5;21.3:9.9,ogre_magi,734,40,31,16
+85,Undying,str,M,Support|Durable|Disabler|Nuker,295.9,129.1,350,56.6:20.8;128.9:57.7;110.4:50.6,undying,713,858,70,27
+86,Rubick,int,R,Support|Disabler|Nuker,786,389.3,370.9,204.2:104.8;337.9:152.2;244:132.4,rubick,3033,1694,219,100
+87,Disruptor,int,R,Support|Disabler|Nuker|Initiator,272.8,121.6,83,79.7:36.7;133.5:59.1;59.7:25.9,disruptor,1108,360,74,32
+88,Nyx Assassin,all,M,Disabler|Nuker|Initiator|Escape,171.8,93.4,301.2,36.5:17.5;74.9:43.4;60.4:32.5,nyx_assassin,537,1449,86,45
+89,Naga Siren,agi,M,Carry|Support|Pusher|Disabler|Initiator|Escape,46.8,27.1,110.8,12.5:8.4;19:10.5;15.4:8.3,naga_siren,139,384,18,9
+90,Keeper of the Light,int,R,Support|Nuker|Disabler,278.1,157.7,739.6,61.8:42.7;119.8:67.9;96.6:47.1,keeper_of_the_light,796,1737,80,40
+91,Io,all,R,Support|Escape|Nuker,130.3,74.2,307,31:18;57.1:31.5;42.2:24.8,wisp,375,1078,55,33
+92,Visage,all,R,Support|Nuker|Durable|Disabler|Pusher,24.1,10.8,255.8,8.2:4;10.9:3.8;5.1:3,visage,100,1528,6,2
+93,Slark,agi,M,Carry|Escape|Disabler|Nuker,216.4,115.9,531.5,50.8:24;93.3:55.6;72.3:36.3,slark,517,1223,138,74
+94,Medusa,agi,R,Carry|Disabler|Durable,40.7,19,80.6,8.5:3.1;18:7.4;14.2:8.5,medusa,196,457,5,5
+95,Troll Warlord,agi,R,Carry|Pusher|Disabler|Durable,44.1,21,64.5,15.2:8.5;18.1:6.7;10.9:5.9,troll_warlord,202,360,9,4
+96,Centaur Warrunner,str,M,Durable|Initiator|Disabler|Nuker|Escape,367,183.6,323.2,70.9:30.5;160.1:80.3;136:72.8,centaur,901,734,109,50
+97,Magnus,all,M,Initiator|Disabler|Nuker|Escape,78.8,41.3,122.2,22:9.2;30.3:15.2;26.5:16.9,magnataur,302,596,19,11
+98,Timbersaw,str,M,Nuker|Durable|Escape,301.6,156.5,418.5,54.4:24;133.6:64.8;113.7:67.7,shredder,757,903,152,79
+99,Bristleback,str,M,Carry|Durable|Initiator|Nuker,149,65.4,171,43.4:16.5;71.3:33.7;34.4:15.3,bristleback,789,1030,20,9
+100,Tusk,str,M,Initiator|Disabler|Nuker,408.2,204.9,250,106.7:52.2;171.8:89.7;129.8:63.1,tusk,1540,1096,80,40
+101,Skywrath Mage,int,R,Support|Nuker|Disabler,145.8,64.4,88.8,51:18;59.9:28.2;34.9:18.2,skywrath_mage,696,493,26,11
+102,Abaddon,all,M,Support|Carry|Durable,38.5,19.4,134.6,10.4:4;16.6:8.2;11.5:7.2,abaddon,172,830,7,3
+103,Elder Titan,str,M,Initiator|Disabler|Nuker|Durable,18.3,8.9,7.8,4.9:3;6.6:2.7;6.8:3.2,elder_titan,55,27,3,3
+104,Legion Commander,str,M,Carry|Disabler|Initiator|Durable|Nuker,66.7,31.3,37.9,25:12;28.4:14;13.3:5.4,legion_commander,330,171,10,4
+105,Techies,all,R,Nuker|Disabler,471.8,244,742.8,87.7:55.2;190.3:104.9;193.8:84,techies,1090,2110,277,147
+106,Ember Spirit,agi,M,Carry|Escape|Nuker|Disabler|Initiator,595.2,311.5,826.7,111.9:65.5;244:128.8;239.4:117.3,ember_spirit,1668,2194,220,108
+107,Earth Spirit,str,M,Nuker|Escape|Disabler|Initiator|Durable,420.4,225.9,656.2,77:44.2;171.2:93;172.3:88.7,earth_spirit,773,970,204,107
+108,Underlord,str,M,Support|Nuker|Disabler|Durable|Escape,268.5,106.2,358.5,49.9:17.9;107.7:34.8;110.9:53.6,abyssal_underlord,872,1168,40,14
+109,Terrorblade,agi,M,Carry|Pusher|Nuker,260,133.3,419.6,47.9:28.3;116.6:63.6;95.5:41.5,terrorblade,664,1073,121,60
+110,Phoenix,str,R,Support|Nuker|Initiator|Escape|Disabler,287.6,145.9,314.5,69.7:32.2;133.6:72.6;84.3:41.1,phoenix,1466,1755,22,9
+111,Oracle,int,R,Support|Nuker|Disabler|Escape,54.4,25,82.7,13.6:5.6;22.6:8.9;18.3:10.5,oracle,207,375,13,6
+112,Winter Wyvern,int,R,Support|Disabler|Nuker,527.6,275.2,449.4,101.6:54.5;224.7:126.5;201.3:94.3,winter_wyvern,1038,866,289,151
+113,Arc Warden,all,R,Carry|Escape|Nuker,18.5,10.5,101,6.9:3.1;6.6:3.3;5.1:4.2,arc_warden,69,546,5,3
+114,Monkey King,agi,M,Carry|Escape|Disabler|Initiator,176.6,96.4,242.7,45.1:26.6;74.2:40.3;57.3:29.5,monkey_king,835,1262,39,23
+119,Dark Willow,int,R,Support|Nuker|Disabler|Escape,655.3,329.2,404.6,107.4:60.5;280.1:138.4;267.8:130.4,dark_willow,1173,646,398,204
+120,Pangolier,all,M,Carry|Nuker|Disabler|Durable|Escape|Initiator,568.9,285.1,707.9,119:61.9;246.5:122;203.4:101.3,pangolier,1882,2968,228,110
+121,Grimstroke,int,R,Support|Nuker|Disabler|Escape,191.4,98.1,104.1,42.6:18.6;85.2:48.2;63.7:31.4,grimstroke,664,345,65,38
+123,Hoodwink,agi,R,Support|Nuker|Escape|Disabler,914.1,437.1,595.2,154.7:79.6;382:180.2;377.5:177.4,hoodwink,2430,1581,386,178
+126,Void Spirit,all,M,Carry|Escape|Nuker|Disabler,234.5,107,376.1,50.9:23.3;108.7:51.5;74.9:32.2,void_spirit,933,2064,57,26
+128,Snapfire,all,R,Support|Nuker|Disabler|Escape,366.1,183.1,476.4,105:49.6;152.5:79.5;108.7:54.1,snapfire,1364,2149,60,25
+129,Mars,str,M,Carry|Initiator|Disabler|Durable,159.2,73.3,119.7,46.8:19;73.3:32.7;39.2:21.6,mars,780,562,17,8
+131,Ring Master,int,R,Support|Nuker|Escape|Disabler,306.6,140.5,137,58.8:31.9;130.3:56.6;117.6:52.1,ringmaster,938,568,87,40
+135,Dawnbreaker,str,M,Carry|Durable,324.9,157.8,456.9,76.1:33.8;141.1:70.1;107.7:53.9,dawnbreaker,1078,1419,108,53
+136,Marci,all,M,Support|Carry|Initiator|Disabler|Escape,77.9,31.7,161,21.9:11.2;33.2:11.4;22.9:9.1,marci,328,940,16,5
+137,Primal Beast,str,M,Initiator|Durable|Disabler,98.9,45.6,65.8,14.6:6;54.8:24.4;29.6:15.2,primal_beast,391,346,32,13
+138,Muerta,int,R,Carry|Nuker|Disabler,132.5,64.5,153.8,25.3:12;60.4:31.4;46.9:21.2,muerta,699,831,12,3
+145,Kez,agi,M,Carry|Escape|Disabler,320.1,171.9,486.6,69.3:40.5;140.8:75.7;110:55.7,kez,900,1515,127,66
+155,Largo,str,M,Durable|Disabler|Support,312.6,168.1,630.9,52.8:28.1;133.2:70.2;126.7:69.9,largo,747,1260,124,66

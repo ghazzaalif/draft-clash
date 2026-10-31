@@ -1,8 +1,13 @@
 /* ===== Draft Clash engine: data model, draft scoring, match simulation ===== */
 var DRAFTW = 0.42, FORMW = 0.4; // calibrated so draft win% matches simulated outcomes
+// pace of pushing and fighting, tuned to 7.41 pro averages (38.7 min, 58.7 kills; 23% of games under 30 min)
+var SIEGE = [0.022, 1.15], PUSHK = 0.62, KILLK = 0.86;
 var DC = (function(){
 const ALPH='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-const META = { matches: 20330, from: 'Oct 2025', to: 'Oct 2026', avgMin: 34.9, avgKills: 58.8, radiantWin: 0.521 };
+/* Pro data: patch 7.41 only (24 Mar - 30 Oct 2026), weighted toward the live letter patch:
+   7.41f x1.0, 7.41e x0.6, 7.41d x0.35, 7.41-7.41c x0.15. Counts below are weighted matches. */
+const META = { patch: '7.41f', patchDate: '15 Sep 2026', base: '7.41', matches: 2759.9, rawMatches: 8881, latestMatches: 954,
+  from: '24 Mar 2026', to: '30 Oct 2026', avgMin: 38.7, avgKills: 58.7, radiantWin: 0.513, latestMin: 40.6, latestKills: 57.5 };
 let H = [], N = 0, VS = '', SY = '';
 
 function load(csv, vs, sy, pos){
@@ -22,6 +27,8 @@ function load(csv, vs, sy, pos){
     return {
       i: i, id: +p[0], name: p[1], attr: p[2], atk: p[3], roles: p[4].split('|'),
       g: g, w: w, bans: +p[7], slug: p[9],
+      // unweighted counts for display: picks and bans on 7.41, games and wins on the live letter patch
+      g741: +p[10] || 0, bans741: +p[11] || 0, gLatest: +p[12] || 0, wLatest: +p[13] || 0,
       wr: wr,
       rawWr: g ? w / g : 0.5,
       stageG: d.map(function(x){ return x[0]; }),
@@ -226,7 +233,7 @@ function simulate(R, D, seed){
   const kda = {}; R.concat(D).forEach(function(h){ kda[h] = [0,0,0]; });
   const st = {
     kills: [0, 0], lead: 0, aegis: null, rosh: { alive: true, kills: [0, 0], respawn: null },
-    torm: [{ alive: false, spawn: 20, kills: 0 }, { alive: false, spawn: 20, kills: 0 }], shards: [0, 0], fb: false,
+    torm: { alive: false, spawn: 20, kills: 0 }, shards: [0, 0], fb: false, // one Tormentor at a time (7.41)
     roshTotal: 0
   };
   const frames = []; const events = [];
@@ -334,10 +341,10 @@ function simulate(R, D, seed){
     // timers
     if (st.aegis && t >= st.aegis.until){ log(t, 0, 'aegis', st.aegis.team, 'Aegis expired for ' + TEAM[st.aegis.team]); st.aegis = null; }
     if (!st.rosh.alive && st.rosh.respawn && t >= st.rosh.respawn[0] && (t >= st.rosh.respawn[1] || rand() < 0.4)){ st.rosh.alive = true; st.rosh.respawn = null; log(t, 0, 'roshup', -1, 'Roshan has respawned'); }
-    st.torm.forEach(function(tm, i){ if (!tm.alive && t >= tm.spawn){ tm.alive = true; if (t === 20 && i === 0) log(t, 0, 'tormup', -1, 'Tormentors have spawned on both sides of the map'); else if (t > 20) log(t, 0, 'tormup', -1, (i === 0 ? 'Radiant' : 'Dire') + '-side Tormentor is back'); } });
+    if (!st.torm.alive && t >= st.torm.spawn){ st.torm.alive = true; log(t, 0, 'tormup', -1, (t === 20 ? 'The Tormentor has spawned in the ' : 'The Tormentor is back in the ') + (roshTop(t) ? 'bottom' : 'top') + ' corner'); }
 
     // fights
-    const lam = [1.05, 1.62, 1.9][s];
+    const lam = [1.05, 1.62, 1.9][s] * KILLK;
     const avgSize = [1.35, 2.5, 3.6][s];
     const nf = poisson(lam / avgSize);
     for (let f = 0; f < nf && winner === null; f++){
@@ -358,9 +365,9 @@ function simulate(R, D, seed){
         // convert the fight
         const roll = rand();
         if (st.rosh.alive && t >= 14 && roll < 0.38){ killRosh(t, r.w, sec + 1); }
-        else if (st.torm.some(function(x){ return x.alive; }) && roll < 0.5){ const i = st.torm[r.w].alive ? r.w : 1 - r.w; takeTorm(t, r.w, i, sec + 1); }
-        else attemptPush(t, r.w, r.margin >= 4 ? 2 + (t > 30 ? 1 : 0) : 1, Math.min(59, sec + 2));
-      } else if (r.margin >= 1 && s >= 1 && rand() < (size >= 3 ? 0.6 : 0.2)){
+        else if (st.torm.alive && roll < 0.5){ takeTorm(t, r.w, sec + 1); }
+        else if (rand() < PUSHK) attemptPush(t, r.w, r.margin >= 4 ? 2 + (t > 30 ? 1 : 0) : 1, Math.min(59, sec + 2));
+      } else if (r.margin >= 1 && s >= 1 && rand() < PUSHK * (size >= 3 ? 0.6 : 0.2)){
         attemptPush(t, r.w, 1, Math.min(59, sec + 2));
       }
     }
@@ -383,7 +390,7 @@ function simulate(R, D, seed){
     for (let team = 0; team < 2 && winner === null; team++){
       const adv = team === 0 ? fightP(t) : 1 - fightP(t);
       let base = t < 7 ? 0 : t < 12 ? 0.11 : t < 20 ? 0.2 : t < 30 ? 0.18 : 0.14;
-      if (rand() < base * (0.4 + 1.2 * adv)) {
+      if (rand() < PUSHK * base * (0.4 + 1.2 * adv)) {
         const opts = nextTarget(team).filter(function(o){ return o.kind === 'tower' && (o.tier === 1 || (o.tier === 2 && t >= 16)); });
         if (opts.length){
           const o = t < 16 ? pickW(opts, function(x){ const L = LN3.find(function(y){ return y.lane === x.lane; }); return !L || L.winner === null || L.winner === -1 ? 1 : L.winner === team ? 3 : 0.4; })
@@ -396,7 +403,7 @@ function simulate(R, D, seed){
     // sieges by the stronger side
     if (t >= 14 && winner === null){
       const pr = fightP(t, structEdge(0)), team = pr >= 0.5 ? 0 : 1, edge = Math.abs(pr - 0.5) * 2;
-      if (rand() < 0.09 + 0.4 * edge + (t > 30 ? 0.1 : 0)) attemptPush(t, team, 1 + (edge > 0.5 && t > 25 ? 1 : 0), 10 + Math.floor(rand() * 40));
+      if (rand() < PUSHK * (SIEGE[0] + SIEGE[1] * edge + (t > 30 ? 0.1 : 0))) attemptPush(t, team, 1 + (edge > 0.5 && t > 25 ? 1 : 0), 10 + Math.floor(rand() * 40));
     }
     if (winner !== null) break;
     // roshan attempts without a big fight
@@ -404,14 +411,12 @@ function simulate(R, D, seed){
       const pr = fightP(t);
       if (rand() < 0.11 + 0.22 * Math.abs(pr - 0.5) + (t > 35 ? 0.06 : 0)){
         const team = rand() < pr ? 0 : 1;
-        if (rand() < 0.35){ const r = fight(t, 2 + Math.floor(rand() * 4), 'Roshan’s lair', 40); if (r.w === team || rand() < 0.5) killRosh(t, r.w, 50); }
+        if (rand() < 0.35){ const r = fight(t, 2 + Math.floor(rand() * 4), 'Roshan’s pit', 40); if (r.w === team || rand() < 0.5) killRosh(t, r.w, 50); }
         else killRosh(t, team, 45);
       }
     }
-    // tormentors
-    st.torm.forEach(function(tm, i){
-      if (tm.alive && rand() < 0.07){ const pr = fightP(t); let team = rand() < (i === 0 ? 0.65 : 0.35) ? 0 : 1; if (rand() < Math.abs(pr - 0.5)) team = pr > 0.5 ? 0 : 1; takeTorm(t, team, i, 30); }
-    });
+    // the Tormentor, taken quietly by whichever side controls that corner
+    if (st.torm.alive && rand() < 0.1){ const pr = fightP(t); takeTorm(t, rand() < pr ? 0 : 1, 30); }
 
     frames.push(snapshot(t));
   }
@@ -427,21 +432,25 @@ function simulate(R, D, seed){
     st.aegis = { team: team, until: t + 5 };
     st.lead += (team === 0 ? 1 : -1) * 600;
     const n = st.roshTotal;
-    const loot = n === 1 ? 'Aegis' : n === 2 ? 'Aegis + Cheese' : 'Aegis, Cheese + Refresher Shard';
+    const loot = n === 1 ? 'Aegis' : n === 2 ? 'Aegis + Roshan\u2019s Banner' : 'Aegis, Cheese + Refresher Shard';
     log(t, sec, 'rosh', team, TEAM[team] + ' slew Roshan (' + ordinal(n) + '): ' + loot, { n: n });
   }
-  function takeTorm(t, team, i, sec){
-    const tm = st.torm[i]; tm.alive = false; tm.spawn = t + 10; tm.kills++;
-    st.shards[team]++;
-    log(t, sec, 'torm', team, TEAM[team] + ' defeated the ' + (i === 0 ? 'Radiant' : 'Dire') + '-side Tormentor for an Aghanim’s Shard', { which: i });
+  function takeTorm(t, team, sec){
+    const tm = st.torm; tm.alive = false; tm.spawn = t + 10; tm.kills++;
+    // 7.41: the Shard goes to a low-net-worth hero without one (supports first); once all five have one, the team takes gold
+    const order = [4, 3, 2, 1, 0], k = st.shards[team];
+    const who = k < 5 ? H[teams[team][order[k]]].name : null;
+    if (k < 5) st.shards[team]++; else st.lead += (team === 0 ? 1 : -1) * 2075;
+    log(t, sec, 'torm', team, TEAM[team] + ' defeated the Tormentor: ' + (who ? 'Aghanim\u2019s Shard for ' + who : '415 gold each'), { corner: roshTop(t) ? 'bottom' : 'top' });
   }
   function snapshot(t){
     return { t: t, kills: st.kills.slice(), lead: Math.round(st.lead), side: clone(side), aegis: st.aegis ? clone(st.aegis) : null,
-      rosh: clone(st.rosh), torm: clone(st.torm), shards: st.shards.slice(), p: livePr(t), kda: clone(kda), day: Math.floor(t / 5) % 2 === 0 };
+      rosh: clone(st.rosh), torm: clone(st.torm), shards: st.shards.slice(), p: livePr(t), kda: clone(kda), day: Math.floor(t / 5) % 2 === 0, roshTop: roshTop(t) };
   }
   events.sort(function(a, b){ return a.t - b.t || a.sec - b.sec; });
   return { ev: ev, frames: frames, events: events, winner: winner, endT: endT, seed: seed, lanes: LN3 };
 }
+function roshTop(t){ return t < 15 || Math.floor(t / 5) % 2 === 0; } // 7.41: starts top; from 15:00 swaps pits each day/night change
 function ordinal(n){ return n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'); }
 
 /* Captains Mode order (team 0 = first pick). type: 'ban' | 'pick' */
@@ -458,6 +467,6 @@ const PHASES = [[0,6,'Ban phase 1'],[7,8,'Pick phase 1'],[9,11,'Ban phase 2'],[1
 return { load: load, heroes: function(){ return H; }, vs: vs, syn: syn, evaluate: evaluate, pickValue: pickValue,
   botChoose: botChoose, simulate: simulate, rng: rng, CM: CM, PHASES: PHASES, META: META, stageWr: stageWr,
   towersUp: towersUp, raxUp: raxUp, contest: contest, LANES: LANES, has: has,
-  POS: POS, share: share, fitPen: fitPen, bestOrder: bestOrder, lanes: lanes, teamPosValue: teamPosValue };
+  POS: POS, share: share, fitPen: fitPen, bestOrder: bestOrder, lanes: lanes, teamPosValue: teamPosValue, roshTop: roshTop };
 })();
 if (typeof module !== 'undefined') module.exports = DC;
