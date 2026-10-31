@@ -4,7 +4,7 @@ A 1v1 Dota 2 Captains Mode draft game. Two captains ban and pick five heroes eac
 
 ## Ways to play
 
-After the draft each captain sets positions 1 to 5 (carry, mid, offlane, soft support, hard support). Positions decide the lanes (Radiant's safe lane is bottom, Dire's is top) and change the win chance: heroes played far from where pros play them lose points, and each position counts more in some stages (supports early, carries late). Against the bot or online, the opponent's positions stay hidden until both captains lock in.
+After the draft each captain sets positions 1 to 5 (carry, mid, offlane, soft support, hard support). Positions decide the lanes (Radiant's safe lane is bottom, Dire's is top) and change the win chance: heroes played far from where pros play them lose points, more so for supports early and carries late. Against the bot or online, the opponent's positions stay hidden until both captains lock in.
 
 - **Bot**: you draft against a bot (Easy, Normal or Hard).
 - **Same screen**: two captains share one device.
@@ -23,7 +23,7 @@ All numbers come from OpenDota's public pro-match data for 30 Oct 2025 to 30 Oct
 ## Model
 
 - **Draft score per stage**: hero strength by game length, head-to-head counters, teammate synergy and team-shape penalties, combined into a win chance for early, mid and late game.
-- **Positions**: hero strength per stage is weighted by position; off-role heroes (under 15% of their pro games at that position) lose up to 6 points; lane matchups count in the early and mid game.
+- **Positions**: off-role heroes (under 15% of their pro games at that position) lose up to 6 points, and a hero's pro win rate at its position adds or removes up to 2; both count more for supports early and carries late. Lane matchups count in the early and mid game.
 - **Simulation**: a laning phase to 10:00 where kills happen between the heroes laning against each other, then each lane is won, lost or even; then minute-by-minute fights, kill credit by role, gold lead, tower → barracks → tier 4 → Ancient, Roshan (8–11 min respawn; Aegis, Cheese, Refresher Shard) and Tormentors (from 20:00; Aghanim's Shard). Calibrated so a draft rated 60% wins about 60% of simulated games; games average about 35.4 minutes and 58 kills, close to the pro averages of 34.9 minutes and 58.8 kills.
 
 ## Build and run

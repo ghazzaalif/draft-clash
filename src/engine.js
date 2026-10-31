@@ -29,7 +29,8 @@ function load(csv, vs, sy, pos){
       // pro games at positions 1-5 (lane role + farm order within each lane)
       posG: pp.map(function(x){ return x[0]; }),
       posShare: pp.map(function(x){ return (x[0] + 0.5) / (pt + 2.5); }),
-      posAdj: pp.map(function(x){ const v = (x[1] + 40 * wr) / (x[0] + 40) - wr; return Math.max(-0.04, Math.min(0.04, v)); })
+      // win-rate difference at each position, only where the hero is really played there (15%+ of its games), shrunk hard
+      posAdj: pp.map(function(x){ if ((x[0] + 0.5) / (pt + 2.5) < 0.15) return 0; const v = (x[1] + 200 * wr) / (x[0] + 200) - wr; return Math.max(-0.02, Math.min(0.02, v)); })
     };
   });
   N = H.length;
@@ -77,7 +78,7 @@ const POS = [
   { n: 1, name: 'Carry', lane: 'safe' }, { n: 2, name: 'Mid', lane: 'mid' }, { n: 3, name: 'Offlane', lane: 'off' },
   { n: 4, name: 'Soft support', lane: 'off' }, { n: 5, name: 'Hard support', lane: 'safe' }
 ];
-// how much each position's hero matters in each stage (each row averages 1)
+// how much a position's fit matters in each stage (each row averages 1): supports early, carries late
 const POSW = [[0.85, 1.2, 1.1, 1.0, 0.85], [1.0, 1.15, 1.0, 0.95, 0.9], [1.35, 1.1, 0.95, 0.85, 0.75]];
 const LANEW = [0.8, 0.3, 0];
 const FITK = 0.06;
@@ -87,7 +88,7 @@ function fitPen(h, p){ const s = H[h].posShare[p]; return s >= 0.15 ? 0 : -FITK 
 const PERMS = (function(){ const out = []; (function rec(a, rest){ if (!rest.length) return out.push(a); rest.forEach(function(x, i){ rec(a.concat([x]), rest.slice(0, i).concat(rest.slice(i + 1))); }); })([], [0, 1, 2, 3, 4]); return out; })();
 function teamPosValue(T){ // a positioned team's own strength, stage-weighted like the overall win chance
   let v = 0;
-  for (let s = 0; s < 3; s++){ let x = 0; for (let p = 0; p < 5; p++){ const h = T[p]; x += POSW[s][p] * (stageWr(h, s) - 0.5 + H[h].posAdj[p] + fitPen(h, p)); } v += [0.3, 0.4, 0.3][s] * x; }
+  for (let s = 0; s < 3; s++){ let x = 0; for (let p = 0; p < 5; p++){ const h = T[p]; x += stageWr(h, s) - 0.5 + POSW[s][p] * (H[h].posAdj[p] + fitPen(h, p)); } v += [0.3, 0.4, 0.3][s] * x; }
   return v;
 }
 // best position order for five heroes (perm[p] = index of the hero at position p+1)
@@ -101,7 +102,7 @@ function bestOrder(T){
 function coverage(T){
   if (!T.length) return 0;
   let best = 0;
-  PERMS.forEach(function(perm){ let v = 0; for (let i = 0; i < T.length; i++) v += Math.min(1, share(T[i], perm[i]) / 0.6); if (v > best) best = v; });
+  PERMS.forEach(function(perm){ let v = 0; for (let i = 0; i < T.length; i++){ const sh = share(T[i], perm[i]); v += sh < 0.15 ? 0 : Math.min(1, sh / 0.35); } if (v > best) best = v; });
   return best;
 }
 // lane matchups from Radiant's side. Each side lane: Radiant pair vs Dire pair.
@@ -135,8 +136,9 @@ function evaluate(R, D, positioned){
   out.lanes = ln;
   for (let s = 0; s < 3; s++){
     let hr = 0, hd = 0, fr = 0, fd = 0;
-    R.forEach(function(h, p){ hr += (full ? POSW[s][p] : 1) * (stageWr(h, s) - 0.5 + (full ? H[h].posAdj[p] : 0)); if (full) fr += POSW[s][p] * fitPen(h, p); });
-    D.forEach(function(h, p){ hd += (full ? POSW[s][p] : 1) * (stageWr(h, s) - 0.5 + (full ? H[h].posAdj[p] : 0)); if (full) fd += POSW[s][p] * fitPen(h, p); });
+    // hero strength is the hero's own; position fit (and how well it does at that position) counts more where the position matters
+    R.forEach(function(h, p){ hr += stageWr(h, s) - 0.5; if (full) fr += POSW[s][p] * (fitPen(h, p) + H[h].posAdj[p]); });
+    D.forEach(function(h, p){ hd += stageWr(h, s) - 0.5; if (full) fd += POSW[s][p] * (fitPen(h, p) + H[h].posAdj[p]); });
     const parts = { hero: hr - hd, matchup: vsSum / 5, synergy: (sR.s - sD.s) / 2, comp: comp(R, s) - comp(D, s),
       lanes: full ? LANEW[s] * (ln[0].matchup + ln[1].matchup + ln[2].matchup) : 0, fit: fr - fd };
     const diff = parts.hero + parts.matchup + parts.synergy + parts.comp + parts.lanes + parts.fit;
@@ -159,7 +161,7 @@ function pickValue(h, A, E){
   const need = roleNeed(A);
   if (need.ini && (has(h,'Initiator'))) v += 0.012;
   // fill open positions: a hero pros only play at a position the team already covers is worth less
-  if (A.length && A.length < 5) v += 0.025 * A.length * (coverage(A.concat([h])) - coverage(A) - 0.75);
+  if (A.length && A.length < 5) v += 0.045 * A.length * (coverage(A.concat([h])) - coverage(A) - 0.75);
   v += 0.03 * Math.min(1, contest(h) * 2);
   return v;
 }
