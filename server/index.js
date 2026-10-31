@@ -1,8 +1,9 @@
 /* Draft Clash room server.
  * One room = two seats (0 Radiant, 1 Dire). The server owns the draft: it checks turn order,
- * seat and hero availability, then broadcasts the whole room. When the draft ends it picks one
- * match seed; both browsers run the same deterministic simulation from it. Check-ins (match
- * start, 15:00, 30:00) wait until both players are ready.
+ * seat and hero availability, then broadcasts the whole room. After the draft each captain sets
+ * positions 1-5 for their heroes; an order stays hidden from the opponent until both lock in.
+ * Then the server picks one match seed; both browsers run the same deterministic simulation
+ * from it. Check-ins (match start, 15:00, 30:00) wait until both players are ready.
  */
 const http = require('http');
 const crypto = require('crypto');
@@ -37,6 +38,7 @@ function turnTeam(room, step){ const t = CM[step][1]; return t === 0 ? room.firs
 function view(room, seat){
   return {
     t: 'room', code: room.code, seat, hostSeat: room.hostSeat, first: room.first, phase: room.phase,
+    locked: room.orders.map(o => !!o), myOrder: room.orders[seat] || null,
     names: room.seats.map((s, i) => s ? s.name : (i ? 'Dire' : 'Radiant')),
     present: room.seats.map(s => !!s), online: room.seats.map(s => !!(s && s.ws)),
     draft: room.draft, seed: room.seed, round: room.round,
@@ -62,7 +64,7 @@ const handlers = {
     const code = newCode();
     const seat = m.side === 0 || m.side === 1 ? m.side : crypto.randomInt(2);
     const first = m.fp === 0 || m.fp === 1 ? m.fp : crypto.randomInt(2);
-    const room = { code, first, hostSeat: seat, phase: 'lobby', seats: [null, null], draft: freshDraft(), seed: 0, round: 0, ready: {}, passed: [], touched: Date.now(), emptySince: null };
+    const room = { code, first, hostSeat: seat, phase: 'lobby', seats: [null, null], draft: freshDraft(), orders: [null, null], seed: 0, round: 0, ready: {}, passed: [], touched: Date.now(), emptySince: null };
     room.seats[seat] = { name: cleanName(m.name, seat ? 'Dire' : 'Radiant'), token: crypto.randomBytes(16).toString('hex'), ws: null };
     rooms.set(code, room);
     attach(ws, room, seat); broadcast(room);
@@ -94,7 +96,21 @@ const handlers = {
     d.used[h] = 1;
     (CM[d.step][0] === 'pick' ? d.picks : d.bans)[ws.seat].push(h);
     d.step++;
-    if (d.step >= CM.length){ room.phase = 'preview'; room.seed = crypto.randomInt(1, 4294967295); room.round++; resetRound(room); }
+    if (d.step >= CM.length){ room.phase = 'positions'; room.orders = [null, null]; room.round++; resetRound(room); }
+    broadcast(room);
+  },
+  positions(ws, m){ // order = this seat's five picks, index 0 = position 1. null unlocks.
+    const room = ws.room; if (!room) return;
+    if (room.phase !== 'positions' || m.round !== room.round) return send(ws, view(room, ws.seat));
+    if (m.order === null){ room.orders[ws.seat] = null; return broadcast(room); }
+    const mine = room.draft.picks[ws.seat];
+    const o = m.order;
+    if (!Array.isArray(o) || o.length !== 5 || new Set(o).size !== 5 || !o.every(h => mine.includes(h))) return fail(ws, 'Those positions do not match your five heroes.');
+    room.orders[ws.seat] = o.slice();
+    if (room.orders[0] && room.orders[1]){
+      room.draft.picks = [room.orders[0].slice(), room.orders[1].slice()];
+      room.phase = 'preview'; room.seed = crypto.randomInt(1, 4294967295); resetRound(room);
+    }
     broadcast(room);
   },
   ready(ws, m){
@@ -114,7 +130,7 @@ const handlers = {
   },
   redraft(ws){ // fresh draft, first pick passes to the other team
     const room = ws.room; if (!room || room.phase === 'lobby' || room.phase === 'draft') return;
-    room.phase = 'draft'; room.draft = freshDraft(); room.first = 1 - room.first; room.seed = 0; room.round++; resetRound(room);
+    room.phase = 'draft'; room.draft = freshDraft(); room.orders = [null, null]; room.first = 1 - room.first; room.seed = 0; room.round++; resetRound(room);
     broadcast(room);
   },
   leave(ws){
@@ -122,7 +138,7 @@ const handlers = {
     room.seats[ws.seat] = null; ws.room = null;
     if (!room.seats[0] && !room.seats[1]) { rooms.delete(room.code); return; }
     // the remaining player keeps the room; if a draft or match was underway it waits for a new opponent
-    room.phase = 'lobby'; room.draft = freshDraft(); room.seed = 0; room.round++; resetRound(room);
+    room.phase = 'lobby'; room.draft = freshDraft(); room.orders = [null, null]; room.seed = 0; room.round++; resetRound(room);
     room.hostSeat = room.seats[0] ? 0 : 1;
     broadcast(room);
   },

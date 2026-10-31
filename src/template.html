@@ -227,6 +227,65 @@ table{border-collapse:collapse;width:100%}
 .tablewrap{overflow-x:auto}
 .cols2{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 .go-row{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:14px}
+
+/* ---------- positions ---------- */
+.poshead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.poshead h2{font-size:40px}
+.poshead p{font-size:14.5px;color:var(--ink-2);max-width:62ch;margin-top:6px}
+.posboard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.pcol .head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px}
+.pcol.t0 .head{background:var(--rad-field)} .pcol.t1 .head{background:var(--dire-field)}
+.pcol .head h3{font-size:28px} .pcol.t0 h3{color:var(--rad)} .pcol.t1 h3{color:var(--dire)}
+.pcol .head .st{font-size:13px;color:var(--ink-2);text-align:right}
+.pcol .head .st b{color:var(--ink);font-weight:700}
+.prows{display:flex;flex-direction:column;border:1px solid var(--rule);border-top:0}
+.prow{display:grid;grid-template-columns:34px 112px 64px minmax(0,1fr) 88px;gap:12px;align-items:center;padding:8px 12px 8px 0;background:var(--ground);border:0;border-top:1px solid var(--rule);text-align:left;min-width:0}
+.prow:first-child{border-top:0}
+button.prow:hover{background:var(--deck)}
+.prow[aria-pressed="true"]{background:var(--gold-field);box-shadow:inset 3px 0 0 var(--gold)}
+.prow .pn{font-family:var(--f-display);font-weight:900;font-size:34px;line-height:1;text-align:center;color:var(--ink-3)}
+.prow[aria-pressed="true"] .pn{color:var(--gold)}
+.prow .pl{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.prow .pl b{font-weight:700;font-size:14px}
+.prow .pl small{font-size:12px;color:var(--ink-3)}
+.prow .pt{width:64px;height:36px;object-fit:cover;display:block;border-radius:var(--r);background:var(--deck)}
+.prow .hn{display:flex;flex-direction:column;min-width:0}
+.prow .hn b{font-weight:500;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fit{font-size:12px;font-weight:700}
+.fit.good{color:var(--rad)} .fit.ok{color:var(--gold)} .fit.bad{color:var(--dire)}
+.dist{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;align-items:end;height:40px}
+.dist i{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-style:normal;font-family:var(--f-num);font-size:10px;color:var(--ink-3);gap:2px}
+.dist i span{display:block;width:100%;background:var(--rule-2);min-height:2px}
+.dist i.on{color:var(--gold)} .dist i.on span{background:var(--gold)}
+.prow.hid{grid-template-columns:64px minmax(0,1fr);padding-left:12px}
+.prow.hid .pn{display:none}
+.lanetab{width:100%;border-collapse:collapse}
+.lanetab td,.lanetab th{padding:9px 8px;border-bottom:1px solid var(--rule);vertical-align:middle}
+.lanetab th{font-size:12.5px;color:var(--ink-3);font-weight:500;text-align:left}
+.lanetab .ln b{font-family:var(--f-display);font-weight:800;font-size:19px;text-transform:uppercase;display:block;line-height:1}
+.lanetab .ln span{font-size:12px;color:var(--ink-3)}
+.lanetab .hs{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.lanetab .hs span{font-size:13.5px}
+.lanetab td.dr .hs{justify-content:flex-end;text-align:right}
+.lanetab .guess{opacity:.55}
+.lanetab .edge{font-family:var(--f-num);font-size:13px;text-align:center;white-space:nowrap}
+.lanetab .res{font-size:13.5px;font-weight:700;text-align:center}
+.posn{font-family:var(--f-display);font-weight:800;font-size:16px;color:var(--ink-3);width:14px;flex:0 0 14px;text-align:center}
+.pos-summary{font-size:15px;max-width:70ch}
+.pos-summary b{font-family:var(--f-num)}
+@media (max-width:860px){ .posboard{grid-template-columns:1fr} }
+@media (max-width:560px){
+  .prow{grid-template-columns:28px minmax(0,1fr) 56px;row-gap:4px;padding:8px 10px 8px 0}
+  .prow .pn{font-size:26px;grid-row:span 2}
+  .prow .pl{grid-column:2;flex-direction:row;gap:8px;align-items:baseline}
+  .prow .pt{grid-column:3;grid-row:1 / span 2;width:56px;height:32px}
+  .prow .hn{grid-column:2;grid-row:2}
+  .prow .dist{display:none}
+  .prow.hid{grid-template-columns:56px minmax(0,1fr)}
+  .prow.hid .pt{grid-column:1;grid-row:1}
+  .prow.hid .hn{grid-column:2;grid-row:1}
+  .lanetab .hs span{display:none}
+}
 .go-row p{font-size:14px;color:var(--ink-2);max-width:68ch}
 
 /* ---------- match ---------- */
@@ -385,7 +444,7 @@ dl.obj dt{color:var(--ink-3);padding-right:18px}
       <h2>How a match runs</h2>
       <div class="track">
         <div><span class="t">24 turns</span><b>Captains Mode draft</b><p>14 bans and 10 picks in tournament order. First pick bans first.</p></div>
-        <div><span class="t">before 0:00</span><b>Draft read</b><p>Win chance per stage, with the reasons.</p></div>
+        <div><span class="t">before 0:00</span><b>Positions and draft read</b><p>Set positions 1 to 5, which also sets the lanes. Then see the win chance per stage.</p></div>
         <div class="cp"><span class="t">0:00 – 15:00</span><b>Early game</b><p>Laning, first blood, first towers. Check-in at 15:00.</p></div>
         <div class="cp"><span class="t">15:00 – 30:00</span><b>Mid game</b><p>Teamfights, Roshan, Tormentors from 20:00. Check-in at 30:00.</p></div>
         <div class="cp"><span class="t">30:00 – end</span><b>Late game</b><p>High ground, barracks, Aegis fights. Final report when an Ancient falls.</p></div>
@@ -415,6 +474,9 @@ dl.obj dt{color:var(--ink-3);padding-right:18px}
       <aside class="sheet" id="detail"></aside>
     </div>
   </section>
+
+  <!-- POSITIONS -->
+  <section id="positions" hidden style="display:flex;flex-direction:column;gap:22px"></section>
 
   <!-- PREVIEW -->
   <section id="preview" hidden></section>
@@ -457,7 +519,7 @@ dl.obj dt{color:var(--ink-3);padding-right:18px}
 /*__ENGINE__*/
 </script>
 <script>
-DC.load(`/*__HEROES__*/`, `/*__VS__*/`, `/*__SY__*/`);
+DC.load(`/*__HEROES__*/`, `/*__VS__*/`, `/*__SY__*/`, `/*__POS__*/`);
 const H = DC.heroes();
 const $ = s => document.querySelector(s);
 const TEAM = ['Radiant', 'Dire'];
@@ -482,12 +544,12 @@ let G = { screen: 'setup', cfg: { mode: 'bot', lvl: 1, side: 0, fp: 0, names: ['
 let M = null;
 let timer = null, lastTs = 0, botTimer = null;
 
-function show(id){ ['setup','draft','preview','match'].forEach(s => $('#' + s).hidden = s !== id); G.screen = id; $('.topbar').hidden = id === 'setup'; $('.foot').hidden = id === 'setup'; renderTop(); renderBar(); if (typeof renderNetbar === 'function') renderNetbar(); window.scrollTo(0, 0); }
+function show(id){ ['setup','draft','positions','preview','match'].forEach(s => $('#' + s).hidden = s !== id); G.screen = id; $('.topbar').hidden = id === 'setup'; $('.foot').hidden = id === 'setup'; renderTop(); renderBar(); if (typeof renderNetbar === 'function') renderNetbar(); window.scrollTo(0, 0); }
 function renderTop(){
   const a = $('#topActions');
   a.innerHTML = G.screen === 'setup' ? '' : '<button class="btn sm quiet" id="newGame">New game</button>';
   const b = $('#newGame'); if (b) b.onclick = () => { stopLoop(); clearTimeout(botTimer); $('#overlay').hidden = true; if (online()) netLeave(); show('setup'); };
-  $('#crumb').textContent = { setup: 'Captains Mode', draft: 'Draft', preview: 'Draft read', match: 'Match' }[G.screen];
+  $('#crumb').textContent = { setup: 'Captains Mode', draft: 'Draft', positions: 'Positions', preview: 'Draft read', match: 'Match' }[G.screen];
 }
 
 /* ---------- setup ---------- */
@@ -629,7 +691,7 @@ function act(h){
   const tn = turn(); if (!tn || G.used[h]) return;
   G.used[h] = 1; (tn.kind === 'pick' ? G.picks : G.bans)[tn.team].push(h);
   G.step++; G.sel = null;
-  if (G.step >= 24){ renderDraft(); setTimeout(showPreview, 600); return; }
+  if (G.step >= 24){ renderDraft(); setTimeout(() => showPositions(true), 600); return; }
   renderDraft(); maybeBot();
 }
 function confirmSel(){
@@ -651,24 +713,124 @@ $('#roleSel').onchange = e => { G.filt.role = e.target.value; renderGrid(); };
 $('#sortSel').onchange = e => { G.filt.sort = e.target.value; renderGrid(); };
 
 /* ---------- draft read ---------- */
+/* ---------- positions ---------- */
+const LANE_OF = [['Safe lane', 'bottom'], ['Mid lane', 'middle'], ['Offlane', 'top'], ['Offlane', 'top'], ['Safe lane', 'bottom']];
+function laneLabel(t, p){ const l = LANE_OF[p]; if (p === 1) return 'Mid lane'; const side = t === 0 ? l[1] : (l[1] === 'bottom' ? 'top' : 'bottom'); return l[0] + ', ' + side; }
+function posEditable(t){
+  if (online()) return t === G.seat && !(NET.room && NET.room.locked[G.seat]);
+  if (G.cfg.mode === 'bot') return t === G.cfg.side;
+  return true;
+}
+function posHidden(t){ return online() ? t !== G.seat : G.cfg.mode === 'bot' && t !== G.cfg.side; }
+function fitInfo(h, p){
+  const sh = DC.share(h, p), pen = DC.fitPen(h, p);
+  if (sh >= 0.4) return { cls: 'good', txt: 'Main position' };
+  if (sh >= 0.15) return { cls: 'ok', txt: 'Played here' };
+  return { cls: 'bad', txt: `Off-role ${pp(pen)}` };
+}
+function showPositions(fresh){
+  if (fresh || !G.pos || !G.pos.order) G.pos = { order: [DC.bestOrder(G.picks[0]), DC.bestOrder(G.picks[1])], sel: null };
+  show('positions'); renderPositions();
+}
+function renderPositions(){
+  const el = $('#positions'); const P = G.pos;
+  const col = t => {
+    const hidden = posHidden(t), edit = posEditable(t);
+    let st = '';
+    if (online() && NET.room){ const lk = NET.room.locked[t]; st = t === G.seat ? (lk ? '<b>Locked in</b>' : 'Your positions') : (lk ? `<b>${esc(G.cfg.names[t])} has locked in</b>` : `${esc(G.cfg.names[t])} is choosing…`) + (t !== G.seat ? '<br>Revealed when both lock in' : ''); }
+    else if (hidden) st = '<b>Bot has set its positions</b><br>Revealed after you lock in';
+    else st = 'Click two heroes to swap';
+    let rows;
+    if (hidden){
+      rows = G.picks[t].map(h => `<div class="prow hid">${art(h, 'pt', 1)}<span class="hn"><b>${esc(H[h].name)}</b><span class="ink3" style="font-size:12px">${H[h].roles.slice(0, 3).join(', ')}</span></span></div>`).join('');
+    } else {
+      rows = P.order[t].map((h, p) => {
+        const f = fitInfo(h, p);
+        const dist = [0, 1, 2, 3, 4].map(q => { const sh = DC.share(h, q); return `<i class="${q === p ? 'on' : ''}" title="Position ${q + 1}: ${Math.round(sh * 100)}% of pro games"><span style="height:${Math.max(2, Math.round(sh * 28))}px"></span>${q + 1}</i>`; }).join('');
+        const tag = edit ? 'button' : 'div';
+        return `<${tag} class="prow" ${edit ? `data-t="${t}" data-p="${p}" aria-pressed="${!!(P.sel && P.sel.t === t && P.sel.p === p)}" aria-label="Position ${p + 1}, ${DC.POS[p].name}: ${esc(H[h].name)}"` : ''}>
+          <span class="pn">${p + 1}</span><span class="pl"><b>${DC.POS[p].name}</b><small>${laneLabel(t, p)}</small></span>
+          ${art(h, 'pt', 1)}<span class="hn"><b>${esc(H[h].name)}</b><span class="fit ${f.cls}">${f.txt}</span></span>
+          <span class="dist" aria-hidden="true">${dist}</span></${tag}>`;
+      }).join('');
+    }
+    return `<div class="pcol t${t}"><div class="head"><h3>${TEAM[t]}</h3><span class="st">${esc(G.cfg.names[t])}${online() && t === G.seat ? ' (you)' : ''}<br>${st}</span></div><div class="prows">${rows}</div></div>`;
+  };
+  // win chance: hidden teams are estimated with their pro positions
+  const RO = posHidden(0) ? DC.bestOrder(G.picks[0]) : P.order[0];
+  const DO = posHidden(1) ? DC.bestOrder(G.picks[1]) : P.order[1];
+  const ev = DC.evaluate(RO, DO, true);
+  const best = DC.evaluate(G.picks[0], G.picks[1], false);
+  const me = online() ? G.seat : G.cfg.mode === 'bot' ? G.cfg.side : null;
+  const anyHidden = posHidden(0) || posHidden(1);
+  const pW = t => t === 0 ? ev.overall : 1 - ev.overall;
+  let summary;
+  if (me != null){
+    const d = pW(me) - (me === 0 ? best.overall : 1 - best.overall);
+    summary = `With these positions ${TEAM[me]} wins <b>${pct(pW(me))}</b>${Math.abs(d) >= 0.005 ? `, ${d > 0 ? 'up' : 'down'} ${Math.abs(Math.round(d * 1000) / 10)} points on pro positions` : ', the same as pro positions'}.${anyHidden ? ` ${TEAM[1 - me]} is assumed to use its pro positions until it locks in.` : ''}`;
+  } else summary = `With these positions Radiant wins <b>${pct(ev.overall)}</b>, Dire <b>${pct(1 - ev.overall)}</b>. Pro positions for both would give Radiant ${pct(best.overall)}.`;
+  const lanes = laneRows(ev.lanes, { guess: [posHidden(0), posHidden(1)] });
+  const lockedMe = online() && NET.room && NET.room.locked[G.seat];
+  const btns = lockedMe
+    ? `<button class="btn" id="posUnlock">Change positions</button><button class="btn go" disabled>Waiting for ${esc(oppName())}</button>`
+    : `<button class="btn" id="posReset">Use pro positions</button><button class="btn go" id="posLock">Lock positions</button>`;
+  el.innerHTML = `<div class="poshead"><div><h2>Set positions</h2><p>Decide who plays 1 to 5. Each hero's bars show how often pros play it at each position; heroes far from their usual position lose win chance. Positions also set the lanes: Radiant's safe lane is bottom, Dire's is top.</p></div></div>
+    <div class="posboard">${col(0)}${col(1)}</div>
+    <div><div class="sh">Lanes, 0:00 to 10:00</div><div class="tablewrap">${lanes}</div></div>
+    <div class="go-row"><p class="pos-summary">${summary}</p><div style="display:flex;gap:8px;flex-wrap:wrap">${btns}</div></div>`;
+  el.querySelectorAll('button.prow').forEach(b => b.onclick = () => {
+    const t = +b.dataset.t, p = +b.dataset.p;
+    if (!P.sel || P.sel.t !== t){ P.sel = { t, p }; }
+    else if (P.sel.p === p){ P.sel = null; }
+    else { const o = P.order[t]; [o[p], o[P.sel.p]] = [o[P.sel.p], o[p]]; P.sel = null; }
+    renderPositions();
+    const again = el.querySelector(`button.prow[data-t="${t}"][data-p="${p}"]`); if (again) again.focus({ preventScroll: true });
+  });
+  const rs = $('#posReset'); if (rs) rs.onclick = () => { [0, 1].forEach(t => { if (posEditable(t)) P.order[t] = DC.bestOrder(G.picks[t]); }); P.sel = null; renderPositions(); };
+  const lk = $('#posLock'); if (lk) lk.onclick = lockPositions;
+  const ul = $('#posUnlock'); if (ul) ul.onclick = () => netSend({ t: 'positions', order: null, round: G.round });
+}
+function laneRows(L, opt){
+  const g = (opt && opt.guess) || [false, false];
+  const hs = (arr, t) => `<div class="hs ${g[t] ? 'guess' : ''}">${arr.map(h => `${art(h, 'thumb sm', 1)}<span>${esc(H[h].name)}</span>`).join('')}</div>`;
+  const name = { top: 'Top', mid: 'Mid', bot: 'Bottom' };
+  const rows = L.map(l => {
+    const e = l.edge, fv = e >= 0 ? 0 : 1;
+    const res = opt && opt.result ? (l.winner < 0 ? '<span class="ink2">Even</span>' : `<span class="${l.winner ? 'dire' : 'rad'}">${TEAM[l.winner]} won</span><br><span class="ink3 num" style="font-weight:400">${l.kills[0]}–${l.kills[1]} kills</span>`) : '';
+    return `<tr><td class="ln"><b>${name[l.lane]}</b><span>${l.lane === 'mid' ? 'Mid vs mid' : l.radRole === 'safe lane' ? 'Radiant safe vs Dire offlane' : 'Radiant offlane vs Dire safe'}</span></td>
+      <td>${hs(l.rad, 0)}</td>
+      <td class="edge ${fv ? 'dire' : 'rad'}">${Math.abs(e) < 0.005 ? '<span class="ink2">Even</span>' : TEAM[fv] + ' ' + pi(Math.abs(e))}</td>
+      ${res ? `<td class="res">${res}</td>` : ''}
+      <td class="dr">${hs(l.dire, 1)}</td></tr>`;
+  }).join('');
+  return `<table class="lanetab"><thead><tr><th>Lane</th><th class="rad">Radiant</th><th style="text-align:center">${opt && opt.result ? 'Expected' : 'Edge'}</th>${opt && opt.result ? '<th style="text-align:center">Result</th>' : ''}<th class="dire" style="text-align:right">Dire</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function lockPositions(){
+  const P = G.pos;
+  if (online()){ netSend({ t: 'positions', order: P.order[G.seat], round: G.round }); return; }
+  [0, 1].forEach(t => { G.picks[t] = posHidden(t) ? DC.bestOrder(G.picks[t]) : P.order[t].slice(); });
+  showPreview();
+}
+
 function showPreview(){
   const R = G.picks[0], D = G.picks[1];
-  const ev = DC.evaluate(R, D);
+  const ev = DC.evaluate(R, D, true);
   const fav = ev.overall >= 0.5 ? 0 : 1;
-  const lu = t => `<div class="lu t${t}"><div class="head"><h2>${TEAM[t]}</h2><div class="who ink2" style="font-size:13px">${esc(G.cfg.names[t])}</div></div>${G.picks[t].map(h => `<div class="hrow">${art(h, 'thumb', 1)}<span>${esc(H[h].name)}</span><span class="r">${H[h].roles.slice(0, 2).join(', ')}</span></div>`).join('')}</div>`;
-  const pv = v => `<td class="m ${v >= 0 ? 'pos' : 'neg'}">${pp(v)}</td>`;
+  const lu = t => `<div class="lu t${t}"><div class="head"><h2>${TEAM[t]}</h2><div class="who ink2" style="font-size:13px">${esc(G.cfg.names[t])}</div></div>${G.picks[t].map((h, p) => `<div class="hrow"><span class="posn">${p + 1}</span>${art(h, 'thumb', 1)}<span>${esc(H[h].name)}</span><span class="r">${DC.POS[p].name}${DC.fitPen(h, p) < 0 ? ' · <span class="neg">off-role</span>' : ''}</span></div>`).join('')}</div>`;
+  const pv = v => Math.abs(v) < 0.0005 ? '<td class="m ink3">0.0</td>' : `<td class="m ${v > 0 ? 'pos' : 'neg'}">${pp(v)}</td>`;
   const rows = [0, 1, 2].map(s => { const st = ev.stages[s], p = st.p; return `<tr>
     <td class="stg"><b>${STG[s]}</b><span>${['0:00 – 15:00','15:00 – 30:00','30:00 – end'][s]}</span></td>
     <td class="p rad">${pct(p)}</td><td><div class="split"><i style="width:${p * 100}%;background:var(--rad)"></i><i style="width:${(1 - p) * 100}%;background:var(--dire)"></i></div></td><td class="p dire" style="text-align:left">${pct(1 - p)}</td>
-    ${pv(st.parts.hero)}${pv(st.parts.matchup)}${pv(st.parts.synergy)}${pv(st.parts.comp)}</tr>`; }).join('');
+    ${pv(st.parts.hero)}${pv(st.parts.lanes)}${pv(st.parts.fit)}${pv(st.parts.matchup)}${pv(st.parts.synergy)}${pv(st.parts.comp)}</tr>`; }).join('');
   const edges = ev.pairs.slice(0, 6).map(x => { const w = x.v >= 0; return `<div><span><span class="${w ? 'rad' : 'dire'}">${esc(H[w ? x.a : x.b].name)}</span> over ${esc(H[w ? x.b : x.a].name)}</span><span class="v">${pi(Math.abs(x.v))}</span></div>`; }).join('');
   const pairs = ev.synR.slice(0, 3).map(x => `<div><span class="rad">${esc(H[x.a].name)} + ${esc(H[x.b].name)}</span><span class="v ${x.v >= 0 ? 'pos' : 'neg'}">${pi(x.v)}</span></div>`).join('')
     + ev.synD.slice(0, 3).map(x => `<div><span class="dire">${esc(H[x.a].name)} + ${esc(H[x.b].name)}</span><span class="v ${x.v >= 0 ? 'pos' : 'neg'}">${pi(x.v)}</span></div>`).join('');
   $('#preview').innerHTML = `<div style="display:flex;flex-direction:column;gap:26px">
     <div class="versus">${lu(0)}<div class="mid"><span class="lab">Draft favors</span><span class="big ${fav ? 'dire' : 'rad'}">${pct(Math.max(ev.overall, 1 - ev.overall))}</span><span class="disp ${fav ? 'dire' : 'rad'}" style="font-size:24px">${TEAM[fav]}</span></div>${lu(1)}</div>
     <div><h2 style="font-size:30px;margin-bottom:8px">Win chance by stage</h2><div class="tablewrap"><table class="ftab">
-      <thead><tr><th>Stage</th><th>Radiant</th><th></th><th style="text-align:left">Dire</th><th>Hero strength</th><th>Counters</th><th>Synergy</th><th>Team shape</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="note" style="margin-top:8px">Factor columns are win-rate points from Radiant's side; negative favors Dire. Team shape costs points for missing a support, a carry, an initiator or reliable disables.</p></div>
+      <thead><tr><th>Stage</th><th>Radiant</th><th></th><th style="text-align:left">Dire</th><th>Hero strength</th><th>Lanes</th><th>Positions</th><th>Counters</th><th>Synergy</th><th>Team shape</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="note" style="margin-top:8px">Factor columns are win-rate points from Radiant's side; negative favors Dire. Hero strength weighs each position by stage (supports matter most early, carries late). Positions costs points for heroes played far from where pros play them. Lanes counts only until the mid game. Team shape costs points for missing a support, a carry, an initiator or reliable disables.</p></div>
+    <div><h2 style="font-size:30px;margin-bottom:8px">Lanes</h2><div class="tablewrap">${laneRows(ev.lanes)}</div></div>
     <div class="cols2"><div><div class="sh">Biggest head-to-head edges</div><div class="rl">${edges}</div></div><div><div class="sh">Best teammate pairs</div><div class="rl">${pairs}</div></div></div>
     <div class="go-row"><p>The draft sets the odds. Gold leads, Aegis, Shards and match-day form decide each fight, so the weaker draft still wins its share.</p><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><button class="btn go" id="goMatch">Start the match</button><span class="waitnote" id="goNote"></span></div></div>
   </div>`;
@@ -804,7 +966,7 @@ function killsUpTo(sec){
 }
 function renderKDA(f){
   [0, 1].forEach(t => {
-    $('#kda' + t).innerHTML = `<thead><tr><th><span class="tt ${t ? 'dire' : 'rad'}">${TEAM[t]}</span></th><th>K</th><th>D</th><th>A</th></tr></thead><tbody>` + G.picks[t].map(h => { const x = f ? f.kda[h] : [0,0,0]; return `<tr><td class="n">${art(h, 'thumb sm', 1)}${esc(H[h].name)}</td><td class="v">${x[0]}</td><td class="v">${x[1]}</td><td class="v">${x[2]}</td></tr>`; }).join('') + '</tbody>';
+    $('#kda' + t).innerHTML = `<thead><tr><th><span class="tt ${t ? 'dire' : 'rad'}">${TEAM[t]}</span></th><th>K</th><th>D</th><th>A</th></tr></thead><tbody>` + G.picks[t].map(h => { const x = f ? f.kda[h] : [0,0,0]; return `<tr><td class="n"><span class="posn">${G.picks[t].indexOf(h) + 1}</span>${art(h, 'thumb sm', 1)}${esc(H[h].name)}</td><td class="v">${x[0]}</td><td class="v">${x[1]}</td><td class="v">${x[2]}</td></tr>`; }).join('') + '</tbody>';
   });
 }
 function renderChart(){
@@ -880,7 +1042,8 @@ function stageReport(s, final){
   const btns = final
     ? `<div class="iact"><button class="btn" id="rematch">Replay this draft</button><button class="btn go" id="again">New draft</button></div>`
     : `<div class="iact"><button class="btn go" id="cont" data-cp="${s === 0 ? '15' : '30'}">Play the ${STG[s + 1].toLowerCase()}</button></div>`;
-  $('#report').innerHTML = `<div class="ihead">${head}</div><div class="ibody"><div style="display:flex;flex-direction:column;gap:22px;min-width:0">${table}${outlook}</div>${mini}</div>${moments}${btns}`;
+  const laneRes = s === 0 && M.lanes && M.lanes[0].winner !== null ? `<div><div class="sh">Laning results, 0:00 to 10:00</div><div class="tablewrap">${laneRows(M.lanes, { result: true })}</div></div>` : '';
+  $('#report').innerHTML = `<div class="ihead">${head}</div><div class="ibody"><div style="display:flex;flex-direction:column;gap:22px;min-width:0">${table}${outlook}</div>${mini}</div>${laneRes}${moments}${btns}`;
   $('#overlay').hidden = false; $('#overlay').scrollTop = 0;
   const cpName = final ? null : (s === 0 ? '15' : '30');
   const c = $('#cont'); if (c){ c.focus({ preventScroll: true }); c.onclick = () => {
@@ -1008,6 +1171,15 @@ function onRoom(r){
     if (G.screen !== 'draft' || G.round !== r.round){ G.round = r.round; stopLoop(); $('#overlay').hidden = true; G.sel = null; show('draft'); }
     renderDraft(); renderNetbar(); return;
   }
+  if (r.phase === 'positions'){
+    if (G.screen !== 'positions' || G.round !== r.round || !G.pos){
+      G.round = r.round; stopLoop(); $('#overlay').hidden = true;
+      G.pos = { order: [DC.bestOrder(G.picks[0]), DC.bestOrder(G.picks[1])], sel: null };
+      if (r.myOrder) G.pos.order[G.seat] = r.myOrder.slice();
+      show('positions');
+    } else if (r.myOrder) G.pos.order[G.seat] = r.myOrder.slice();
+    renderPositions(); renderNetbar(); return;
+  }
   if (r.phase === 'preview'){
     if (G.screen !== 'preview' || G.round !== r.round){ G.round = r.round; G.seed = r.seed; stopLoop(); $('#overlay').hidden = true; showPreview(); }
     syncPreviewBtn(); renderNetbar(); return;
@@ -1031,6 +1203,7 @@ function start(data){
   if (data && data.G){
     G = data.G;
     if (G.screen === 'draft'){ show('draft'); renderDraft(); maybeBot(); return; }
+    if (G.screen === 'positions'){ showPositions(false); return; }
     if (G.screen === 'preview'){ showPreview(); return; }
     if (G.screen === 'match' && G.seed){
       M = DC.simulate(G.picks[0], G.picks[1], G.seed); show('match');

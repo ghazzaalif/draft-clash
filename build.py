@@ -7,9 +7,10 @@ engine = (root / 'src/engine.js').read_text()
 heroes = (root / 'data/heroes.csv').read_text().strip()
 vs = (root / 'data/vs.txt').read_text().replace('\n', '')
 syn = (root / 'data/syn.txt').read_text().replace('\n', '')
+positions = (root / 'data/positions.csv').read_text().strip()
 assert '</script' not in engine
 body = (page.replace('/*__ENGINE__*/', engine).replace('/*__HEROES__*/', heroes)
-            .replace('/*__VS__*/', vs).replace('/*__SY__*/', syn)
+            .replace('/*__VS__*/', vs).replace('/*__SY__*/', syn).replace('/*__POS__*/', positions)
             .replace('__DC_SERVER__', os.environ.get('DC_SERVER', 'wss://draft-clash-rooms.onrender.com')))
 shell = """<!doctype html>
 <html lang="en">

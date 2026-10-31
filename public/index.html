@@ -238,6 +238,65 @@ table{border-collapse:collapse;width:100%}
 .tablewrap{overflow-x:auto}
 .cols2{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 .go-row{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:14px}
+
+/* ---------- positions ---------- */
+.poshead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.poshead h2{font-size:40px}
+.poshead p{font-size:14.5px;color:var(--ink-2);max-width:62ch;margin-top:6px}
+.posboard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.pcol .head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px}
+.pcol.t0 .head{background:var(--rad-field)} .pcol.t1 .head{background:var(--dire-field)}
+.pcol .head h3{font-size:28px} .pcol.t0 h3{color:var(--rad)} .pcol.t1 h3{color:var(--dire)}
+.pcol .head .st{font-size:13px;color:var(--ink-2);text-align:right}
+.pcol .head .st b{color:var(--ink);font-weight:700}
+.prows{display:flex;flex-direction:column;border:1px solid var(--rule);border-top:0}
+.prow{display:grid;grid-template-columns:34px 112px 64px minmax(0,1fr) 88px;gap:12px;align-items:center;padding:8px 12px 8px 0;background:var(--ground);border:0;border-top:1px solid var(--rule);text-align:left;min-width:0}
+.prow:first-child{border-top:0}
+button.prow:hover{background:var(--deck)}
+.prow[aria-pressed="true"]{background:var(--gold-field);box-shadow:inset 3px 0 0 var(--gold)}
+.prow .pn{font-family:var(--f-display);font-weight:900;font-size:34px;line-height:1;text-align:center;color:var(--ink-3)}
+.prow[aria-pressed="true"] .pn{color:var(--gold)}
+.prow .pl{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.prow .pl b{font-weight:700;font-size:14px}
+.prow .pl small{font-size:12px;color:var(--ink-3)}
+.prow .pt{width:64px;height:36px;object-fit:cover;display:block;border-radius:var(--r);background:var(--deck)}
+.prow .hn{display:flex;flex-direction:column;min-width:0}
+.prow .hn b{font-weight:500;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fit{font-size:12px;font-weight:700}
+.fit.good{color:var(--rad)} .fit.ok{color:var(--gold)} .fit.bad{color:var(--dire)}
+.dist{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;align-items:end;height:40px}
+.dist i{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-style:normal;font-family:var(--f-num);font-size:10px;color:var(--ink-3);gap:2px}
+.dist i span{display:block;width:100%;background:var(--rule-2);min-height:2px}
+.dist i.on{color:var(--gold)} .dist i.on span{background:var(--gold)}
+.prow.hid{grid-template-columns:64px minmax(0,1fr);padding-left:12px}
+.prow.hid .pn{display:none}
+.lanetab{width:100%;border-collapse:collapse}
+.lanetab td,.lanetab th{padding:9px 8px;border-bottom:1px solid var(--rule);vertical-align:middle}
+.lanetab th{font-size:12.5px;color:var(--ink-3);font-weight:500;text-align:left}
+.lanetab .ln b{font-family:var(--f-display);font-weight:800;font-size:19px;text-transform:uppercase;display:block;line-height:1}
+.lanetab .ln span{font-size:12px;color:var(--ink-3)}
+.lanetab .hs{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.lanetab .hs span{font-size:13.5px}
+.lanetab td.dr .hs{justify-content:flex-end;text-align:right}
+.lanetab .guess{opacity:.55}
+.lanetab .edge{font-family:var(--f-num);font-size:13px;text-align:center;white-space:nowrap}
+.lanetab .res{font-size:13.5px;font-weight:700;text-align:center}
+.posn{font-family:var(--f-display);font-weight:800;font-size:16px;color:var(--ink-3);width:14px;flex:0 0 14px;text-align:center}
+.pos-summary{font-size:15px;max-width:70ch}
+.pos-summary b{font-family:var(--f-num)}
+@media (max-width:860px){ .posboard{grid-template-columns:1fr} }
+@media (max-width:560px){
+  .prow{grid-template-columns:28px minmax(0,1fr) 56px;row-gap:4px;padding:8px 10px 8px 0}
+  .prow .pn{font-size:26px;grid-row:span 2}
+  .prow .pl{grid-column:2;flex-direction:row;gap:8px;align-items:baseline}
+  .prow .pt{grid-column:3;grid-row:1 / span 2;width:56px;height:32px}
+  .prow .hn{grid-column:2;grid-row:2}
+  .prow .dist{display:none}
+  .prow.hid{grid-template-columns:56px minmax(0,1fr)}
+  .prow.hid .pt{grid-column:1;grid-row:1}
+  .prow.hid .hn{grid-column:2;grid-row:1}
+  .lanetab .hs span{display:none}
+}
 .go-row p{font-size:14px;color:var(--ink-2);max-width:68ch}
 
 /* ---------- match ---------- */
@@ -396,7 +455,7 @@ dl.obj dt{color:var(--ink-3);padding-right:18px}
       <h2>How a match runs</h2>
       <div class="track">
         <div><span class="t">24 turns</span><b>Captains Mode draft</b><p>14 bans and 10 picks in tournament order. First pick bans first.</p></div>
-        <div><span class="t">before 0:00</span><b>Draft read</b><p>Win chance per stage, with the reasons.</p></div>
+        <div><span class="t">before 0:00</span><b>Positions and draft read</b><p>Set positions 1 to 5, which also sets the lanes. Then see the win chance per stage.</p></div>
         <div class="cp"><span class="t">0:00 – 15:00</span><b>Early game</b><p>Laning, first blood, first towers. Check-in at 15:00.</p></div>
         <div class="cp"><span class="t">15:00 – 30:00</span><b>Mid game</b><p>Teamfights, Roshan, Tormentors from 20:00. Check-in at 30:00.</p></div>
         <div class="cp"><span class="t">30:00 – end</span><b>Late game</b><p>High ground, barracks, Aegis fights. Final report when an Ancient falls.</p></div>
@@ -426,6 +485,9 @@ dl.obj dt{color:var(--ink-3);padding-right:18px}
       <aside class="sheet" id="detail"></aside>
     </div>
   </section>
+
+  <!-- POSITIONS -->
+  <section id="positions" hidden style="display:flex;flex-direction:column;gap:22px"></section>
 
   <!-- PREVIEW -->
   <section id="preview" hidden></section>
@@ -472,19 +534,31 @@ const ALPH='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const META = { matches: 20330, from: 'Oct 2025', to: 'Oct 2026', avgMin: 34.9, avgKills: 58.8, radiantWin: 0.521 };
 let H = [], N = 0, VS = '', SY = '';
 
-function load(csv, vs, sy){
+function load(csv, vs, sy, pos){
   VS = vs.replace(/\s+/g,''); SY = sy.replace(/\s+/g,'');
+  const P = {};
+  (pos || '').trim().split('\n').forEach(function(line){
+    if (!line) return;
+    const c = line.indexOf(','); P[+line.slice(0, c)] = line.slice(c + 1).split(';').map(function(x){ return x.split(':').map(Number); });
+  });
   H = csv.trim().split('\n').map(function(line, i){
     const p = line.split(',');
     const d = p[8].split(';').map(function(x){ return x.split(':').map(Number); });
     const g = +p[5], w = +p[6];
+    const wr = (w + 15) / (g + 30);
+    const pp = P[+p[0]] || [[0,0],[0,0],[0,0],[0,0],[0,0]];
+    const pt = pp.reduce(function(a, x){ return a + x[0]; }, 0);
     return {
       i: i, id: +p[0], name: p[1], attr: p[2], atk: p[3], roles: p[4].split('|'),
       g: g, w: w, bans: +p[7], slug: p[9],
-      wr: (w + 15) / (g + 30),
+      wr: wr,
       rawWr: g ? w / g : 0.5,
       stageG: d.map(function(x){ return x[0]; }),
-      stageWr: d.map(function(x){ return (x[1] + 20) / (x[0] + 40); })
+      stageWr: d.map(function(x){ return (x[1] + 20) / (x[0] + 40); }),
+      // pro games at positions 1-5 (lane role + farm order within each lane)
+      posG: pp.map(function(x){ return x[0]; }),
+      posShare: pp.map(function(x){ return (x[0] + 0.5) / (pt + 2.5); }),
+      posAdj: pp.map(function(x){ const v = (x[1] + 40 * wr) / (x[0] + 40) - wr; return Math.max(-0.04, Math.min(0.04, v)); })
     };
   });
   N = H.length;
@@ -525,21 +599,76 @@ function comp(team, s){
   return c;
 }
 
-/* Evaluate two (possibly partial) lineups. Returns per-stage radiant win prob and breakdown. */
-function evaluate(R, D){
-  const out = { stages: [] };
+/* ---------- positions ----------
+   A positioned team is an array of 5 heroes where index 0..4 = position 1..5.
+   Radiant's safe lane is bottom, Dire's safe lane is top. */
+const POS = [
+  { n: 1, name: 'Carry', lane: 'safe' }, { n: 2, name: 'Mid', lane: 'mid' }, { n: 3, name: 'Offlane', lane: 'off' },
+  { n: 4, name: 'Soft support', lane: 'off' }, { n: 5, name: 'Hard support', lane: 'safe' }
+];
+// how much each position's hero matters in each stage (each row averages 1)
+const POSW = [[0.85, 1.2, 1.1, 1.0, 0.85], [1.0, 1.15, 1.0, 0.95, 0.9], [1.35, 1.1, 0.95, 0.85, 0.75]];
+const LANEW = [0.8, 0.3, 0];
+const FITK = 0.06;
+function share(h, p){ return H[h].posShare[p]; }
+// win-rate points lost for playing a hero where pros rarely play it (none above 15% of its games)
+function fitPen(h, p){ const s = H[h].posShare[p]; return s >= 0.15 ? 0 : -FITK * Math.pow(1 - s / 0.15, 1.3); }
+const PERMS = (function(){ const out = []; (function rec(a, rest){ if (!rest.length) return out.push(a); rest.forEach(function(x, i){ rec(a.concat([x]), rest.slice(0, i).concat(rest.slice(i + 1))); }); })([], [0, 1, 2, 3, 4]); return out; })();
+function teamPosValue(T){ // a positioned team's own strength, stage-weighted like the overall win chance
+  let v = 0;
+  for (let s = 0; s < 3; s++){ let x = 0; for (let p = 0; p < 5; p++){ const h = T[p]; x += POSW[s][p] * (stageWr(h, s) - 0.5 + H[h].posAdj[p] + fitPen(h, p)); } v += [0.3, 0.4, 0.3][s] * x; }
+  return v;
+}
+// best position order for five heroes (perm[p] = index of the hero at position p+1)
+function bestOrder(T){
+  if (T.length !== 5) return T.slice();
+  let best = null, bv = -1e9;
+  PERMS.forEach(function(perm){ const o = perm.map(function(i){ return T[i]; }); const v = teamPosValue(o); if (v > bv){ bv = v; best = o; } });
+  return best;
+}
+// how well a partial team can still cover distinct positions (sum of best shares)
+function coverage(T){
+  if (!T.length) return 0;
+  let best = 0;
+  PERMS.forEach(function(perm){ let v = 0; for (let i = 0; i < T.length; i++) v += Math.min(1, share(T[i], perm[i]) / 0.6); if (v > best) best = v; });
+  return best;
+}
+// lane matchups from Radiant's side. Each side lane: Radiant pair vs Dire pair.
+function lanes(R, D){
+  function edge(rs, ds){
+    let m = 0; rs.forEach(function(a){ ds.forEach(function(b){ m += vs(a, b); }); }); m /= rs.length * ds.length;
+    let e = 0; rs.forEach(function(a){ e += stageWr(a, 0) - 0.5; }); ds.forEach(function(b){ e -= stageWr(b, 0) - 0.5; });
+    let f = 0; rs.forEach(function(a){ f += fitPen(a, R.indexOf(a)); }); ds.forEach(function(b){ f -= fitPen(b, D.indexOf(b)); });
+    return { matchup: m, edge: m + 0.5 * e / rs.length + f / rs.length };
+  }
+  return [
+    Object.assign({ lane: 'top', rad: [R[2], R[3]], dire: [D[0], D[4]], radRole: 'offlane', direRole: 'safe lane' }, edge([R[2], R[3]], [D[0], D[4]])),
+    Object.assign({ lane: 'mid', rad: [R[1]], dire: [D[1]], radRole: 'mid', direRole: 'mid' }, edge([R[1]], [D[1]])),
+    Object.assign({ lane: 'bot', rad: [R[0], R[4]], dire: [D[2], D[3]], radRole: 'safe lane', direRole: 'offlane' }, edge([R[0], R[4]], [D[2], D[3]]))
+  ];
+}
+
+/* Evaluate two lineups. Partial lineups (during the draft) skip position terms. Full lineups are
+   read as position-ordered when `positioned`; otherwise each team gets its best position order. */
+function evaluate(R, D, positioned){
+  const full = R.length === 5 && D.length === 5;
+  if (full && !positioned){ R = bestOrder(R); D = bestOrder(D); }
+  const out = { stages: [], R: R, D: D, positioned: full };
   let vsSum = 0; const pairs = [];
   R.forEach(function(a){ D.forEach(function(b){ const v = vs(a, b); vsSum += v; pairs.push({ a: a, b: b, v: v }); }); });
   function synTeam(T){ let s = 0; const l = [];
     for (let x = 0; x < T.length; x++) for (let y = x + 1; y < T.length; y++){ const v = syn(T[x], T[y]); s += v; l.push({ a: T[x], b: T[y], v: v }); }
     return { s: s, l: l }; }
   const sR = synTeam(R), sD = synTeam(D);
+  const ln = full ? lanes(R, D) : null;
+  out.lanes = ln;
   for (let s = 0; s < 3; s++){
-    let hr = 0, hd = 0;
-    R.forEach(function(h){ hr += stageWr(h, s) - 0.5; });
-    D.forEach(function(h){ hd += stageWr(h, s) - 0.5; });
-    const parts = { hero: hr - hd, matchup: vsSum / 5, synergy: (sR.s - sD.s) / 2, comp: comp(R, s) - comp(D, s) };
-    const diff = parts.hero + parts.matchup + parts.synergy + parts.comp;
+    let hr = 0, hd = 0, fr = 0, fd = 0;
+    R.forEach(function(h, p){ hr += (full ? POSW[s][p] : 1) * (stageWr(h, s) - 0.5 + (full ? H[h].posAdj[p] : 0)); if (full) fr += POSW[s][p] * fitPen(h, p); });
+    D.forEach(function(h, p){ hd += (full ? POSW[s][p] : 1) * (stageWr(h, s) - 0.5 + (full ? H[h].posAdj[p] : 0)); if (full) fd += POSW[s][p] * fitPen(h, p); });
+    const parts = { hero: hr - hd, matchup: vsSum / 5, synergy: (sR.s - sD.s) / 2, comp: comp(R, s) - comp(D, s),
+      lanes: full ? LANEW[s] * (ln[0].matchup + ln[1].matchup + ln[2].matchup) : 0, fit: fr - fd };
+    const diff = parts.hero + parts.matchup + parts.synergy + parts.comp + parts.lanes + parts.fit;
     const p = sig(4 * 0.9 * diff + logit(META.radiantWin));
     out.stages.push({ p: p, parts: parts, heroR: hr, heroD: hd });
   }
@@ -557,11 +686,9 @@ function pickValue(h, A, E){
   E.forEach(function(e){ v += vs(h, e) / 5; });
   A.forEach(function(a){ v += syn(h, a) / 2; });
   const need = roleNeed(A);
-  if (need.sup && has(h,'Support')) v += 0.02;
-  if (need.car && has(h,'Carry')) v += 0.02;
   if (need.ini && (has(h,'Initiator'))) v += 0.012;
-  if (!need.sup && has(h,'Support') && countRole(A,'Support') >= 3) v -= 0.02;
-  if (!need.car && has(h,'Carry') && !has(h,'Support') && countRole(A,'Carry') >= 3) v -= 0.015;
+  // fill open positions: a hero pros only play at a position the team already covers is worth less
+  if (A.length && A.length < 5) v += 0.025 * A.length * (coverage(A.concat([h])) - coverage(A) - 0.75);
   v += 0.03 * Math.min(1, contest(h) * 2);
   return v;
 }
@@ -605,10 +732,16 @@ function raxUp(sd){ let n = 0; LANES.forEach(function(l){ n += sd.rax[l][0] + sd
 /* ---------- match simulation ---------- */
 const KILLW = { Carry: 1.35, Nuker: 1.3, Escape: 1.05, Initiator: 1.0, Disabler: 0.95, Durable: 0.9, Pusher: 1.0, Support: 0.6 };
 const DEATHW = { Support: 1.4, Carry: 0.85, Durable: 0.75, Escape: 0.85 };
+// kill and death share by position and stage
+const KILLP = [[0.8, 1.4, 1.1, 1.0, 0.6], [1.1, 1.3, 1.0, 0.85, 0.6], [1.5, 1.2, 0.95, 0.75, 0.55]];
+const DEATHP = [[0.9, 0.9, 1.2, 1.1, 1.0], [0.8, 0.9, 1.0, 1.15, 1.3], [0.8, 0.9, 1.0, 1.15, 1.3]];
+const LANEK = 9; // logit per win-rate point of lane edge
 
+/* R and D are position-ordered (index 0 = position 1). */
 function simulate(R, D, seed){
   const rand = rng(seed);
-  const ev = evaluate(R, D);
+  const ev = evaluate(R, D, true);
+  const LN3 = ev.lanes.map(function(l){ return { lane: l.lane, rad: l.rad, dire: l.dire, radRole: l.radRole, direRole: l.direRole, edge: l.edge, kills: [0, 0], winner: null }; });
   const teams = [R, D];
   const side = [freshSide(), freshSide()];
   const kda = {}; R.concat(D).forEach(function(h){ kda[h] = [0,0,0]; });
@@ -686,20 +819,25 @@ function simulate(R, D, seed){
       takeStructure(t, att, o, sec);
     }
   }
-  function fight(t, size, place, sec, extra){
-    const q = fightP(t, extra);
+  function fight(t, size, place, sec, extra, lane){
+    const q = lane ? sig(0.5 * DRAFTW * logit(ev.stages[0].p) + LANEK * lane.edge + form[0] + leadLogit(t, 0)) : fightP(t, extra);
     let w = rand() < q ? 0 : 1; const l = 1 - w;
     let wk = Math.max(1, Math.round(size * (0.62 + rand() * 0.38)));
     let lk = size - wk; if (lk > wk){ const z = wk; wk = lk; lk = z; }
     if (size <= 2 && rand() < 0.75) lk = 0, wk = size;
     const s = stageOf(t);
     function credit(team, n){
-      const killers = teams[team], victims = teams[1 - team];
+      const killers = lane ? (team === 0 ? lane.rad : lane.dire) : teams[team];
+      const victims = lane ? (team === 0 ? lane.dire : lane.rad) : teams[1 - team];
+      if (lane) lane.kills[team] += n;
+      const dead = {};
       for (let i = 0; i < n; i++){
-        const k = pickW(killers, function(h){ return roleW(h, KILLW) * (0.6 + stageWr(h, s)); });
-        const v = pickW(victims, function(h){ return roleW(h, DEATHW); });
+        const k = pickW(killers, function(h){ return KILLP[s][teams[team].indexOf(h)] * Math.sqrt(roleW(h, KILLW)) * (0.6 + stageWr(h, s)); });
+        const alive = victims.filter(function(h){ return !dead[h]; });
+        const v = pickW(alive.length ? alive : victims, function(h){ return DEATHP[s][teams[1 - team].indexOf(h)] * Math.sqrt(roleW(h, DEATHW)); });
+        dead[v] = 1;
         kda[k][0]++; kda[v][1]++;
-        killers.forEach(function(a){ if (a !== k && rand() < (size >= 3 ? 0.55 : 0.25)) kda[a][2]++; });
+        killers.forEach(function(a){ if (a !== k && rand() < (size >= 3 ? 0.55 : 0.4)) kda[a][2]++; });
         st.kills[team]++;
         st.lead += (team === 0 ? 1 : -1) * (180 + 11 * t);
         if (!st.fb){ st.fb = true; log(t, sec, 'fb', team, 'First Blood: ' + H[k].name + ' killed ' + H[v].name, { killer: k, victim: v }); }
@@ -729,6 +867,12 @@ function simulate(R, D, seed){
       if (s === 0) size = rand() < 0.72 ? 1 : 2 + (rand() < 0.25 ? 1 : 0);
       else if (s === 1) size = rand() < 0.45 ? 1 + (rand() < 0.4 ? 1 : 0) : 3 + Math.floor(rand() * 4);
       else size = rand() < 0.3 ? 1 + (rand() < 0.4 ? 1 : 0) : 3 + Math.floor(rand() * 6);
+      if (t <= 10){ // laning phase: kills happen in lanes between the heroes laning against each other
+        const place = pickW(['top lane', 'mid lane', 'bot lane', 'the jungle'], function(x){ return x === 'the jungle' ? 0.3 : x === 'mid lane' ? 0.85 : 1; });
+        const lane = place === 'the jungle' ? null : LN3[['top lane', 'mid lane', 'bot lane'].indexOf(place)];
+        fight(t, lane && lane.lane === 'mid' ? 1 : Math.min(size, 2), place, sec, 0, lane);
+        continue;
+      }
       const place = pickW(['top lane', 'mid lane', 'bot lane', 'the jungle', 'the river'], function(x){ return x === 'the river' && st.rosh.alive && t > 14 ? 2 : 1; });
       const r = fight(t, size, place, sec);
       if (size >= 3 && r.margin >= 2){
@@ -743,13 +887,30 @@ function simulate(R, D, seed){
     }
     if (winner !== null) break;
 
-    // laning / split-push pressure
+    // end of the laning phase: each lane is won, lost or even
+    if (t === 10) LN3.forEach(function(L){
+      const x = LANEK * L.edge + (L.kills[0] - L.kills[1]) * 0.35 + gauss() * 0.45 + 0.5 * form[0];
+      L.winner = x > 0.4 ? 0 : x < -0.4 ? 1 : -1;
+      if (L.winner >= 0) st.lead += (L.winner === 0 ? 1 : -1) * 550;
+      const nm = function(a){ return a.map(function(h){ return H[h].name; }).join(' and '); };
+      const where = L.lane === 'mid' ? 'mid' : L.lane === 'top' ? 'the top lane' : 'the bottom lane';
+      const w = L.winner, txt = w < 0
+        ? 'Laning: ' + where + ' went even (' + nm(L.rad) + ' vs ' + nm(L.dire) + ')'
+        : 'Laning: ' + TEAM[w] + ' won ' + where + ' (' + nm(w ? L.dire : L.rad) + ' over ' + nm(w ? L.rad : L.dire) + ')';
+      log(t, 59, 'lane', w, txt, { lane: L.lane });
+    });
+
+    // laning / split-push pressure (early towers fall in the lanes a team won)
     for (let team = 0; team < 2 && winner === null; team++){
       const adv = team === 0 ? fightP(t) : 1 - fightP(t);
       let base = t < 7 ? 0 : t < 12 ? 0.11 : t < 20 ? 0.2 : t < 30 ? 0.18 : 0.14;
       if (rand() < base * (0.4 + 1.2 * adv)) {
         const opts = nextTarget(team).filter(function(o){ return o.kind === 'tower' && (o.tier === 1 || (o.tier === 2 && t >= 16)); });
-        if (opts.length){ const o = opts[Math.floor(rand() * opts.length)]; takeStructure(t, team, o, 20 + Math.floor(rand() * 39)); }
+        if (opts.length){
+          const o = t < 16 ? pickW(opts, function(x){ const L = LN3.find(function(y){ return y.lane === x.lane; }); return !L || L.winner === null || L.winner === -1 ? 1 : L.winner === team ? 3 : 0.4; })
+            : opts[Math.floor(rand() * opts.length)];
+          takeStructure(t, team, o, 20 + Math.floor(rand() * 39));
+        }
       }
     }
 
@@ -800,7 +961,7 @@ function simulate(R, D, seed){
       rosh: clone(st.rosh), torm: clone(st.torm), shards: st.shards.slice(), p: livePr(t), kda: clone(kda), day: Math.floor(t / 5) % 2 === 0 };
   }
   events.sort(function(a, b){ return a.t - b.t || a.sec - b.sec; });
-  return { ev: ev, frames: frames, events: events, winner: winner, endT: endT, seed: seed };
+  return { ev: ev, frames: frames, events: events, winner: winner, endT: endT, seed: seed, lanes: LN3 };
 }
 function ordinal(n){ return n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'); }
 
@@ -817,7 +978,8 @@ const PHASES = [[0,6,'Ban phase 1'],[7,8,'Pick phase 1'],[9,11,'Ban phase 2'],[1
 
 return { load: load, heroes: function(){ return H; }, vs: vs, syn: syn, evaluate: evaluate, pickValue: pickValue,
   botChoose: botChoose, simulate: simulate, rng: rng, CM: CM, PHASES: PHASES, META: META, stageWr: stageWr,
-  towersUp: towersUp, raxUp: raxUp, contest: contest, LANES: LANES, has: has };
+  towersUp: towersUp, raxUp: raxUp, contest: contest, LANES: LANES, has: has,
+  POS: POS, share: share, fitPen: fitPen, bestOrder: bestOrder, lanes: lanes, teamPosValue: teamPosValue };
 })();
 if (typeof module !== 'undefined') module.exports = DC;
 
@@ -949,7 +1111,133 @@ DC.load(`1,Anti-Mage,agi,M,Carry|Escape|Nuker,660,322,1310,254:125;286:142;120:5
 137,Primal Beast,str,M,Initiator|Durable|Disabler,1338,681,1571,401:192;614:313;323:176,primal_beast
 138,Muerta,int,R,Carry|Nuker|Disabler,1596,787,1460,498:240;664:336;434:211,muerta
 145,Kez,agi,M,Carry|Escape|Disabler,1817,960,2493,591:314;779:420;447:226,kez
-155,Largo,str,M,Durable|Disabler|Support,1619,881,2813,499:263;663:354;457:264,largo`, `VWVQXYSSPXUTYYUVaLSSQQbQUVVNaTQbSXcXWPSMRQaTSTcYUVXjYQWbWXSbJMTWTNZZNVRZTbUWXQSSaUQbZUWPSVQQZXSNXWSVSYVUbbWPaaQZYWRVWVZeXVbVTUJRbXPYSbUWcUUXXTUWUTUURZYVURSTTcSPUUXbXbVaZabTRbOXSYVXNRUQOVVVSRQYYPSVVaPQYVXRKVaQYTbUQVdWVWQRXaVWMYYaRUXbYOZWMUaUVYVTQSVUWUaXcYWZVLWXbceWQQbcYaTPZRRYTOUWQRRfPWdUVJXSaVYUNWUNWRVXUZTVNXUbVWUTPRbaSWYZVbPSbYbPYWUXbPaOXTFWcYWTVUSZUUXTeWQTLNYSUXfOTcTZRVTSaYUbeURcbTYOWVRZYVPSVVXRXXXTSQUNXZTaSSZSVPXTXReWWSVRWbSYSURQTVVTPTNXaWRSVSaVYUWIMRVbZVVYVRYgXVbYVQTbVTgRTaXSUVSbQSUaZZTWZYZQTRUYaSUIaYRXXRWRSXPeQRaRPZdbPUVSRZQVdOWZUWYQWXSYYYTYQZLWLQbQYUSQZWUbSXdaaRcVOYSLcTTZPUXTaaWRTVSbNUXZWXaTZVOTPQUUZTUYYVSSPccQYPUkVfRQZTTbUUTTRahaTMbZYLSRZUaYUhVPWSXQaNSTTSXbZQQbSRXYUVXeVMVYdQVSWbSUWVXcYSUVRXRTTTOaVXXTYWXJfWdYPYTQUWOPUNWXVYZbRaPhZSSXRWVXSZYTQZOUYPZWTVbaRQYSThgWVhVRSXVMTSPQYUQSNVTUSXTZTPQUISaaPSRXTPcRXYXVSZVXTYYYVSOMTXTXURUYYWYYgZTVOUZSQSZScbbjWXXWWQTVXXTRUXfaSUZUTZTQYYOWXfWScTVRZTTWRQVUdRdXVbXMTaUSXUWVZOUZZUSQUOXVRdPXTSRRZPWWZWLViRURTUYaaYWaShYRVXUeQXTPVXRXSYUTRcYTWWeiJPYTRQSWUeOaVVVePVSRVOZaZLYTWQUUXWZYdXSOUaSTcRLZcaWecOYaaPXKUSWTMhZYUTQTTPWTRSVQYSUWXPQTWcUYaSVTPTfZNWUZVYVQWbTThLZNZPSORQSTSRVTWcWQSMVVRdVZULUZWQKOUaQSfURZZRWJTnTeNbRPRSXMdXbVUYTORUSWZTTRVdNYcdSVUWXTYTYVTUYgUTXeWSZUUcSaXcSVTXaWYTaUXYRTXWYTWUXXPXWNUSRUTVOXVXTcUVTWRSaXVVWRYUbYUQWPXNQYSRWSXUTVWXTWPcUaVXSZYdVabMaYVVVVQUXZYRWZPbWYQQVQSYWVRVVVRXZRZQUZVRaVRVXacgaYaVUWUKSUKaZZUNOZYVQZTTXYQVOTaXUUPbTVWQbRROTaTaTWVSVPUSaTRbTWTUSaaTWSTSYGVNVbRVaXcUTQcYRQSPdbPYYQVSTaTWTVUXXZYWRUZXRQUXaUWZWZPhRSXTYUXQSVPXUUWUQMYUYUVbSTVbTSZaedYYWJTMYXSVSPQVbXRUcLQTXYWTYWSZWXcWKTdZZWSUVYSXZaQSWVYVTWTSZXRdVOXXRbOdZWUXTSbPeaeSRQTXZTQbRTfXVVTUSVWUVWWNXXbTWVUbZZTRYWRTVWWUbbYRRfaLVWOPZSRUYMYSNRjWRcTRRPVVVSQSTTPQUUXWZTSRONTccQZVNVcbSUSRSQZUWaWXXaWNWSaaLPYdSSUTTUaRWdfQWdUZVURTVOSaTUYZbXVVfNYXWNWbaWSMYePNMZWJZUQaPTZVWQdeXaXVRRTRKUPdXTVcQUWWaWObNacYUQagWPPUYYQTLRbWaeXYUeVaZYTbTZPSQOPSaaRTaTXVcSdWbSQUZaLSQSVRaYOcUWUQRTZUWXXXYPbYXXQeLIUUXVUaPQUWVSYUTTRVZTcRSUaXPeTVVScRXRZWcYPPYkVVaTTVWUTVeUSVSVTWSUTWXTWZfWfcRYbWQXSWTaYcaVbUVXTWXWTRZRaXWVPPbUXVQRVaUZNQTXYJTYOMRVRSWVaUUUTWSbWZZSWeVVUTSTUSURSZTYYUTTSYVSPYcRPSVcUTOgVcYXVVcOTUWcYXUTdUURQRUQZWTSXVZXSOdUWSYbUXQVVWVVOVUOTNTYTXWVRYTWQXTTSTbSUZUQdRTfWdXRTVRWXVUaSVTQWUYQeWZXVUWURSYURVTRUbXXaaUVRTUTaSVdTOSVUaZZVVWYaPSXOSXWXcVUdaPVYVVOVbZbXTRVPSWTNONPQfWTfaRRPVRTbRTXWPRWVXVQXSVZUWVRYXSXOVVYWUZRPMSYUhWVScSPTXWYRZQaXTWOMXUZVhcZWZRaTRQVPaUaUSVVTSVUYYbXRQPWVZWVXUXWQXZRXaKWcYUTPSYWWVRScMOTRTXTSWUYWUXRQUXaUSYSVPWXXdZYOSXSiVTYWVWYWWdUbYYRfUXSWZVRZXTRTcIPRUXeSYXTVbTLXXNTRTdVTQJXSVXXbSZWXZUcUYWVOZYYQQUPaZXVPUUXVRTPUXUgQRWbkaZPYPUHUUXbWVZSVTZMPWZSaQXaOZYZQbXXKdMWTVPTYVTcbXPiSPOWQSTbMTWXSWSYaUVOSVcZRZQWcUSRYYZUWaSbTagWbbYNOWWYWRZRbeYNcRQaNXVYXRXUVXVPVWYaaXYSVSXXRSaaTaaPWWXYLPcSUSXTZPYVTWcWRQMSXRTWZSaWXSTTZOTZWYVSTQWURZYSVUQYYeUWTTSMZYaWUUMQXPTaYXSWUVNYTXVTVUaOXUcPSWXcTUVUaQdZRVWRQYXTcTRWXPRUVPUVWaRYSRJVUYRZZOaQbYaZZURPWXTcPTYYYWYRYMfXVQUTUSYaVYZSXTYUYQZROSXWPNWTYWUSVUTZQVWZWeZWSWUOYTVTWRTTWXLRYbJXZXYNSTbUdQMUadUXVXWTYSSSZXUOdJXPcYTaMNSWcMPOXWVYTaVVVXUWXUcSXKTYXZWUZWRVeKZbcWYXNYTVYbUUXWYZPRcPNWYQRWbVWXSRcWUXPOaZSWTYabVVSOYOUaLVdUXdXbVZVTLbUXUQQRWVfbVUXUfUUWPaOYaXJVXVYScYRVTfWYWYWZTUcZSZSTdXUKRTSUaWVTXTYYRXQUVTSTTZXSXQWUWbYYXXXSQTWPXWRbTScZZYTXJNXVUWTSNRVUUVTYSQQPQQSZcMSSdTXVScbUYWTYUbTYVdQYQUYaWaTUPWgWUaTTTWMXNZSQadhUWURYTXSXJQVSTQbYZTSYUPaYcUXUYVTWUWVTYWRUYUWPRWWUYPUUNRaWdVVdTSPWQZPHdUVQYUIOSaRXRTUVYSRZaXYYWaTTRdZXTWXVVSSVbUYaOOWYaTWOZRZWUVVUZSTUiZQdUUVSWZUZWXWVVXSVUQZReSVXUSRTSXbTSQYUPOXYVMOUVPXYMXXTTUUTQUYQTRVYUUUYRTSWYaUaNVUONaXWURYPWPRVOSPhXRSXPVWYTTbTVabZVTQWPTYQRUXYVbTWYYTZNZaRUUSSTQdPYXWRgbJQYfYUXVTNXSSTYUOSgYcYZbSYZbNUSUaXbSQLaUdcYWTVWXUTNXQTVaQPWcbNWQUWWYObQaZVXTSZPWNbZdPXWYVLUVYWbYYfSKXVMVMQSTZROVRQRIXYSaQjScUQPRTRNTWRTWbVYQaaUXRPNPaZPUaWPbSWQZUaRRRSYVWTVKVabYUXXTXWZXKUUVWTTNWXWbTVWVSRSfXTaUSSXRaRVcZWVVXTXWVQPYMgPXUVUObZNXYTYcSVVTTPZXSWUVTaYQRcRWZYUWYbUPSUXUaaddWbVQeWTOXaVWYWSTNURXRPblRcUWVWUTXXVUYTVRTZgWRVRYgYbXbVZUVZUSRTOWUWQTYYWOaOOQZVRZRQWUVXcTYRYTWYRVTYbWXWVVVTUYZSXTTVSZSSZWWMeZTbaTaTaUXWTSNWWYRZWWRZXhaZZSZYZYaTTWWUVQLMXSWQRPWVTSUaTUOTWcXXWOOTZXRWZYTWUbbWXUWSSXZTVPXQZQVXRTTOOPWZMWWXbYVYUUZVRWYafUYTaWZeOTUTZQVVgXTOVZXWTRTWWWWYTPOXRWWUZRZTaRLZUYVXSdVdXaUPUPQcYdaYZZZRWXcOMVUaPXUQXWXaTbPPUTeQcVRXYSVdWWdRPUMUNYVRUcNTSWUUQXVRUcaVUXdSWPXZLWaZTXRXWSQSTYUUVUaZKSRfYcfXbaNdaSIUUSSSbTTUWXTSUNLTSUNWYXYZYYYXQXVZRTYXUYWZhZcRYaPTQadSVOaTXaeZQWZWQSSbTWYVaVVVVRSQUSdVVPWQdZUSUSeXPWZaPdbORiXTSTRPRaUXXQXRRSOUYVOUWYcSYRYeQcZKUVYUWTQMUPaSTOdTTPQMbeYPTQbfcXUabQTTXaTYQWUaUVacPScWMSWafHORRWTTSaQWQXSRTPTUTZQQTcXSQVOSSSUPZYiVYPLXahSPWRWQVYXUbTZVePROXTYTVRZSYTWTSYVVeUQVJYTUROSdWcMPTYWYaPQQNTSYcURXQYYcXacdWWXUSRXRZUWebRMRZYRaWRTgTQUZWcaYYUWNVYQbSZPTSXcSQTVYQUYdXbOVXSZURUWWXXUUWWSVXdZZSUXMZTVaRUbZVOSaWWWSZUPVSTSWUZRYPYSOZZZbLQSYbWRSaNSUTVTORSPVYTUWVUZVPQScSZXWYUYNWWdWbVRUXTdYWYSYVaeVTTORYXbTVRUWcOXUWNTgRcUbVYQMWYVTXXXaYVaPURYRORaRWVaWVObWQYYWUZTWQWSZPXSWUYMeXbSSWYUaQaaPTTUISUTaVVWQYWSUSWNPYaTZTVXWVPUUYYRYSUWYPXUaZXYOQRSZeWUURZcaWaeUVUbUVSUNSaWVXVPWRYfWZSZPaXZVOaPNWWWTaQURfSgRWaRVNSVbVQUQaTYSSZVfXOVYRXRZUZaSZUbHbWbVUONWRRUbNXXUWWVPXNiOdTYTfMTYTPQZRcZUXOYVSTMaUXUXTSSVPNUOIXVTTVPSVWSXUaTRWbVZdTbPPWWWZWZYYNSTPeVRUQSdYSMYZVTSZVXWQaSXZYYYTVQaZdYVUUSZVTZYVXULURSYdNXRQWSagePSZcQTVPZOVXWOWfWWUUWQWXUUTVXUWSSSTaYVOQVNTXSVUbZXXYZOOWWSQVOTUTWWUPTacUTcQXUTMWbSYVURXVVXVRaWbMVWPaXbRRWSXWUXWXZbXUXUWYUYQWRVVUVXZbXYSWXWSVJVYVOUUVcWWZXcbVRVWUUWPQTWQWVSVRXZaYXZUXVPUQSTZOYVRWSYaSabPUVSdQUPYVaWaZXWPRNSPaUQXQhTXaTTZZXYSSbVVWWOTdaYWVeUNYbhJVQVbTVRWhZXVbSTQYXTKTdRVWaPQecaWIZQUHWXYYReVPYaTVXVWXUYaRWOUUXeXUQScUTWXTTTUSKaVTcSVSeSUQYYdZZWXQYVWZTYgbbUSVQYTbWcSVTUZTORZUSSPTZVURYaRTWVRUKZYTNVRRZZNYSYfVZTQVUbNXZWWOTYSZROTVPaWXWTZTcaYXVbSNQZUYUaeVXURcWXYXOTSQYRYZXSZZabTZTUSSRYPOaVVVhQJSXdUfVcRaYXiOWcRSQZaVcYaYYaTRWVRXRUVYXSWVdbSXNVZbKTTWXWTRZZcUVSOLTTcWbUYWSeVUYXYORaVMSORRRUYZTWXXaWURWTUQWTXTfVhQMWWZSUaXaURVaUcYYORaWXRSTYeUXUaZLPYTYbdVZTWRVTVaYSTVPZNTVSWRTWTXYPUQUXVVYYQaSMPPQTVQbVWVZYPVTXhWSZPSSaWZTUXbeRbSWaRaSYSTVYVSbUbVSXcUTZcYSPOaTWXKWWXPSSYdeMUUeVSQTUdQVYVdVSQUUPdYZWOTPTWWYVaVJUWSUSTRQbORWRTOcSZYZTYUZTbJYZRTSPYOQVVVRbWTTeRWZXaQXbYUVVSPVXUZUcUVQWXWaTSUORTWWXUQWRQbUVbNTTaReUUZMRUUVdXTUWVTKbPXWUcSUWcYUPXPXRTMRTKcaTLVaYUVWUbTSUWZVSTaROYYdaafWXXXkSdaYNOdZSTbXTZTURZRTXdTbReSXTXfPUZUQTYbfTTWQNaPPUNTTWTUScUVQUcQSbZYRPVPbZPSeUPcbZYdTXQcfUVVZQSZWOSfUaWRWVUfXKYOUOTYYYbYVXUWUcQTXbWbRaTYWUPNYadVZUKNYTURRVVVeSQbWacMWVSZRXbTbMVUSWaXVYUWUaVSTaZYTURcVTXKUOTVTTbeRaSWUWQWUaZaYbYWPQWYOTMPSTUURYSTOVZYMYROTQWYTdUZVXQWVUWeXSUSRZbTcZWYWVVQaeXSSUUdTTSXaUVMVXTVVTOHUaSaVYWRRYYXVWUVWaWLSORSSWZYZUXbRURRSPWQXXVPVcONVVXYQZSSbPRYUYUUVVeWYVQYOWSVVPTbTTTaYTUVPTUXWYUYVeeTeZWacYSOVMVXZTUSJYYQVcVTZZhWJURMWTaXWTWWUhcQQWVSVYVbRSbUKVNVURRTVgWRYScWVSUcaTTZXUVUSUXQZVbTSTWcQZbWWbXVTWXVRQURUUaVQbcUYQWTdXaUUUVUZSUQePVQafUWTVUXTVUeWTMTNTQVWVXRYVKaPcReSVUUYWVZPVXQcLYXQWTWcdPXVUYTPRaaTRYTYRaQQOUYSNObTVTNPQaXOXWTXePWTcQKhbTVTReYcPRffNcVVRWcQcWUTUUTWXZYYWTbRTHXZTPPSVZTVUNWSVbQQWdXSSLbXTXVRHSYUQQZVUWHXYhTVTYRXQXWTNWUVWPYSZSYMPUUWZbYXZYWbTUVTZWSMQRPVRWRUTUWTaVTUPWUXZaYVZfSZZTSXWaVZZYZUVQSQURRXReSUgVXPRTWSRWYNYUWWOUUWTSSWRfWLPYNVbbZQQZaTOSYXXQUTXTPdSXUbTRSSRXbZVVSZSQcXNVbaTQVXcXWPTVVaZXTdYbUURbbYYOPVQaTUNcTgaVUVVVVVbWOSYVSVWVZXbjTcUZVWdXVbURQXSUcNZbaYPTTUUTQSOXaVQWQSWNOZXRiOXSUURUdOXRRVXaSQNTOTQUZXYVTSQYUVVVWQWbPVWSSeYXRSPYRYVNZTTbWYVVWRSUUUVVXXUUXZVaPZWSUXTTZZVOQTNWYPSTZUWSVVcTUWVWVUUbMXWUcWWTZYXcbRYYZVQYFRKTVaTcXOYafUTSVXUSZOUZVXPWYOQSVYXUVSPbPPUTRTbWZWZbSPLWOQOVZScPRdXdOaSRZXaWVPVOgPaSOTTRbRaVbaQRUdSPdTJbVWaWaPSeRfcXTWWSTeNWdYWaUNUVNUTNbTXiZfYSbTVXSXVVWWVXVWUXXOWXUReWPPYVRQVcaWRWWTPSdfXUSWXYSYSZaWRNWXUWgWWVLUZQWaSXbfSWZRWaSWVaVZVWRUQPbZORSPXPbXXITYXTMRRPReXYdSbVXZZOWQVWNRPPTWUUaVWWTVeXPRSTVYRYQUWSTVRVXYWTOdeRUSNQSSeYXVZTTXdYVQQZXcUSQSaWTSKeVQWXdTWjTSXWaZWYNaWXUVQYZVRQeXXYOPcYRUbSXSYWUVTUTPYXYROhUSVQRRfVUWUTSVaXVVVbSMVYWWSZVaYZQNYaLSXPUTPSOTPYYVTQgXRVJdaTdSZcSNPXRUSYNTSVSVTaWRYSSVVWWeYJUaRWbUbXTSSWUPRVVaVWYZVPZTTUQVQWUPWaWUNQUTPYZWVTYRVRRROUXZPcUSSPTVROcbZXTVXRRVUVVbdSXYVVWYSVTSZMVSVUURTMUQVXcRYTaVPXYXPUYQRSYQXTVfWRQQcMUWUNVYWSXVNcXZYThWXQXbRZPSaNRXVaWTYZRYVRZXYXdRTbfUbUVVbWVXQPWQVWQTYVRWZXQPQcRJXSUUMdXYVRTRQVXQXXSUSSVXVPSTUMZRPVdTYXfQSVUTVTVVZURYaaZVVbUTUQYRSUWUUcTWVWZUYWZaUVSZQVUSXVcPNTaT`, `ZZVGVVXXVRXXXORPTbUNUbTSTYYVTUVYXUVTUYTUNVXTbVVZdUcVURUWSZPUSVPYXZUVaMecXVXZUZTOLWVaZVVZWUSXZVdLXRUPVTYMSQXfVVXbTZbWgRTIYWRObUPXVTPRYUXaaVaVQWWSRdTZXOXQXYTXSaUcOVZbYWRUUTYSOYUaXVUPVQYUYVVWTVNNTVZMUVRUVUYWTVaWUXMYKQSSMWVUVcQVVKXcUYXaWTUVYRNaTVWOXVYaWXXYVVPOOjVXdUYQUaUWMfUXVbVXULQWUQXVVUWZRVaUbTRTTUYORNXRTNmVbUWJTaXZadRQUZQURcPWWVLSWUaTYZVWTWZQWWZSVVPUNSRSYXWXReXVRPfVTVbcXZVUTXTVVQVYNSVZVdQWaWcTUQOgWVUTVXTTTWVRUVVTXXVSYVQVZTaPOUXWSeTPXRcXZTRUXSTQRXXXUSUTXTVRUXVVZWUYUSVXVaYOWTVeVYVRYTQhUZURSTbVOSXaPTRaSLSVXbXWeaTbabOTaQVRZMUbVWUJJbSaRVSTSSWaVTPUSZYSVTXZJVbRWWXZcTYZUUWXWSZZbYUZQQUXTTaWXUQQbbVVPUQTVWTUaWRSYUTQTYUTMNSTYVcQTVKPbXcXVXSQaTXQZWUSdPWaPdaVVTWWVVaOVWbTgRXUVTROdWOXRVWTJWTVVYNicXOUSfTReQXRSRVZMTVVWONZZTObUYXTUVTXZaXZYUSTVUQWRcSSQSaYUadTVYVTYXPWVcYVVONUWNTUYPUZWNWRJVaQVUWPTaSUdXZOVdVYbZTURUURfUaOWNObUXUdUSYTNVYOSXTRQUfafSVXVbNXUNRSTXSSRZRVcbXTdRUYTYZVVOVfRTTVORXdVYWUSWTPXPUUZUbYVROVYVNXUTSXaVXThVYQYbSaWSVRYVQSRWSVQXNWXRcTYZbQRUUMXVVYObVfZUVPQVXUVUSVSUaPUSXUVRbWVWaaYSbRVbZRfVTQVWXaRWYWOUVTZVVNTWWTeSUXVXRUSXfVRKXWRXZdTUMVaXRMaYRUVaVZfQNYZVaTYWaVQPXZNUbSbRUVTMdSXWRbVTZbUUQMVeTSbPOQbSUYbRNaXWeUZVSMQYgTVVWUZcQPSYdeXQYQLfSaZXPPXaWUdVWdRTbVaWXXSUQWSSaZQRVPbXLXQZSSVWcPTVaXbTSWbWXaRTbRVaQTSNbKZQVSYTOQURRSVRUcbSaWWVTXTaQWbUQTWTXUXaRXXXQRXXTVaULOVWWOWTbWZTSTTOSaRQWWSWUWQVVSQYVZUTXXSZVWTVVPZRXXXUSSbTVYWTVYbZYSYXTZVZRYTVSaWfXWVXPQQSYWReTRZZUWcheLUUVXUVJWRXPTYaVVQXPXKRVRVWMTVWUVTQYPZMTTaXWYVXPYXTTTRYbTVPaYTQPZXVYQdYVWPfUSaTNUObSMYTVRXbOURTVSPUWVfUOaVUYXdZYZaZTXbZXNQVWTWRbXUMSUUSQQZXWXNQSSQcUUUVbVUYYOOVTSNYUNQWVUZReUVZcUZRVZSSLVXRTQXZRUWaXTRXSWPVSaMPYWXbWWYZSfWWaXUUbSUWUWZVVPXXeYYYYSbQObTZXQRSPbTQUQaRcTbZReeWWUSRKTXWZTURZVeVXbfVOaYTLedaNRUKbYPYRPUUcYZUUaUUYXTUVXWQXZTZXTYSWbRISMcRSYTTcUOUWPTPVTXJLXdTSaZWWXWYRbVSUOOVXZPWWZQTgWTVVYUVWTPWYbbWOOWYOVVWUSSTSYOVZebUTWWeZLYWYRbNUURSOYWYbYXVPRSVKfRUUSPXVLPXWUaZXNLcScVbcUNXXXUTQNVZRRUPQRPWSUVUYdSUWNdUPWaVOYRRgaWVWXRSYQbZaKXNYYWVUXWXWScYRYRUbTPaPVbOUQWWVbYXVSOTVXRWUTQSQSMeRTXWUUPUXSUWXYbXVTaVaSWVSZTaUeWTZSSWRWhaQTZbKdNTYRSSSXWbZSZOVWVTRZUTZSXPcUYWTKYTWWZTSXTXZaOZTSVTPTYSTVPQVQPZXQVTTTQbNPVaMMTVXfTQWVZYdWWWOQXWYTVSQXaVTXVXQYTUPVeTWcUXQVUXbbTUXXZfSWYYTTWVXdPZRWTWSXTUMVNZRVWTXTYTVXYUSTURUSZabURdZPScVcYbUSRbWYZSVRSUUXVfYTVVYOYcLVXPVdTXUUPXPPVZTVRWUSTYSXRXVRVVPPWSXPUSSYTaVSUTUTXUedbaTQWcOaTWUVZNVeWaVUPRTVXOQabQVRVMdWVXZQTSTYcOZYRYTURZWQRTVPWOZYXRWOeVWXXOabMTbWdZVWbYPcaLaPUTbVUUWRSTYWbRTYafTSRTbVVRSSZTZPRUXQSTQUYXOTNWXSLTbYUfXaXcYSVYSSZSTYaZXSYSTVWfXNZcTVUXOZYSUXfYRSWUeaUSWUUXVSRXVXYRRZTdYiTXPTXbYQVRROTXZNbURZWUYVUXYUYSRYPSRWWYUWaVXHTXRSVYXTSXYTVSQWUVbRTRYRQKeVcLXXbYceTYYTONibLVTXdPXYUbWYTPfYPYYadPZSZUXcMPYVWLXVXbWYYZZUTUSVNVdRWSOVUXTPTWSTaWXVTUNVLRTRTbLZcVeZTWXSUVcVVVULbWRTcPQVWVSMYYZWYVcaWTTkOaMXYVfYReaVcPUTYbQSVZUTWXdPPYVVQPbYSQPNYTaXTWSedPOUSTZVSTUUTXPRVeQZPSJQVSWSXPYVRRYPSVTSWTaaaYXUWPaSbcQOSQgVUbUeRRWWNRXVWVPRXUZSWeXPMZfWVYTTRXUTMVTSRXUWSVZQaXTVWSMZTRVSUTYaaSTWTXeTYXTWRZPYXaWURWTVWRWbYQLLZYWVYdUZVPKZSUZQXWRPZaXYMTbgUQTTXZVVZQPVKdRdcbLTPbQTRaPQWcNYNOLVdaWVaSTTPRJPYdaSZTUNVNZQVVZTUYRQOVUXaQQPURbYWbXVWTUOVXcNOSQTbbPUXTWWMTYWUWaVVaTVWWQPWZXMXacRXVTWSYbVZSTUWaWRYRcTVSXaZUQeXXUYWUSSSaUWRQSXSeXSYVUdTUVVVWUYcWeTYWYSNRRSWQYXTRVRRVbYSTSRTXVQcUbQUVQYVUSTYVTUVUXYURgSZVQYYXRXXWdSXUQSYSaVVXUUSWXYSXRVVMVWLcTWUTbbSSUUSVKUWWiXZSMRTRZRVUQOSYbUXbYUSURTPUQUcUXWQYZQVXTLSXZdVVPVXYcaOKRTVQdZNSXRYXTaYVNWVYaaZWTdXMTIabeRWZbYRQOTVaTReUWTSXZWYZVaSVQiUVPSRSbZRPMSTWSVaSUZSXSVYUZZRTSVaSbUUZRXTiZdRVTRSUWTWeRWXXTXXUVOUVXQPYVVWSYQPUSWTbUbTTVYRYTcTXZRYSYUaWYbVTSXUXUXTXQVXXVSYQWYcOPVNZYVXQZSPRbaZSWRaWWUYYTZaUTaLcWZXbSPYVVOWQbbXZSRVWTZVQViTZUUSOVTbYYXWTRZWUTTTUTRSQWaTZZQOcWNRTVLOSYUVPSVWUWfYShWTfMTVXfVPQQZSdaOYUXYVOWXOifcPXXecXVTSRVZSTOaSaKaUVbQHXUTWUYZOTMYbWVWPVXVSYWRYcRbiWbYZVSTYdXeYfVXPTROQXXZRTMOVSaRXSVNNTXXTZWUVPUQOXZSYTWWOYQMSaQXSXWWcVaUaPWQWQUYTdWWadWXObWQOMUVWZSOWYWZMROWVTVZdcVYQTeZVQWVTUNVQYSVXOTULTNXbTUTXZUWTWUaWdRYQWUTXUTdVUUaZYPXRVQUYXZSXPXQSZZUXTbeTaZSURXRQPZVWQWVRTRUSWWYdUKSVTaYYScZQWbUTZXUUSPVVYWNVSWTOQYUURYVWWaSTWdMVUORVSXPbZYcZbSWPLgbNVUTRXSUVMZPVbbSbYUSXSVZSWWcRVXXXMULVSVQbZVZXeNXaSZRYROTRXYWQYVgcZXOYaRSTXRSWQPUcUfeXXUebYWVXVMXWYXZWWLYRVROVSQMOaVVUdVUURSTVZcPaYVYbbVYVRdOQPTSVVZbXaWURQZZcXRTUVWMTSPYVXSUXbTOUWPMTVWPWaTVZZTOSYaVNLVOcWXRVQYPVOaVeSPQZTXWUdSVSSTUbRYacRTVVQWWSZbVVQWXYWVVeWRXOSPVcXWXRUaVcYOUUThZSPRQVXPVcTXTVSUUXaQPQZNUTTTVaYSQVYaVYSVWVTSSTeVUPOcSTcYPVQiUUUUUZZSdcPaTSSSaRVbYYRcQcTLNQWMeNXSVTTPWRcQKPTROYQSRVVWWbbVWXXaZTUSdOOfWXbSWSQTbUQSXLQUTZTPXPYVSQbSTcRZUTWVcYTSTaSeYaXWUaZXddNaTQYWXUXXVXWRYXRVUXUVZPVQeJQeMQVcVXWTWTWWWVPVYaPOXTPTWVOYWacVOUUcXTMVUVPaXXMSaWVWSVQVXRXOVRZWZUTPZRZYTVQaTVTVSTXRNWUTYRXYVPXbRUZTcQfTTYdUbWZZSgYWQaPUbVUaLbZUUaYZSZKVYfRYgUSXPaZZNMaXTXTRWPSbWQXUVUUQSTQbXTabWTcTdVbPUULZZOZUZKRcSWYSPMccMaYgQSTWXPVUZRWWTcXUVJVUZbYQWbVSaXRPZXTXRTPYXTVTWTUWSSbaQSQUURXTUVWUXPUYTSPYSbeWdRTVYTYTYWcdaaXTeRQSQXSSZRVYZWWSNZVSPcYQPZkaaSXTWXZPSaVQaSQVUVVTNVWUSVVUQUTSbRSTNSUXURScUcaXTSSVRUYXZMZOPOTQUTWUSZWUQeRVVVIUWTXWWcRYTXVUOTVhKWWVaUZTXYUbPYQXWaOZadRcYXIZVVZeTaVbUPYTSRWZTQLRUTVRYSTXSXZTYXTURXSUVWWbUQWdYXSXVdTQUZcYVYOZTVPdQQQTRUSaPLUTUXTWZTPNecTNTUQKZZaaXWTVZPVYLWScbfTRWVVROSSVYVVVXbQcZdSaXZbYLaXVSOVWUfPPUZSRSTKPeSUWXaYYYRUWRZfWXXUTYUXUbWVTbXbaWXXUdVURUTObVWWWXRVWRXRcRUWXTRZYdMYZcYeRYZcYJQbaYhVXgURRUVWThTZZUZXbRVYUXWYUTUWZjXWYKVQVXSQTaRTeVXRaeWTNScXYTRRZbPQXVTYUeSSNYUSaRYYWeOOUTYPNRaUbWPRUdPYRZOTbbTRYWVWTfWNVRVZWfRdQQTSYVXRaVTWUYZjXWaZbQPfUhcXOTQPbZQVWSaQWbVTVXYUaXTQTVWPZWVTSUUYYVTUSaSXUWQRYVNQWXTTfYXNVWWOQRPZXXTZXYWRXZXVMRUPZTVSSVQZTZWWYOVWRVVRaXRXOXWTSOYZYUSLaXSaVQTQWXVUTTbbbVZMZXaUbWUQTZWURXXVYRSXSTPUaVVSRUYSObbaSOIVRbRVTVcTYSQXSJTZgaYUeOJWWdWTTUYVcNRRRYSTVURWbSZXXQYUQdbVXUOTVNUZWVTaVfRXafUZVTXbaSeVNVWXXYZWQXbTfVVXWRdPSOXMTWVWTVPXVRbacKSXTaQccPZSRXYTZYVRRXQTbTXOVYVYSZUUfSbIbQSVSUTTabQTVSVbdVWVSYbWRUYbVcXKVTUWQLeVMXUfPYSReXdVaaUWNXXbQYSWPUJaUUVXVWQbZZYbaXSRaXXOcVdUURVbTRSUcXOSPOOaVSUYdVRTPRVUSZQWUWWUdXUNUYPcTQRZVWXXRKRYWUlaYXUTWZVVTZWTPcXXUPVTZZXWNbTTULVPYTXVcZaQQVaTbMPYbUXVTRZVePWRXZYRWdQTNVZYSUSXWUYaTXXXWNSbTXdOZWUMaRWbcbYTPZPQURTbPTUTRSXTbPXbQZSOUVSQVUbaUbaYRcPRUYZXTXWTWNZSVQYWSYTZaVRTVTYWVMPYPcUZNZYRWbRVSRXXRdYXXZUVSScbVWaVaRWfVUXTWQgSUZSRbVTVSTRTSUUZYPbaOWTQSWSWUTPYXXTNbOTRVYVXZQLgOQWNVNZXaYQZbWdbPaPRbVPdPQZRUXUbWSXTUWVVWYabZVdTWOVYaVZUVhVTXPTUPWOTWWYfWZXYVaQSRZVaVSbWTNUPTXbTTPRUSUVVXXZdTVUJTWVWVWNVSVYZUQVTUdcTdUXSZWPXWVSXOQURTUWXVMXZVPVRYQYfaUQUSVeZYYfYXYUaRcTcUMYNcYXZRaaTXSYWYKRQVSOScOacZWRSUWVUbaRPWWTPVYMPXUYYTWUXbTRNVVaYbXYZaWSTTTXcWWXUXRTaTXVaLPXUNYWOSSbVQYTWUSQUYbSYbQNUfYTTVWaTXWbVUPQZTdTTYZPPQXQZOSWaUSSdUSVUTYYUcZUUSWUbZVNeZOZTWaQXYTWYVXTVWVXUWSTXTbWRVbWQPYVRVTTaWYXYUSLdUZWWWVZeMRVPTPUZYWWSTYSSZYUaTbXTQVVSWNVVXWXQWVVYQVWcRZVRKaTUZWWeVQWXWOYTXYXWUcQUSMUTOOVdVRRaOQWTXSaZWOVTbeVVaWdUXVTcXVTTZWRYLSTXSSQUQWVUUZZaVSRcURQYUUUVSZUWSPXYVYWRWUYOQRWeZUThXTXVTVUTfQVZVRdbVVWTSVQRTXWSVUMRWSTVSTXVSYRUUQNNTPbYecaUKeVUbTbUQWRTYVbaTVWTXYPQWSTYRWQOTXWNSYVWYTXTUWYXbRXVOUTXVRaVIVRdTZfaTaYWZSXURWTTTScabNVaUTVUZaaXUXXRXVTXSZTXZZcQVhTXTRRWNZTWQXWWRQUPeYRQUWRRPVOWeTaQSUUTWZQeWWZZRYRVWSXUXZSZOaQYQXaTYdWNaSZVQXXYWTRVbYUVTRTTZUSWZPcXRNbWWZVbeXcTRTaTLZScTYVcMYXReYVXTWVYYPPYWSXTRbSUXXYRYYadcZTUZTRVTOcTTWWVVZVSaQTVaVVTSVXYTXXfTUXRTRVQYXRTTcaRNTPWUZYMTPXXYYaVXVZTYTVRQPSVZQZYWWWXXTVXVPZKUYWcWUXXSRYSQOUWYYUSVVaPSaTUadUVcabTVSdUNYQaVSeQTTUURaZUcSNXSdSZSUaPeRWRYRSNUQZVWUTVhSSNWaTUPTVVYTUUVWaYVPRSRUUWSWcVVTUQOYWUYUPYWUSVeOcPSUROXWYUVbTaWTaYUWZTVMUdaYVSaTUTYSUVZWYVZRTUVQeRZTXTcSYTXXRVXcZcTVWfLZSTOPVVYVTQOaYWSWZUVVQcXdTWTWTUXQWZcWcYQQQTSUdVVQZSVVUWMWSVaXaaRZbSTUUUPRPQWUQUWcZaVYaWQaTVVRSZTiQPabSRWRYUaPXWUcVaNSTXRaWWOXMbXWOVVXeTWZRNXbSZRXYUYUSXOXZTOSQTUcUWZXUSUORVTdUeXRWbUXbSQRVZTcRVTeSWQTeScVXWTVXSUVSUUTdVSXPZXXbQSZKMRTTWaTReZUdVeUQVQTYaNTYYUMZZQZSTXZUWdYQTUZSPPRQVYWXZUXSNbVSjTYdbcYZVYQVTVPZQgeTPcSWSZRZYTUXNOYVQQTRUSYZRYRRYOYaVXTbUSXXNPWTWUVUWSYXUYeQMeXSTNUTSSUYMVUYSOTOYcZXNWaYUVVYRSWTUUVRZWYXRXWaYNUQVUPRSZXcWYRVfUWXaZZRPVUPSSRWPQSOXRQaXTYYXXVZaRWTXaUYWRVXTQWUTPOVWWQVVVXXQWPTOgRMZZPbYfZZSYUgYfVRXYQfRVPQYTTWTVUUTYWYbUYXQRTKZVTYUMRZUUTTVOOYaRVRQdYaYaYYULQTcTRXYRTRXRTPTZRTYSUWSYbSYRRfNXQOXcXbUVPRWXaWWTJTUYYPVOXWSRQXXTXTVabYMXfTaUbYOabObbaUbUMURRNbKbZeZUTQTTUZaTQVTTWQZYRRWVUZZVJaRVaWYWURVUVVVSXTVRVTQWVWXQGTQUaWPWUdUVZVTTbUaUXcSSSUYWUaTdVZYSSQSTUXRYOQWaVVQUYTSNabUSVMYWVY`);
+155,Largo,str,M,Durable|Disabler|Support,1619,881,2813,499:263;663:354;457:264,largo`, `VWVQXYSSPXUTYYUVaLSSQQbQUVVNaTQbSXcXWPSMRQaTSTcYUVXjYQWbWXSbJMTWTNZZNVRZTbUWXQSSaUQbZUWPSVQQZXSNXWSVSYVUbbWPaaQZYWRVWVZeXVbVTUJRbXPYSbUWcUUXXTUWUTUURZYVURSTTcSPUUXbXbVaZabTRbOXSYVXNRUQOVVVSRQYYPSVVaPQYVXRKVaQYTbUQVdWVWQRXaVWMYYaRUXbYOZWMUaUVYVTQSVUWUaXcYWZVLWXbceWQQbcYaTPZRRYTOUWQRRfPWdUVJXSaVYUNWUNWRVXUZTVNXUbVWUTPRbaSWYZVbPSbYbPYWUXbPaOXTFWcYWTVUSZUUXTeWQTLNYSUXfOTcTZRVTSaYUbeURcbTYOWVRZYVPSVVXRXXXTSQUNXZTaSSZSVPXTXReWWSVRWbSYSURQTVVTPTNXaWRSVSaVYUWIMRVbZVVYVRYgXVbYVQTbVTgRTaXSUVSbQSUaZZTWZYZQTRUYaSUIaYRXXRWRSXPeQRaRPZdbPUVSRZQVdOWZUWYQWXSYYYTYQZLWLQbQYUSQZWUbSXdaaRcVOYSLcTTZPUXTaaWRTVSbNUXZWXaTZVOTPQUUZTUYYVSSPccQYPUkVfRQZTTbUUTTRahaTMbZYLSRZUaYUhVPWSXQaNSTTSXbZQQbSRXYUVXeVMVYdQVSWbSUWVXcYSUVRXRTTTOaVXXTYWXJfWdYPYTQUWOPUNWXVYZbRaPhZSSXRWVXSZYTQZOUYPZWTVbaRQYSThgWVhVRSXVMTSPQYUQSNVTUSXTZTPQUISaaPSRXTPcRXYXVSZVXTYYYVSOMTXTXURUYYWYYgZTVOUZSQSZScbbjWXXWWQTVXXTRUXfaSUZUTZTQYYOWXfWScTVRZTTWRQVUdRdXVbXMTaUSXUWVZOUZZUSQUOXVRdPXTSRRZPWWZWLViRURTUYaaYWaShYRVXUeQXTPVXRXSYUTRcYTWWeiJPYTRQSWUeOaVVVePVSRVOZaZLYTWQUUXWZYdXSOUaSTcRLZcaWecOYaaPXKUSWTMhZYUTQTTPWTRSVQYSUWXPQTWcUYaSVTPTfZNWUZVYVQWbTThLZNZPSORQSTSRVTWcWQSMVVRdVZULUZWQKOUaQSfURZZRWJTnTeNbRPRSXMdXbVUYTORUSWZTTRVdNYcdSVUWXTYTYVTUYgUTXeWSZUUcSaXcSVTXaWYTaUXYRTXWYTWUXXPXWNUSRUTVOXVXTcUVTWRSaXVVWRYUbYUQWPXNQYSRWSXUTVWXTWPcUaVXSZYdVabMaYVVVVQUXZYRWZPbWYQQVQSYWVRVVVRXZRZQUZVRaVRVXacgaYaVUWUKSUKaZZUNOZYVQZTTXYQVOTaXUUPbTVWQbRROTaTaTWVSVPUSaTRbTWTUSaaTWSTSYGVNVbRVaXcUTQcYRQSPdbPYYQVSTaTWTVUXXZYWRUZXRQUXaUWZWZPhRSXTYUXQSVPXUUWUQMYUYUVbSTVbTSZaedYYWJTMYXSVSPQVbXRUcLQTXYWTYWSZWXcWKTdZZWSUVYSXZaQSWVYVTWTSZXRdVOXXRbOdZWUXTSbPeaeSRQTXZTQbRTfXVVTUSVWUVWWNXXbTWVUbZZTRYWRTVWWUbbYRRfaLVWOPZSRUYMYSNRjWRcTRRPVVVSQSTTPQUUXWZTSRONTccQZVNVcbSUSRSQZUWaWXXaWNWSaaLPYdSSUTTUaRWdfQWdUZVURTVOSaTUYZbXVVfNYXWNWbaWSMYePNMZWJZUQaPTZVWQdeXaXVRRTRKUPdXTVcQUWWaWObNacYUQagWPPUYYQTLRbWaeXYUeVaZYTbTZPSQOPSaaRTaTXVcSdWbSQUZaLSQSVRaYOcUWUQRTZUWXXXYPbYXXQeLIUUXVUaPQUWVSYUTTRVZTcRSUaXPeTVVScRXRZWcYPPYkVVaTTVWUTVeUSVSVTWSUTWXTWZfWfcRYbWQXSWTaYcaVbUVXTWXWTRZRaXWVPPbUXVQRVaUZNQTXYJTYOMRVRSWVaUUUTWSbWZZSWeVVUTSTUSURSZTYYUTTSYVSPYcRPSVcUTOgVcYXVVcOTUWcYXUTdUURQRUQZWTSXVZXSOdUWSYbUXQVVWVVOVUOTNTYTXWVRYTWQXTTSTbSUZUQdRTfWdXRTVRWXVUaSVTQWUYQeWZXVUWURSYURVTRUbXXaaUVRTUTaSVdTOSVUaZZVVWYaPSXOSXWXcVUdaPVYVVOVbZbXTRVPSWTNONPQfWTfaRRPVRTbRTXWPRWVXVQXSVZUWVRYXSXOVVYWUZRPMSYUhWVScSPTXWYRZQaXTWOMXUZVhcZWZRaTRQVPaUaUSVVTSVUYYbXRQPWVZWVXUXWQXZRXaKWcYUTPSYWWVRScMOTRTXTSWUYWUXRQUXaUSYSVPWXXdZYOSXSiVTYWVWYWWdUbYYRfUXSWZVRZXTRTcIPRUXeSYXTVbTLXXNTRTdVTQJXSVXXbSZWXZUcUYWVOZYYQQUPaZXVPUUXVRTPUXUgQRWbkaZPYPUHUUXbWVZSVTZMPWZSaQXaOZYZQbXXKdMWTVPTYVTcbXPiSPOWQSTbMTWXSWSYaUVOSVcZRZQWcUSRYYZUWaSbTagWbbYNOWWYWRZRbeYNcRQaNXVYXRXUVXVPVWYaaXYSVSXXRSaaTaaPWWXYLPcSUSXTZPYVTWcWRQMSXRTWZSaWXSTTZOTZWYVSTQWURZYSVUQYYeUWTTSMZYaWUUMQXPTaYXSWUVNYTXVTVUaOXUcPSWXcTUVUaQdZRVWRQYXTcTRWXPRUVPUVWaRYSRJVUYRZZOaQbYaZZURPWXTcPTYYYWYRYMfXVQUTUSYaVYZSXTYUYQZROSXWPNWTYWUSVUTZQVWZWeZWSWUOYTVTWRTTWXLRYbJXZXYNSTbUdQMUadUXVXWTYSSSZXUOdJXPcYTaMNSWcMPOXWVYTaVVVXUWXUcSXKTYXZWUZWRVeKZbcWYXNYTVYbUUXWYZPRcPNWYQRWbVWXSRcWUXPOaZSWTYabVVSOYOUaLVdUXdXbVZVTLbUXUQQRWVfbVUXUfUUWPaOYaXJVXVYScYRVTfWYWYWZTUcZSZSTdXUKRTSUaWVTXTYYRXQUVTSTTZXSXQWUWbYYXXXSQTWPXWRbTScZZYTXJNXVUWTSNRVUUVTYSQQPQQSZcMSSdTXVScbUYWTYUbTYVdQYQUYaWaTUPWgWUaTTTWMXNZSQadhUWURYTXSXJQVSTQbYZTSYUPaYcUXUYVTWUWVTYWRUYUWPRWWUYPUUNRaWdVVdTSPWQZPHdUVQYUIOSaRXRTUVYSRZaXYYWaTTRdZXTWXVVSSVbUYaOOWYaTWOZRZWUVVUZSTUiZQdUUVSWZUZWXWVVXSVUQZReSVXUSRTSXbTSQYUPOXYVMOUVPXYMXXTTUUTQUYQTRVYUUUYRTSWYaUaNVUONaXWURYPWPRVOSPhXRSXPVWYTTbTVabZVTQWPTYQRUXYVbTWYYTZNZaRUUSSTQdPYXWRgbJQYfYUXVTNXSSTYUOSgYcYZbSYZbNUSUaXbSQLaUdcYWTVWXUTNXQTVaQPWcbNWQUWWYObQaZVXTSZPWNbZdPXWYVLUVYWbYYfSKXVMVMQSTZROVRQRIXYSaQjScUQPRTRNTWRTWbVYQaaUXRPNPaZPUaWPbSWQZUaRRRSYVWTVKVabYUXXTXWZXKUUVWTTNWXWbTVWVSRSfXTaUSSXRaRVcZWVVXTXWVQPYMgPXUVUObZNXYTYcSVVTTPZXSWUVTaYQRcRWZYUWYbUPSUXUaaddWbVQeWTOXaVWYWSTNURXRPblRcUWVWUTXXVUYTVRTZgWRVRYgYbXbVZUVZUSRTOWUWQTYYWOaOOQZVRZRQWUVXcTYRYTWYRVTYbWXWVVVTUYZSXTTVSZSSZWWMeZTbaTaTaUXWTSNWWYRZWWRZXhaZZSZYZYaTTWWUVQLMXSWQRPWVTSUaTUOTWcXXWOOTZXRWZYTWUbbWXUWSSXZTVPXQZQVXRTTOOPWZMWWXbYVYUUZVRWYafUYTaWZeOTUTZQVVgXTOVZXWTRTWWWWYTPOXRWWUZRZTaRLZUYVXSdVdXaUPUPQcYdaYZZZRWXcOMVUaPXUQXWXaTbPPUTeQcVRXYSVdWWdRPUMUNYVRUcNTSWUUQXVRUcaVUXdSWPXZLWaZTXRXWSQSTYUUVUaZKSRfYcfXbaNdaSIUUSSSbTTUWXTSUNLTSUNWYXYZYYYXQXVZRTYXUYWZhZcRYaPTQadSVOaTXaeZQWZWQSSbTWYVaVVVVRSQUSdVVPWQdZUSUSeXPWZaPdbORiXTSTRPRaUXXQXRRSOUYVOUWYcSYRYeQcZKUVYUWTQMUPaSTOdTTPQMbeYPTQbfcXUabQTTXaTYQWUaUVacPScWMSWafHORRWTTSaQWQXSRTPTUTZQQTcXSQVOSSSUPZYiVYPLXahSPWRWQVYXUbTZVePROXTYTVRZSYTWTSYVVeUQVJYTUROSdWcMPTYWYaPQQNTSYcURXQYYcXacdWWXUSRXRZUWebRMRZYRaWRTgTQUZWcaYYUWNVYQbSZPTSXcSQTVYQUYdXbOVXSZURUWWXXUUWWSVXdZZSUXMZTVaRUbZVOSaWWWSZUPVSTSWUZRYPYSOZZZbLQSYbWRSaNSUTVTORSPVYTUWVUZVPQScSZXWYUYNWWdWbVRUXTdYWYSYVaeVTTORYXbTVRUWcOXUWNTgRcUbVYQMWYVTXXXaYVaPURYRORaRWVaWVObWQYYWUZTWQWSZPXSWUYMeXbSSWYUaQaaPTTUISUTaVVWQYWSUSWNPYaTZTVXWVPUUYYRYSUWYPXUaZXYOQRSZeWUURZcaWaeUVUbUVSUNSaWVXVPWRYfWZSZPaXZVOaPNWWWTaQURfSgRWaRVNSVbVQUQaTYSSZVfXOVYRXRZUZaSZUbHbWbVUONWRRUbNXXUWWVPXNiOdTYTfMTYTPQZRcZUXOYVSTMaUXUXTSSVPNUOIXVTTVPSVWSXUaTRWbVZdTbPPWWWZWZYYNSTPeVRUQSdYSMYZVTSZVXWQaSXZYYYTVQaZdYVUUSZVTZYVXULURSYdNXRQWSagePSZcQTVPZOVXWOWfWWUUWQWXUUTVXUWSSSTaYVOQVNTXSVUbZXXYZOOWWSQVOTUTWWUPTacUTcQXUTMWbSYVURXVVXVRaWbMVWPaXbRRWSXWUXWXZbXUXUWYUYQWRVVUVXZbXYSWXWSVJVYVOUUVcWWZXcbVRVWUUWPQTWQWVSVRXZaYXZUXVPUQSTZOYVRWSYaSabPUVSdQUPYVaWaZXWPRNSPaUQXQhTXaTTZZXYSSbVVWWOTdaYWVeUNYbhJVQVbTVRWhZXVbSTQYXTKTdRVWaPQecaWIZQUHWXYYReVPYaTVXVWXUYaRWOUUXeXUQScUTWXTTTUSKaVTcSVSeSUQYYdZZWXQYVWZTYgbbUSVQYTbWcSVTUZTORZUSSPTZVURYaRTWVRUKZYTNVRRZZNYSYfVZTQVUbNXZWWOTYSZROTVPaWXWTZTcaYXVbSNQZUYUaeVXURcWXYXOTSQYRYZXSZZabTZTUSSRYPOaVVVhQJSXdUfVcRaYXiOWcRSQZaVcYaYYaTRWVRXRUVYXSWVdbSXNVZbKTTWXWTRZZcUVSOLTTcWbUYWSeVUYXYORaVMSORRRUYZTWXXaWURWTUQWTXTfVhQMWWZSUaXaURVaUcYYORaWXRSTYeUXUaZLPYTYbdVZTWRVTVaYSTVPZNTVSWRTWTXYPUQUXVVYYQaSMPPQTVQbVWVZYPVTXhWSZPSSaWZTUXbeRbSWaRaSYSTVYVSbUbVSXcUTZcYSPOaTWXKWWXPSSYdeMUUeVSQTUdQVYVdVSQUUPdYZWOTPTWWYVaVJUWSUSTRQbORWRTOcSZYZTYUZTbJYZRTSPYOQVVVRbWTTeRWZXaQXbYUVVSPVXUZUcUVQWXWaTSUORTWWXUQWRQbUVbNTTaReUUZMRUUVdXTUWVTKbPXWUcSUWcYUPXPXRTMRTKcaTLVaYUVWUbTSUWZVSTaROYYdaafWXXXkSdaYNOdZSTbXTZTURZRTXdTbReSXTXfPUZUQTYbfTTWQNaPPUNTTWTUScUVQUcQSbZYRPVPbZPSeUPcbZYdTXQcfUVVZQSZWOSfUaWRWVUfXKYOUOTYYYbYVXUWUcQTXbWbRaTYWUPNYadVZUKNYTURRVVVeSQbWacMWVSZRXbTbMVUSWaXVYUWUaVSTaZYTURcVTXKUOTVTTbeRaSWUWQWUaZaYbYWPQWYOTMPSTUURYSTOVZYMYROTQWYTdUZVXQWVUWeXSUSRZbTcZWYWVVQaeXSSUUdTTSXaUVMVXTVVTOHUaSaVYWRRYYXVWUVWaWLSORSSWZYZUXbRURRSPWQXXVPVcONVVXYQZSSbPRYUYUUVVeWYVQYOWSVVPTbTTTaYTUVPTUXWYUYVeeTeZWacYSOVMVXZTUSJYYQVcVTZZhWJURMWTaXWTWWUhcQQWVSVYVbRSbUKVNVURRTVgWRYScWVSUcaTTZXUVUSUXQZVbTSTWcQZbWWbXVTWXVRQURUUaVQbcUYQWTdXaUUUVUZSUQePVQafUWTVUXTVUeWTMTNTQVWVXRYVKaPcReSVUUYWVZPVXQcLYXQWTWcdPXVUYTPRaaTRYTYRaQQOUYSNObTVTNPQaXOXWTXePWTcQKhbTVTReYcPRffNcVVRWcQcWUTUUTWXZYYWTbRTHXZTPPSVZTVUNWSVbQQWdXSSLbXTXVRHSYUQQZVUWHXYhTVTYRXQXWTNWUVWPYSZSYMPUUWZbYXZYWbTUVTZWSMQRPVRWRUTUWTaVTUPWUXZaYVZfSZZTSXWaVZZYZUVQSQURRXReSUgVXPRTWSRWYNYUWWOUUWTSSWRfWLPYNVbbZQQZaTOSYXXQUTXTPdSXUbTRSSRXbZVVSZSQcXNVbaTQVXcXWPTVVaZXTdYbUURbbYYOPVQaTUNcTgaVUVVVVVbWOSYVSVWVZXbjTcUZVWdXVbURQXSUcNZbaYPTTUUTQSOXaVQWQSWNOZXRiOXSUURUdOXRRVXaSQNTOTQUZXYVTSQYUVVVWQWbPVWSSeYXRSPYRYVNZTTbWYVVWRSUUUVVXXUUXZVaPZWSUXTTZZVOQTNWYPSTZUWSVVcTUWVWVUUbMXWUcWWTZYXcbRYYZVQYFRKTVaTcXOYafUTSVXUSZOUZVXPWYOQSVYXUVSPbPPUTRTbWZWZbSPLWOQOVZScPRdXdOaSRZXaWVPVOgPaSOTTRbRaVbaQRUdSPdTJbVWaWaPSeRfcXTWWSTeNWdYWaUNUVNUTNbTXiZfYSbTVXSXVVWWVXVWUXXOWXUReWPPYVRQVcaWRWWTPSdfXUSWXYSYSZaWRNWXUWgWWVLUZQWaSXbfSWZRWaSWVaVZVWRUQPbZORSPXPbXXITYXTMRRPReXYdSbVXZZOWQVWNRPPTWUUaVWWTVeXPRSTVYRYQUWSTVRVXYWTOdeRUSNQSSeYXVZTTXdYVQQZXcUSQSaWTSKeVQWXdTWjTSXWaZWYNaWXUVQYZVRQeXXYOPcYRUbSXSYWUVTUTPYXYROhUSVQRRfVUWUTSVaXVVVbSMVYWWSZVaYZQNYaLSXPUTPSOTPYYVTQgXRVJdaTdSZcSNPXRUSYNTSVSVTaWRYSSVVWWeYJUaRWbUbXTSSWUPRVVaVWYZVPZTTUQVQWUPWaWUNQUTPYZWVTYRVRRROUXZPcUSSPTVROcbZXTVXRRVUVVbdSXYVVWYSVTSZMVSVUURTMUQVXcRYTaVPXYXPUYQRSYQXTVfWRQQcMUWUNVYWSXVNcXZYThWXQXbRZPSaNRXVaWTYZRYVRZXYXdRTbfUbUVVbWVXQPWQVWQTYVRWZXQPQcRJXSUUMdXYVRTRQVXQXXSUSSVXVPSTUMZRPVdTYXfQSVUTVTVVZURYaaZVVbUTUQYRSUWUUcTWVWZUYWZaUVSZQVUSXVcPNTaT`, `ZZVGVVXXVRXXXORPTbUNUbTSTYYVTUVYXUVTUYTUNVXTbVVZdUcVURUWSZPUSVPYXZUVaMecXVXZUZTOLWVaZVVZWUSXZVdLXRUPVTYMSQXfVVXbTZbWgRTIYWRObUPXVTPRYUXaaVaVQWWSRdTZXOXQXYTXSaUcOVZbYWRUUTYSOYUaXVUPVQYUYVVWTVNNTVZMUVRUVUYWTVaWUXMYKQSSMWVUVcQVVKXcUYXaWTUVYRNaTVWOXVYaWXXYVVPOOjVXdUYQUaUWMfUXVbVXULQWUQXVVUWZRVaUbTRTTUYORNXRTNmVbUWJTaXZadRQUZQURcPWWVLSWUaTYZVWTWZQWWZSVVPUNSRSYXWXReXVRPfVTVbcXZVUTXTVVQVYNSVZVdQWaWcTUQOgWVUTVXTTTWVRUVVTXXVSYVQVZTaPOUXWSeTPXRcXZTRUXSTQRXXXUSUTXTVRUXVVZWUYUSVXVaYOWTVeVYVRYTQhUZURSTbVOSXaPTRaSLSVXbXWeaTbabOTaQVRZMUbVWUJJbSaRVSTSSWaVTPUSZYSVTXZJVbRWWXZcTYZUUWXWSZZbYUZQQUXTTaWXUQQbbVVPUQTVWTUaWRSYUTQTYUTMNSTYVcQTVKPbXcXVXSQaTXQZWUSdPWaPdaVVTWWVVaOVWbTgRXUVTROdWOXRVWTJWTVVYNicXOUSfTReQXRSRVZMTVVWONZZTObUYXTUVTXZaXZYUSTVUQWRcSSQSaYUadTVYVTYXPWVcYVVONUWNTUYPUZWNWRJVaQVUWPTaSUdXZOVdVYbZTURUURfUaOWNObUXUdUSYTNVYOSXTRQUfafSVXVbNXUNRSTXSSRZRVcbXTdRUYTYZVVOVfRTTVORXdVYWUSWTPXPUUZUbYVROVYVNXUTSXaVXThVYQYbSaWSVRYVQSRWSVQXNWXRcTYZbQRUUMXVVYObVfZUVPQVXUVUSVSUaPUSXUVRbWVWaaYSbRVbZRfVTQVWXaRWYWOUVTZVVNTWWTeSUXVXRUSXfVRKXWRXZdTUMVaXRMaYRUVaVZfQNYZVaTYWaVQPXZNUbSbRUVTMdSXWRbVTZbUUQMVeTSbPOQbSUYbRNaXWeUZVSMQYgTVVWUZcQPSYdeXQYQLfSaZXPPXaWUdVWdRTbVaWXXSUQWSSaZQRVPbXLXQZSSVWcPTVaXbTSWbWXaRTbRVaQTSNbKZQVSYTOQURRSVRUcbSaWWVTXTaQWbUQTWTXUXaRXXXQRXXTVaULOVWWOWTbWZTSTTOSaRQWWSWUWQVVSQYVZUTXXSZVWTVVPZRXXXUSSbTVYWTVYbZYSYXTZVZRYTVSaWfXWVXPQQSYWReTRZZUWcheLUUVXUVJWRXPTYaVVQXPXKRVRVWMTVWUVTQYPZMTTaXWYVXPYXTTTRYbTVPaYTQPZXVYQdYVWPfUSaTNUObSMYTVRXbOURTVSPUWVfUOaVUYXdZYZaZTXbZXNQVWTWRbXUMSUUSQQZXWXNQSSQcUUUVbVUYYOOVTSNYUNQWVUZReUVZcUZRVZSSLVXRTQXZRUWaXTRXSWPVSaMPYWXbWWYZSfWWaXUUbSUWUWZVVPXXeYYYYSbQObTZXQRSPbTQUQaRcTbZReeWWUSRKTXWZTURZVeVXbfVOaYTLedaNRUKbYPYRPUUcYZUUaUUYXTUVXWQXZTZXTYSWbRISMcRSYTTcUOUWPTPVTXJLXdTSaZWWXWYRbVSUOOVXZPWWZQTgWTVVYUVWTPWYbbWOOWYOVVWUSSTSYOVZebUTWWeZLYWYRbNUURSOYWYbYXVPRSVKfRUUSPXVLPXWUaZXNLcScVbcUNXXXUTQNVZRRUPQRPWSUVUYdSUWNdUPWaVOYRRgaWVWXRSYQbZaKXNYYWVUXWXWScYRYRUbTPaPVbOUQWWVbYXVSOTVXRWUTQSQSMeRTXWUUPUXSUWXYbXVTaVaSWVSZTaUeWTZSSWRWhaQTZbKdNTYRSSSXWbZSZOVWVTRZUTZSXPcUYWTKYTWWZTSXTXZaOZTSVTPTYSTVPQVQPZXQVTTTQbNPVaMMTVXfTQWVZYdWWWOQXWYTVSQXaVTXVXQYTUPVeTWcUXQVUXbbTUXXZfSWYYTTWVXdPZRWTWSXTUMVNZRVWTXTYTVXYUSTURUSZabURdZPScVcYbUSRbWYZSVRSUUXVfYTVVYOYcLVXPVdTXUUPXPPVZTVRWUSTYSXRXVRVVPPWSXPUSSYTaVSUTUTXUedbaTQWcOaTWUVZNVeWaVUPRTVXOQabQVRVMdWVXZQTSTYcOZYRYTURZWQRTVPWOZYXRWOeVWXXOabMTbWdZVWbYPcaLaPUTbVUUWRSTYWbRTYafTSRTbVVRSSZTZPRUXQSTQUYXOTNWXSLTbYUfXaXcYSVYSSZSTYaZXSYSTVWfXNZcTVUXOZYSUXfYRSWUeaUSWUUXVSRXVXYRRZTdYiTXPTXbYQVRROTXZNbURZWUYVUXYUYSRYPSRWWYUWaVXHTXRSVYXTSXYTVSQWUVbRTRYRQKeVcLXXbYceTYYTONibLVTXdPXYUbWYTPfYPYYadPZSZUXcMPYVWLXVXbWYYZZUTUSVNVdRWSOVUXTPTWSTaWXVTUNVLRTRTbLZcVeZTWXSUVcVVVULbWRTcPQVWVSMYYZWYVcaWTTkOaMXYVfYReaVcPUTYbQSVZUTWXdPPYVVQPbYSQPNYTaXTWSedPOUSTZVSTUUTXPRVeQZPSJQVSWSXPYVRRYPSVTSWTaaaYXUWPaSbcQOSQgVUbUeRRWWNRXVWVPRXUZSWeXPMZfWVYTTRXUTMVTSRXUWSVZQaXTVWSMZTRVSUTYaaSTWTXeTYXTWRZPYXaWURWTVWRWbYQLLZYWVYdUZVPKZSUZQXWRPZaXYMTbgUQTTXZVVZQPVKdRdcbLTPbQTRaPQWcNYNOLVdaWVaSTTPRJPYdaSZTUNVNZQVVZTUYRQOVUXaQQPURbYWbXVWTUOVXcNOSQTbbPUXTWWMTYWUWaVVaTVWWQPWZXMXacRXVTWSYbVZSTUWaWRYRcTVSXaZUQeXXUYWUSSSaUWRQSXSeXSYVUdTUVVVWUYcWeTYWYSNRRSWQYXTRVRRVbYSTSRTXVQcUbQUVQYVUSTYVTUVUXYURgSZVQYYXRXXWdSXUQSYSaVVXUUSWXYSXRVVMVWLcTWUTbbSSUUSVKUWWiXZSMRTRZRVUQOSYbUXbYUSURTPUQUcUXWQYZQVXTLSXZdVVPVXYcaOKRTVQdZNSXRYXTaYVNWVYaaZWTdXMTIabeRWZbYRQOTVaTReUWTSXZWYZVaSVQiUVPSRSbZRPMSTWSVaSUZSXSVYUZZRTSVaSbUUZRXTiZdRVTRSUWTWeRWXXTXXUVOUVXQPYVVWSYQPUSWTbUbTTVYRYTcTXZRYSYUaWYbVTSXUXUXTXQVXXVSYQWYcOPVNZYVXQZSPRbaZSWRaWWUYYTZaUTaLcWZXbSPYVVOWQbbXZSRVWTZVQViTZUUSOVTbYYXWTRZWUTTTUTRSQWaTZZQOcWNRTVLOSYUVPSVWUWfYShWTfMTVXfVPQQZSdaOYUXYVOWXOifcPXXecXVTSRVZSTOaSaKaUVbQHXUTWUYZOTMYbWVWPVXVSYWRYcRbiWbYZVSTYdXeYfVXPTROQXXZRTMOVSaRXSVNNTXXTZWUVPUQOXZSYTWWOYQMSaQXSXWWcVaUaPWQWQUYTdWWadWXObWQOMUVWZSOWYWZMROWVTVZdcVYQTeZVQWVTUNVQYSVXOTULTNXbTUTXZUWTWUaWdRYQWUTXUTdVUUaZYPXRVQUYXZSXPXQSZZUXTbeTaZSURXRQPZVWQWVRTRUSWWYdUKSVTaYYScZQWbUTZXUUSPVVYWNVSWTOQYUURYVWWaSTWdMVUORVSXPbZYcZbSWPLgbNVUTRXSUVMZPVbbSbYUSXSVZSWWcRVXXXMULVSVQbZVZXeNXaSZRYROTRXYWQYVgcZXOYaRSTXRSWQPUcUfeXXUebYWVXVMXWYXZWWLYRVROVSQMOaVVUdVUURSTVZcPaYVYbbVYVRdOQPTSVVZbXaWURQZZcXRTUVWMTSPYVXSUXbTOUWPMTVWPWaTVZZTOSYaVNLVOcWXRVQYPVOaVeSPQZTXWUdSVSSTUbRYacRTVVQWWSZbVVQWXYWVVeWRXOSPVcXWXRUaVcYOUUThZSPRQVXPVcTXTVSUUXaQPQZNUTTTVaYSQVYaVYSVWVTSSTeVUPOcSTcYPVQiUUUUUZZSdcPaTSSSaRVbYYRcQcTLNQWMeNXSVTTPWRcQKPTROYQSRVVWWbbVWXXaZTUSdOOfWXbSWSQTbUQSXLQUTZTPXPYVSQbSTcRZUTWVcYTSTaSeYaXWUaZXddNaTQYWXUXXVXWRYXRVUXUVZPVQeJQeMQVcVXWTWTWWWVPVYaPOXTPTWVOYWacVOUUcXTMVUVPaXXMSaWVWSVQVXRXOVRZWZUTPZRZYTVQaTVTVSTXRNWUTYRXYVPXbRUZTcQfTTYdUbWZZSgYWQaPUbVUaLbZUUaYZSZKVYfRYgUSXPaZZNMaXTXTRWPSbWQXUVUUQSTQbXTabWTcTdVbPUULZZOZUZKRcSWYSPMccMaYgQSTWXPVUZRWWTcXUVJVUZbYQWbVSaXRPZXTXRTPYXTVTWTUWSSbaQSQUURXTUVWUXPUYTSPYSbeWdRTVYTYTYWcdaaXTeRQSQXSSZRVYZWWSNZVSPcYQPZkaaSXTWXZPSaVQaSQVUVVTNVWUSVVUQUTSbRSTNSUXURScUcaXTSSVRUYXZMZOPOTQUTWUSZWUQeRVVVIUWTXWWcRYTXVUOTVhKWWVaUZTXYUbPYQXWaOZadRcYXIZVVZeTaVbUPYTSRWZTQLRUTVRYSTXSXZTYXTURXSUVWWbUQWdYXSXVdTQUZcYVYOZTVPdQQQTRUSaPLUTUXTWZTPNecTNTUQKZZaaXWTVZPVYLWScbfTRWVVROSSVYVVVXbQcZdSaXZbYLaXVSOVWUfPPUZSRSTKPeSUWXaYYYRUWRZfWXXUTYUXUbWVTbXbaWXXUdVURUTObVWWWXRVWRXRcRUWXTRZYdMYZcYeRYZcYJQbaYhVXgURRUVWThTZZUZXbRVYUXWYUTUWZjXWYKVQVXSQTaRTeVXRaeWTNScXYTRRZbPQXVTYUeSSNYUSaRYYWeOOUTYPNRaUbWPRUdPYRZOTbbTRYWVWTfWNVRVZWfRdQQTSYVXRaVTWUYZjXWaZbQPfUhcXOTQPbZQVWSaQWbVTVXYUaXTQTVWPZWVTSUUYYVTUSaSXUWQRYVNQWXTTfYXNVWWOQRPZXXTZXYWRXZXVMRUPZTVSSVQZTZWWYOVWRVVRaXRXOXWTSOYZYUSLaXSaVQTQWXVUTTbbbVZMZXaUbWUQTZWURXXVYRSXSTPUaVVSRUYSObbaSOIVRbRVTVcTYSQXSJTZgaYUeOJWWdWTTUYVcNRRRYSTVURWbSZXXQYUQdbVXUOTVNUZWVTaVfRXafUZVTXbaSeVNVWXXYZWQXbTfVVXWRdPSOXMTWVWTVPXVRbacKSXTaQccPZSRXYTZYVRRXQTbTXOVYVYSZUUfSbIbQSVSUTTabQTVSVbdVWVSYbWRUYbVcXKVTUWQLeVMXUfPYSReXdVaaUWNXXbQYSWPUJaUUVXVWQbZZYbaXSRaXXOcVdUURVbTRSUcXOSPOOaVSUYdVRTPRVUSZQWUWWUdXUNUYPcTQRZVWXXRKRYWUlaYXUTWZVVTZWTPcXXUPVTZZXWNbTTULVPYTXVcZaQQVaTbMPYbUXVTRZVePWRXZYRWdQTNVZYSUSXWUYaTXXXWNSbTXdOZWUMaRWbcbYTPZPQURTbPTUTRSXTbPXbQZSOUVSQVUbaUbaYRcPRUYZXTXWTWNZSVQYWSYTZaVRTVTYWVMPYPcUZNZYRWbRVSRXXRdYXXZUVSScbVWaVaRWfVUXTWQgSUZSRbVTVSTRTSUUZYPbaOWTQSWSWUTPYXXTNbOTRVYVXZQLgOQWNVNZXaYQZbWdbPaPRbVPdPQZRUXUbWSXTUWVVWYabZVdTWOVYaVZUVhVTXPTUPWOTWWYfWZXYVaQSRZVaVSbWTNUPTXbTTPRUSUVVXXZdTVUJTWVWVWNVSVYZUQVTUdcTdUXSZWPXWVSXOQURTUWXVMXZVPVRYQYfaUQUSVeZYYfYXYUaRcTcUMYNcYXZRaaTXSYWYKRQVSOScOacZWRSUWVUbaRPWWTPVYMPXUYYTWUXbTRNVVaYbXYZaWSTTTXcWWXUXRTaTXVaLPXUNYWOSSbVQYTWUSQUYbSYbQNUfYTTVWaTXWbVUPQZTdTTYZPPQXQZOSWaUSSdUSVUTYYUcZUUSWUbZVNeZOZTWaQXYTWYVXTVWVXUWSTXTbWRVbWQPYVRVTTaWYXYUSLdUZWWWVZeMRVPTPUZYWWSTYSSZYUaTbXTQVVSWNVVXWXQWVVYQVWcRZVRKaTUZWWeVQWXWOYTXYXWUcQUSMUTOOVdVRRaOQWTXSaZWOVTbeVVaWdUXVTcXVTTZWRYLSTXSSQUQWVUUZZaVSRcURQYUUUVSZUWSPXYVYWRWUYOQRWeZUThXTXVTVUTfQVZVRdbVVWTSVQRTXWSVUMRWSTVSTXVSYRUUQNNTPbYecaUKeVUbTbUQWRTYVbaTVWTXYPQWSTYRWQOTXWNSYVWYTXTUWYXbRXVOUTXVRaVIVRdTZfaTaYWZSXURWTTTScabNVaUTVUZaaXUXXRXVTXSZTXZZcQVhTXTRRWNZTWQXWWRQUPeYRQUWRRPVOWeTaQSUUTWZQeWWZZRYRVWSXUXZSZOaQYQXaTYdWNaSZVQXXYWTRVbYUVTRTTZUSWZPcXRNbWWZVbeXcTRTaTLZScTYVcMYXReYVXTWVYYPPYWSXTRbSUXXYRYYadcZTUZTRVTOcTTWWVVZVSaQTVaVVTSVXYTXXfTUXRTRVQYXRTTcaRNTPWUZYMTPXXYYaVXVZTYTVRQPSVZQZYWWWXXTVXVPZKUYWcWUXXSRYSQOUWYYUSVVaPSaTUadUVcabTVSdUNYQaVSeQTTUURaZUcSNXSdSZSUaPeRWRYRSNUQZVWUTVhSSNWaTUPTVVYTUUVWaYVPRSRUUWSWcVVTUQOYWUYUPYWUSVeOcPSUROXWYUVbTaWTaYUWZTVMUdaYVSaTUTYSUVZWYVZRTUVQeRZTXTcSYTXXRVXcZcTVWfLZSTOPVVYVTQOaYWSWZUVVQcXdTWTWTUXQWZcWcYQQQTSUdVVQZSVVUWMWSVaXaaRZbSTUUUPRPQWUQUWcZaVYaWQaTVVRSZTiQPabSRWRYUaPXWUcVaNSTXRaWWOXMbXWOVVXeTWZRNXbSZRXYUYUSXOXZTOSQTUcUWZXUSUORVTdUeXRWbUXbSQRVZTcRVTeSWQTeScVXWTVXSUVSUUTdVSXPZXXbQSZKMRTTWaTReZUdVeUQVQTYaNTYYUMZZQZSTXZUWdYQTUZSPPRQVYWXZUXSNbVSjTYdbcYZVYQVTVPZQgeTPcSWSZRZYTUXNOYVQQTRUSYZRYRRYOYaVXTbUSXXNPWTWUVUWSYXUYeQMeXSTNUTSSUYMVUYSOTOYcZXNWaYUVVYRSWTUUVRZWYXRXWaYNUQVUPRSZXcWYRVfUWXaZZRPVUPSSRWPQSOXRQaXTYYXXVZaRWTXaUYWRVXTQWUTPOVWWQVVVXXQWPTOgRMZZPbYfZZSYUgYfVRXYQfRVPQYTTWTVUUTYWYbUYXQRTKZVTYUMRZUUTTVOOYaRVRQdYaYaYYULQTcTRXYRTRXRTPTZRTYSUWSYbSYRRfNXQOXcXbUVPRWXaWWTJTUYYPVOXWSRQXXTXTVabYMXfTaUbYOabObbaUbUMURRNbKbZeZUTQTTUZaTQVTTWQZYRRWVUZZVJaRVaWYWURVUVVVSXTVRVTQWVWXQGTQUaWPWUdUVZVTTbUaUXcSSSUYWUaTdVZYSSQSTUXRYOQWaVVQUYTSNabUSVMYWVY`, `1,568:273;8:6;30:13;1:1;1:0
+2,5:3;16:9;2274:1153;79:40;45:15
+3,0:0;4:1;0:0;161:78;825:452
+4,179:88;6:2;16:12;2:1;1:1
+5,0:0;2:0;1:0;64:30;1597:785
+6,997:496;11:5;2:1;0:0;6:3
+7,6:2;341:156;180:76;106:52;3:1
+8,1418:741;0:0;3:1;1:0;2:1
+9,31:14;52:29;13:6;357:173;443:235
+10,903:420;146:71;3:3;0:0;2:1
+11,2262:1157;2048:975;10:5;4:3;4:2
+12,623:287;0:0;2:1;0:0;0:0
+13,7:4;2131:1083;3:0;2:1;2:0
+14,122:70;313:156;721:378;696:338;378:187
+15,510:257;242:115;561:281;18:9;17:5
+16,5:2;612:306;300:134;12:1;0:0
+17,78:31;2286:1138;0:0;3:3;1:1
+18,952:456;1:0;13:9;4:1;4:2
+19,1048:521;984:469;184:92;776:391;54:23
+20,101:47;6:1;50:26;334:155;462:237
+21,1083:574;219:100;327:178;1327:637;101:52
+22,22:11;442:202;54:34;626:281;186:93
+23,43:24;497:254;361:187;7:4;0:0
+25,142:72;1414:674;5:2;46:20;15:8
+26,6:0;73:35;19:6;2117:1071;840:394
+27,2:0;1:1;8:3;1017:539;854:373
+28,14:7;630:329;1716:862;69:35;2:0
+29,25:13;15:5;2283:1091;66:29;5:1
+30,3:0;0:0;6:0;154:73;903:447
+31,2:1;2:1;4:0;169:75;1617:778
+32,55:25;86:36;12:6;24:9;9:5
+33,9:4;30:14;441:261;37:20;14:7
+34,18:6;442:190;13:4;17:8;36:21
+35,317:188;1182:605;7:3;33:15;6:6
+36,348:179;492:234;370:186;7:2;2:1
+37,6:3;0:0;5:2;167:74;2130:1013
+38,321:161;611:315;1154:593;11:6;1:1
+39,117:60;2294:1102;108:51;49:23;42:23
+40,35:20;45:22;89:41;212:103;615:332
+41,759:363;12:4;36:15;58:36;16:10
+42,266:119;0:0;336:176;13:4;1:0
+43,11:5;334:143;322:146;19:11;19:10
+44,553:252;0:0;1:0;1:0;3:1
+45,3:1;36:15;14:6;279:142;454:228
+46,1642:794;319:164;2:1;1:0;2:0
+47,144:77;945:474;436:208;15:3;6:1
+48,2193:1062;4:2;0:0;2:1;0:0
+49,1039:508;1005:484;544:253;7:4;4:0
+50,5:4;26:14;30:16;93:37;730:377
+51,0:0;3:2;30:14;760:394;872:455
+52,56:27;729:375;31:14;32:18;13:9
+53,571:306;496:257;196:101;146:73;68:33
+54,1498:728;1:0;9:5;0:0;1:1
+55,4:3;8:2;703:336;8:5;1:1
+56,988:533;84:36;13:5;15:6;6:2
+57,61:28;44:22;211:114;23:11;92:44
+58,1:1;3:1;10:5;143:85;766:395
+59,98:46;587:311;108:67;18:6;19:10
+60,12:4;51:31;739:341;37:16;3:2
+61,181:106;104:45;89:57;0:0;2:0
+62,3:2;21:11;34:24;475:267;33:16
+63,808:383;9:5;44:27;214:84;59:20
+64,15:9;16:7;33:17;589:275;2847:1435
+65,37:23;229:119;626:347;385:180;187:97
+66,1:0;1:1;3:1;113:69;484:285
+67,278:125;3:2;4:0;1:0;2:0
+68,0:0;5:2;4:1;106:52;777:378
+69,191:89;17:6;1406:755;16:8;6:2
+70,2038:975;6:2;22:10;3:1;1:0
+71,15:8;28:15;332:178;1125:579;351:163
+72,1500:724;4:2;9:3;90:46;54:30
+73,605:322;64:35;90:47;24:14;30:18
+74,6:4;2207:1125;8:3;90:47;40:25
+75,18:10;12:4;2:1;499:234;909:433
+76,21:11;498:223;1:1;0:0;3:1
+77,28:19;47:27;427:220;2:1;0:0
+78,18:10;8:4;877:444;14:10;10:5
+79,0:0;7:3;10:6;1628:883;620:316
+80,498:309;52:28;53:32;5:2;10:3
+81,255:120;5:2;428:203;19:9;7:3
+82,92:49;145:66;10:5;0:0;0:0
+83,4:3;5:3;24:16;144:88;1135:689
+84,16:9;14:5;161:97;282:127;2263:1116
+85,36:16;15:7;331:169;77:37;701:326
+86,3:1;629:343;112:65;3171:1604;495:247
+87,0:0;4:2;1:0;456:218;2698:1276
+88,1:1;39:20;42:19;862:469;86:46
+89,251:140;2:1;11:6;12:5;128:60
+90,2:1;513:287;23:9;653:356;69:38
+91,61:35;64:32;10:2;164:96;223:117
+92,11:6;40:18;135:70;27:9;17:5
+93,789:391;90:54;22:8;49:23;10:2
+94,791:347;2:1;9:1;0:0;0:0
+95,722:337;7:3;2:0;0:0;2:1
+96,3:2;54:33;2230:1110;64:30;4:2
+97,33:22;162:75;375:173;96:51;33:16
+98,32:17;278:127;1462:718;16:7;3:1
+99,164:71;36:16;1249:589;16:3;1:0
+100,1:0;29:19;16:7;1726:870;1547:750
+101,1:0;118:62;47:20;1852:886;220:98
+102,671:346;2:2;356:186;41:18;77:34
+103,6:3;3:3;18:6;10:4;80:34
+104,11:2;15:5;626:308;35:21;0:0
+105,4:1;35:17;61:28;957:477;420:209
+106,47:24;2696:1445;39:17;19:13;3:3
+107,2:2;786:418;66:32;270:150;53:26
+108,27:16;22:13;1815:836;21:8;5:3
+109,1255:622;1:1;18:13;4:1;2:2
+110,1:0;73:33;434:251;442:213;1227:652
+111,0:0;9:6;2:2;56:25;355:172
+112,4:2;7:3;19:9;123:58;932:468
+113,13:6;180:94;0:0;1:0;1:1
+114,683:376;369:184;36:21;51:28;12:7
+119,2:1;11:6;10:6;1759:820;229:115
+120,8:3;1422:701;932:466;10:5;1:1
+121,0:0;8:3;7:5;669:340;341:182
+123,7:1;15:6;43:18;2888:1466;508:258
+126,46:24;1584:751;62:32;106:43;12:5
+128,6:1;447:259;246:119;1730:865;874:467
+129,16:7;82:35;2691:1263;79:32;3:1
+131,2:1;3:1;9:6;1107:560;870:406
+135,35:20;46:19;1582:775;25:11;17:7
+136,161:96;56:26;254:147;345:162;241:114
+137,5:4;431:237;722:346;19:8;3:0
+138,921:470;93:44;10:6;386:164;18:11
+145,1130:597;443:225;21:13;4:1;3:1
+155,7:4;87:47;914:508;219:118;231:120`);
 const H = DC.heroes();
 const $ = s => document.querySelector(s);
 const TEAM = ['Radiant', 'Dire'];
@@ -974,12 +1262,12 @@ let G = { screen: 'setup', cfg: { mode: 'bot', lvl: 1, side: 0, fp: 0, names: ['
 let M = null;
 let timer = null, lastTs = 0, botTimer = null;
 
-function show(id){ ['setup','draft','preview','match'].forEach(s => $('#' + s).hidden = s !== id); G.screen = id; $('.topbar').hidden = id === 'setup'; $('.foot').hidden = id === 'setup'; renderTop(); renderBar(); if (typeof renderNetbar === 'function') renderNetbar(); window.scrollTo(0, 0); }
+function show(id){ ['setup','draft','positions','preview','match'].forEach(s => $('#' + s).hidden = s !== id); G.screen = id; $('.topbar').hidden = id === 'setup'; $('.foot').hidden = id === 'setup'; renderTop(); renderBar(); if (typeof renderNetbar === 'function') renderNetbar(); window.scrollTo(0, 0); }
 function renderTop(){
   const a = $('#topActions');
   a.innerHTML = G.screen === 'setup' ? '' : '<button class="btn sm quiet" id="newGame">New game</button>';
   const b = $('#newGame'); if (b) b.onclick = () => { stopLoop(); clearTimeout(botTimer); $('#overlay').hidden = true; if (online()) netLeave(); show('setup'); };
-  $('#crumb').textContent = { setup: 'Captains Mode', draft: 'Draft', preview: 'Draft read', match: 'Match' }[G.screen];
+  $('#crumb').textContent = { setup: 'Captains Mode', draft: 'Draft', positions: 'Positions', preview: 'Draft read', match: 'Match' }[G.screen];
 }
 
 /* ---------- setup ---------- */
@@ -1121,7 +1409,7 @@ function act(h){
   const tn = turn(); if (!tn || G.used[h]) return;
   G.used[h] = 1; (tn.kind === 'pick' ? G.picks : G.bans)[tn.team].push(h);
   G.step++; G.sel = null;
-  if (G.step >= 24){ renderDraft(); setTimeout(showPreview, 600); return; }
+  if (G.step >= 24){ renderDraft(); setTimeout(() => showPositions(true), 600); return; }
   renderDraft(); maybeBot();
 }
 function confirmSel(){
@@ -1143,24 +1431,124 @@ $('#roleSel').onchange = e => { G.filt.role = e.target.value; renderGrid(); };
 $('#sortSel').onchange = e => { G.filt.sort = e.target.value; renderGrid(); };
 
 /* ---------- draft read ---------- */
+/* ---------- positions ---------- */
+const LANE_OF = [['Safe lane', 'bottom'], ['Mid lane', 'middle'], ['Offlane', 'top'], ['Offlane', 'top'], ['Safe lane', 'bottom']];
+function laneLabel(t, p){ const l = LANE_OF[p]; if (p === 1) return 'Mid lane'; const side = t === 0 ? l[1] : (l[1] === 'bottom' ? 'top' : 'bottom'); return l[0] + ', ' + side; }
+function posEditable(t){
+  if (online()) return t === G.seat && !(NET.room && NET.room.locked[G.seat]);
+  if (G.cfg.mode === 'bot') return t === G.cfg.side;
+  return true;
+}
+function posHidden(t){ return online() ? t !== G.seat : G.cfg.mode === 'bot' && t !== G.cfg.side; }
+function fitInfo(h, p){
+  const sh = DC.share(h, p), pen = DC.fitPen(h, p);
+  if (sh >= 0.4) return { cls: 'good', txt: 'Main position' };
+  if (sh >= 0.15) return { cls: 'ok', txt: 'Played here' };
+  return { cls: 'bad', txt: `Off-role ${pp(pen)}` };
+}
+function showPositions(fresh){
+  if (fresh || !G.pos || !G.pos.order) G.pos = { order: [DC.bestOrder(G.picks[0]), DC.bestOrder(G.picks[1])], sel: null };
+  show('positions'); renderPositions();
+}
+function renderPositions(){
+  const el = $('#positions'); const P = G.pos;
+  const col = t => {
+    const hidden = posHidden(t), edit = posEditable(t);
+    let st = '';
+    if (online() && NET.room){ const lk = NET.room.locked[t]; st = t === G.seat ? (lk ? '<b>Locked in</b>' : 'Your positions') : (lk ? `<b>${esc(G.cfg.names[t])} has locked in</b>` : `${esc(G.cfg.names[t])} is choosing…`) + (t !== G.seat ? '<br>Revealed when both lock in' : ''); }
+    else if (hidden) st = '<b>Bot has set its positions</b><br>Revealed after you lock in';
+    else st = 'Click two heroes to swap';
+    let rows;
+    if (hidden){
+      rows = G.picks[t].map(h => `<div class="prow hid">${art(h, 'pt', 1)}<span class="hn"><b>${esc(H[h].name)}</b><span class="ink3" style="font-size:12px">${H[h].roles.slice(0, 3).join(', ')}</span></span></div>`).join('');
+    } else {
+      rows = P.order[t].map((h, p) => {
+        const f = fitInfo(h, p);
+        const dist = [0, 1, 2, 3, 4].map(q => { const sh = DC.share(h, q); return `<i class="${q === p ? 'on' : ''}" title="Position ${q + 1}: ${Math.round(sh * 100)}% of pro games"><span style="height:${Math.max(2, Math.round(sh * 28))}px"></span>${q + 1}</i>`; }).join('');
+        const tag = edit ? 'button' : 'div';
+        return `<${tag} class="prow" ${edit ? `data-t="${t}" data-p="${p}" aria-pressed="${!!(P.sel && P.sel.t === t && P.sel.p === p)}" aria-label="Position ${p + 1}, ${DC.POS[p].name}: ${esc(H[h].name)}"` : ''}>
+          <span class="pn">${p + 1}</span><span class="pl"><b>${DC.POS[p].name}</b><small>${laneLabel(t, p)}</small></span>
+          ${art(h, 'pt', 1)}<span class="hn"><b>${esc(H[h].name)}</b><span class="fit ${f.cls}">${f.txt}</span></span>
+          <span class="dist" aria-hidden="true">${dist}</span></${tag}>`;
+      }).join('');
+    }
+    return `<div class="pcol t${t}"><div class="head"><h3>${TEAM[t]}</h3><span class="st">${esc(G.cfg.names[t])}${online() && t === G.seat ? ' (you)' : ''}<br>${st}</span></div><div class="prows">${rows}</div></div>`;
+  };
+  // win chance: hidden teams are estimated with their pro positions
+  const RO = posHidden(0) ? DC.bestOrder(G.picks[0]) : P.order[0];
+  const DO = posHidden(1) ? DC.bestOrder(G.picks[1]) : P.order[1];
+  const ev = DC.evaluate(RO, DO, true);
+  const best = DC.evaluate(G.picks[0], G.picks[1], false);
+  const me = online() ? G.seat : G.cfg.mode === 'bot' ? G.cfg.side : null;
+  const anyHidden = posHidden(0) || posHidden(1);
+  const pW = t => t === 0 ? ev.overall : 1 - ev.overall;
+  let summary;
+  if (me != null){
+    const d = pW(me) - (me === 0 ? best.overall : 1 - best.overall);
+    summary = `With these positions ${TEAM[me]} wins <b>${pct(pW(me))}</b>${Math.abs(d) >= 0.005 ? `, ${d > 0 ? 'up' : 'down'} ${Math.abs(Math.round(d * 1000) / 10)} points on pro positions` : ', the same as pro positions'}.${anyHidden ? ` ${TEAM[1 - me]} is assumed to use its pro positions until it locks in.` : ''}`;
+  } else summary = `With these positions Radiant wins <b>${pct(ev.overall)}</b>, Dire <b>${pct(1 - ev.overall)}</b>. Pro positions for both would give Radiant ${pct(best.overall)}.`;
+  const lanes = laneRows(ev.lanes, { guess: [posHidden(0), posHidden(1)] });
+  const lockedMe = online() && NET.room && NET.room.locked[G.seat];
+  const btns = lockedMe
+    ? `<button class="btn" id="posUnlock">Change positions</button><button class="btn go" disabled>Waiting for ${esc(oppName())}</button>`
+    : `<button class="btn" id="posReset">Use pro positions</button><button class="btn go" id="posLock">Lock positions</button>`;
+  el.innerHTML = `<div class="poshead"><div><h2>Set positions</h2><p>Decide who plays 1 to 5. Each hero's bars show how often pros play it at each position; heroes far from their usual position lose win chance. Positions also set the lanes: Radiant's safe lane is bottom, Dire's is top.</p></div></div>
+    <div class="posboard">${col(0)}${col(1)}</div>
+    <div><div class="sh">Lanes, 0:00 to 10:00</div><div class="tablewrap">${lanes}</div></div>
+    <div class="go-row"><p class="pos-summary">${summary}</p><div style="display:flex;gap:8px;flex-wrap:wrap">${btns}</div></div>`;
+  el.querySelectorAll('button.prow').forEach(b => b.onclick = () => {
+    const t = +b.dataset.t, p = +b.dataset.p;
+    if (!P.sel || P.sel.t !== t){ P.sel = { t, p }; }
+    else if (P.sel.p === p){ P.sel = null; }
+    else { const o = P.order[t]; [o[p], o[P.sel.p]] = [o[P.sel.p], o[p]]; P.sel = null; }
+    renderPositions();
+    const again = el.querySelector(`button.prow[data-t="${t}"][data-p="${p}"]`); if (again) again.focus({ preventScroll: true });
+  });
+  const rs = $('#posReset'); if (rs) rs.onclick = () => { [0, 1].forEach(t => { if (posEditable(t)) P.order[t] = DC.bestOrder(G.picks[t]); }); P.sel = null; renderPositions(); };
+  const lk = $('#posLock'); if (lk) lk.onclick = lockPositions;
+  const ul = $('#posUnlock'); if (ul) ul.onclick = () => netSend({ t: 'positions', order: null, round: G.round });
+}
+function laneRows(L, opt){
+  const g = (opt && opt.guess) || [false, false];
+  const hs = (arr, t) => `<div class="hs ${g[t] ? 'guess' : ''}">${arr.map(h => `${art(h, 'thumb sm', 1)}<span>${esc(H[h].name)}</span>`).join('')}</div>`;
+  const name = { top: 'Top', mid: 'Mid', bot: 'Bottom' };
+  const rows = L.map(l => {
+    const e = l.edge, fv = e >= 0 ? 0 : 1;
+    const res = opt && opt.result ? (l.winner < 0 ? '<span class="ink2">Even</span>' : `<span class="${l.winner ? 'dire' : 'rad'}">${TEAM[l.winner]} won</span><br><span class="ink3 num" style="font-weight:400">${l.kills[0]}–${l.kills[1]} kills</span>`) : '';
+    return `<tr><td class="ln"><b>${name[l.lane]}</b><span>${l.lane === 'mid' ? 'Mid vs mid' : l.radRole === 'safe lane' ? 'Radiant safe vs Dire offlane' : 'Radiant offlane vs Dire safe'}</span></td>
+      <td>${hs(l.rad, 0)}</td>
+      <td class="edge ${fv ? 'dire' : 'rad'}">${Math.abs(e) < 0.005 ? '<span class="ink2">Even</span>' : TEAM[fv] + ' ' + pi(Math.abs(e))}</td>
+      ${res ? `<td class="res">${res}</td>` : ''}
+      <td class="dr">${hs(l.dire, 1)}</td></tr>`;
+  }).join('');
+  return `<table class="lanetab"><thead><tr><th>Lane</th><th class="rad">Radiant</th><th style="text-align:center">${opt && opt.result ? 'Expected' : 'Edge'}</th>${opt && opt.result ? '<th style="text-align:center">Result</th>' : ''}<th class="dire" style="text-align:right">Dire</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function lockPositions(){
+  const P = G.pos;
+  if (online()){ netSend({ t: 'positions', order: P.order[G.seat], round: G.round }); return; }
+  [0, 1].forEach(t => { G.picks[t] = posHidden(t) ? DC.bestOrder(G.picks[t]) : P.order[t].slice(); });
+  showPreview();
+}
+
 function showPreview(){
   const R = G.picks[0], D = G.picks[1];
-  const ev = DC.evaluate(R, D);
+  const ev = DC.evaluate(R, D, true);
   const fav = ev.overall >= 0.5 ? 0 : 1;
-  const lu = t => `<div class="lu t${t}"><div class="head"><h2>${TEAM[t]}</h2><div class="who ink2" style="font-size:13px">${esc(G.cfg.names[t])}</div></div>${G.picks[t].map(h => `<div class="hrow">${art(h, 'thumb', 1)}<span>${esc(H[h].name)}</span><span class="r">${H[h].roles.slice(0, 2).join(', ')}</span></div>`).join('')}</div>`;
-  const pv = v => `<td class="m ${v >= 0 ? 'pos' : 'neg'}">${pp(v)}</td>`;
+  const lu = t => `<div class="lu t${t}"><div class="head"><h2>${TEAM[t]}</h2><div class="who ink2" style="font-size:13px">${esc(G.cfg.names[t])}</div></div>${G.picks[t].map((h, p) => `<div class="hrow"><span class="posn">${p + 1}</span>${art(h, 'thumb', 1)}<span>${esc(H[h].name)}</span><span class="r">${DC.POS[p].name}${DC.fitPen(h, p) < 0 ? ' · <span class="neg">off-role</span>' : ''}</span></div>`).join('')}</div>`;
+  const pv = v => Math.abs(v) < 0.0005 ? '<td class="m ink3">0.0</td>' : `<td class="m ${v > 0 ? 'pos' : 'neg'}">${pp(v)}</td>`;
   const rows = [0, 1, 2].map(s => { const st = ev.stages[s], p = st.p; return `<tr>
     <td class="stg"><b>${STG[s]}</b><span>${['0:00 – 15:00','15:00 – 30:00','30:00 – end'][s]}</span></td>
     <td class="p rad">${pct(p)}</td><td><div class="split"><i style="width:${p * 100}%;background:var(--rad)"></i><i style="width:${(1 - p) * 100}%;background:var(--dire)"></i></div></td><td class="p dire" style="text-align:left">${pct(1 - p)}</td>
-    ${pv(st.parts.hero)}${pv(st.parts.matchup)}${pv(st.parts.synergy)}${pv(st.parts.comp)}</tr>`; }).join('');
+    ${pv(st.parts.hero)}${pv(st.parts.lanes)}${pv(st.parts.fit)}${pv(st.parts.matchup)}${pv(st.parts.synergy)}${pv(st.parts.comp)}</tr>`; }).join('');
   const edges = ev.pairs.slice(0, 6).map(x => { const w = x.v >= 0; return `<div><span><span class="${w ? 'rad' : 'dire'}">${esc(H[w ? x.a : x.b].name)}</span> over ${esc(H[w ? x.b : x.a].name)}</span><span class="v">${pi(Math.abs(x.v))}</span></div>`; }).join('');
   const pairs = ev.synR.slice(0, 3).map(x => `<div><span class="rad">${esc(H[x.a].name)} + ${esc(H[x.b].name)}</span><span class="v ${x.v >= 0 ? 'pos' : 'neg'}">${pi(x.v)}</span></div>`).join('')
     + ev.synD.slice(0, 3).map(x => `<div><span class="dire">${esc(H[x.a].name)} + ${esc(H[x.b].name)}</span><span class="v ${x.v >= 0 ? 'pos' : 'neg'}">${pi(x.v)}</span></div>`).join('');
   $('#preview').innerHTML = `<div style="display:flex;flex-direction:column;gap:26px">
     <div class="versus">${lu(0)}<div class="mid"><span class="lab">Draft favors</span><span class="big ${fav ? 'dire' : 'rad'}">${pct(Math.max(ev.overall, 1 - ev.overall))}</span><span class="disp ${fav ? 'dire' : 'rad'}" style="font-size:24px">${TEAM[fav]}</span></div>${lu(1)}</div>
     <div><h2 style="font-size:30px;margin-bottom:8px">Win chance by stage</h2><div class="tablewrap"><table class="ftab">
-      <thead><tr><th>Stage</th><th>Radiant</th><th></th><th style="text-align:left">Dire</th><th>Hero strength</th><th>Counters</th><th>Synergy</th><th>Team shape</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="note" style="margin-top:8px">Factor columns are win-rate points from Radiant's side; negative favors Dire. Team shape costs points for missing a support, a carry, an initiator or reliable disables.</p></div>
+      <thead><tr><th>Stage</th><th>Radiant</th><th></th><th style="text-align:left">Dire</th><th>Hero strength</th><th>Lanes</th><th>Positions</th><th>Counters</th><th>Synergy</th><th>Team shape</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="note" style="margin-top:8px">Factor columns are win-rate points from Radiant's side; negative favors Dire. Hero strength weighs each position by stage (supports matter most early, carries late). Positions costs points for heroes played far from where pros play them. Lanes counts only until the mid game. Team shape costs points for missing a support, a carry, an initiator or reliable disables.</p></div>
+    <div><h2 style="font-size:30px;margin-bottom:8px">Lanes</h2><div class="tablewrap">${laneRows(ev.lanes)}</div></div>
     <div class="cols2"><div><div class="sh">Biggest head-to-head edges</div><div class="rl">${edges}</div></div><div><div class="sh">Best teammate pairs</div><div class="rl">${pairs}</div></div></div>
     <div class="go-row"><p>The draft sets the odds. Gold leads, Aegis, Shards and match-day form decide each fight, so the weaker draft still wins its share.</p><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><button class="btn go" id="goMatch">Start the match</button><span class="waitnote" id="goNote"></span></div></div>
   </div>`;
@@ -1296,7 +1684,7 @@ function killsUpTo(sec){
 }
 function renderKDA(f){
   [0, 1].forEach(t => {
-    $('#kda' + t).innerHTML = `<thead><tr><th><span class="tt ${t ? 'dire' : 'rad'}">${TEAM[t]}</span></th><th>K</th><th>D</th><th>A</th></tr></thead><tbody>` + G.picks[t].map(h => { const x = f ? f.kda[h] : [0,0,0]; return `<tr><td class="n">${art(h, 'thumb sm', 1)}${esc(H[h].name)}</td><td class="v">${x[0]}</td><td class="v">${x[1]}</td><td class="v">${x[2]}</td></tr>`; }).join('') + '</tbody>';
+    $('#kda' + t).innerHTML = `<thead><tr><th><span class="tt ${t ? 'dire' : 'rad'}">${TEAM[t]}</span></th><th>K</th><th>D</th><th>A</th></tr></thead><tbody>` + G.picks[t].map(h => { const x = f ? f.kda[h] : [0,0,0]; return `<tr><td class="n"><span class="posn">${G.picks[t].indexOf(h) + 1}</span>${art(h, 'thumb sm', 1)}${esc(H[h].name)}</td><td class="v">${x[0]}</td><td class="v">${x[1]}</td><td class="v">${x[2]}</td></tr>`; }).join('') + '</tbody>';
   });
 }
 function renderChart(){
@@ -1372,7 +1760,8 @@ function stageReport(s, final){
   const btns = final
     ? `<div class="iact"><button class="btn" id="rematch">Replay this draft</button><button class="btn go" id="again">New draft</button></div>`
     : `<div class="iact"><button class="btn go" id="cont" data-cp="${s === 0 ? '15' : '30'}">Play the ${STG[s + 1].toLowerCase()}</button></div>`;
-  $('#report').innerHTML = `<div class="ihead">${head}</div><div class="ibody"><div style="display:flex;flex-direction:column;gap:22px;min-width:0">${table}${outlook}</div>${mini}</div>${moments}${btns}`;
+  const laneRes = s === 0 && M.lanes && M.lanes[0].winner !== null ? `<div><div class="sh">Laning results, 0:00 to 10:00</div><div class="tablewrap">${laneRows(M.lanes, { result: true })}</div></div>` : '';
+  $('#report').innerHTML = `<div class="ihead">${head}</div><div class="ibody"><div style="display:flex;flex-direction:column;gap:22px;min-width:0">${table}${outlook}</div>${mini}</div>${laneRes}${moments}${btns}`;
   $('#overlay').hidden = false; $('#overlay').scrollTop = 0;
   const cpName = final ? null : (s === 0 ? '15' : '30');
   const c = $('#cont'); if (c){ c.focus({ preventScroll: true }); c.onclick = () => {
@@ -1500,6 +1889,15 @@ function onRoom(r){
     if (G.screen !== 'draft' || G.round !== r.round){ G.round = r.round; stopLoop(); $('#overlay').hidden = true; G.sel = null; show('draft'); }
     renderDraft(); renderNetbar(); return;
   }
+  if (r.phase === 'positions'){
+    if (G.screen !== 'positions' || G.round !== r.round || !G.pos){
+      G.round = r.round; stopLoop(); $('#overlay').hidden = true;
+      G.pos = { order: [DC.bestOrder(G.picks[0]), DC.bestOrder(G.picks[1])], sel: null };
+      if (r.myOrder) G.pos.order[G.seat] = r.myOrder.slice();
+      show('positions');
+    } else if (r.myOrder) G.pos.order[G.seat] = r.myOrder.slice();
+    renderPositions(); renderNetbar(); return;
+  }
   if (r.phase === 'preview'){
     if (G.screen !== 'preview' || G.round !== r.round){ G.round = r.round; G.seed = r.seed; stopLoop(); $('#overlay').hidden = true; showPreview(); }
     syncPreviewBtn(); renderNetbar(); return;
@@ -1523,6 +1921,7 @@ function start(data){
   if (data && data.G){
     G = data.G;
     if (G.screen === 'draft'){ show('draft'); renderDraft(); maybeBot(); return; }
+    if (G.screen === 'positions'){ showPositions(false); return; }
     if (G.screen === 'preview'){ showPreview(); return; }
     if (G.screen === 'match' && G.seed){
       M = DC.simulate(G.picks[0], G.picks[1], G.seed); show('match');

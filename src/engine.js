@@ -5,19 +5,31 @@ const ALPH='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const META = { matches: 20330, from: 'Oct 2025', to: 'Oct 2026', avgMin: 34.9, avgKills: 58.8, radiantWin: 0.521 };
 let H = [], N = 0, VS = '', SY = '';
 
-function load(csv, vs, sy){
+function load(csv, vs, sy, pos){
   VS = vs.replace(/\s+/g,''); SY = sy.replace(/\s+/g,'');
+  const P = {};
+  (pos || '').trim().split('\n').forEach(function(line){
+    if (!line) return;
+    const c = line.indexOf(','); P[+line.slice(0, c)] = line.slice(c + 1).split(';').map(function(x){ return x.split(':').map(Number); });
+  });
   H = csv.trim().split('\n').map(function(line, i){
     const p = line.split(',');
     const d = p[8].split(';').map(function(x){ return x.split(':').map(Number); });
     const g = +p[5], w = +p[6];
+    const wr = (w + 15) / (g + 30);
+    const pp = P[+p[0]] || [[0,0],[0,0],[0,0],[0,0],[0,0]];
+    const pt = pp.reduce(function(a, x){ return a + x[0]; }, 0);
     return {
       i: i, id: +p[0], name: p[1], attr: p[2], atk: p[3], roles: p[4].split('|'),
       g: g, w: w, bans: +p[7], slug: p[9],
-      wr: (w + 15) / (g + 30),
+      wr: wr,
       rawWr: g ? w / g : 0.5,
       stageG: d.map(function(x){ return x[0]; }),
-      stageWr: d.map(function(x){ return (x[1] + 20) / (x[0] + 40); })
+      stageWr: d.map(function(x){ return (x[1] + 20) / (x[0] + 40); }),
+      // pro games at positions 1-5 (lane role + farm order within each lane)
+      posG: pp.map(function(x){ return x[0]; }),
+      posShare: pp.map(function(x){ return (x[0] + 0.5) / (pt + 2.5); }),
+      posAdj: pp.map(function(x){ const v = (x[1] + 40 * wr) / (x[0] + 40) - wr; return Math.max(-0.04, Math.min(0.04, v)); })
     };
   });
   N = H.length;
@@ -58,21 +70,76 @@ function comp(team, s){
   return c;
 }
 
-/* Evaluate two (possibly partial) lineups. Returns per-stage radiant win prob and breakdown. */
-function evaluate(R, D){
-  const out = { stages: [] };
+/* ---------- positions ----------
+   A positioned team is an array of 5 heroes where index 0..4 = position 1..5.
+   Radiant's safe lane is bottom, Dire's safe lane is top. */
+const POS = [
+  { n: 1, name: 'Carry', lane: 'safe' }, { n: 2, name: 'Mid', lane: 'mid' }, { n: 3, name: 'Offlane', lane: 'off' },
+  { n: 4, name: 'Soft support', lane: 'off' }, { n: 5, name: 'Hard support', lane: 'safe' }
+];
+// how much each position's hero matters in each stage (each row averages 1)
+const POSW = [[0.85, 1.2, 1.1, 1.0, 0.85], [1.0, 1.15, 1.0, 0.95, 0.9], [1.35, 1.1, 0.95, 0.85, 0.75]];
+const LANEW = [0.8, 0.3, 0];
+const FITK = 0.06;
+function share(h, p){ return H[h].posShare[p]; }
+// win-rate points lost for playing a hero where pros rarely play it (none above 15% of its games)
+function fitPen(h, p){ const s = H[h].posShare[p]; return s >= 0.15 ? 0 : -FITK * Math.pow(1 - s / 0.15, 1.3); }
+const PERMS = (function(){ const out = []; (function rec(a, rest){ if (!rest.length) return out.push(a); rest.forEach(function(x, i){ rec(a.concat([x]), rest.slice(0, i).concat(rest.slice(i + 1))); }); })([], [0, 1, 2, 3, 4]); return out; })();
+function teamPosValue(T){ // a positioned team's own strength, stage-weighted like the overall win chance
+  let v = 0;
+  for (let s = 0; s < 3; s++){ let x = 0; for (let p = 0; p < 5; p++){ const h = T[p]; x += POSW[s][p] * (stageWr(h, s) - 0.5 + H[h].posAdj[p] + fitPen(h, p)); } v += [0.3, 0.4, 0.3][s] * x; }
+  return v;
+}
+// best position order for five heroes (perm[p] = index of the hero at position p+1)
+function bestOrder(T){
+  if (T.length !== 5) return T.slice();
+  let best = null, bv = -1e9;
+  PERMS.forEach(function(perm){ const o = perm.map(function(i){ return T[i]; }); const v = teamPosValue(o); if (v > bv){ bv = v; best = o; } });
+  return best;
+}
+// how well a partial team can still cover distinct positions (sum of best shares)
+function coverage(T){
+  if (!T.length) return 0;
+  let best = 0;
+  PERMS.forEach(function(perm){ let v = 0; for (let i = 0; i < T.length; i++) v += Math.min(1, share(T[i], perm[i]) / 0.6); if (v > best) best = v; });
+  return best;
+}
+// lane matchups from Radiant's side. Each side lane: Radiant pair vs Dire pair.
+function lanes(R, D){
+  function edge(rs, ds){
+    let m = 0; rs.forEach(function(a){ ds.forEach(function(b){ m += vs(a, b); }); }); m /= rs.length * ds.length;
+    let e = 0; rs.forEach(function(a){ e += stageWr(a, 0) - 0.5; }); ds.forEach(function(b){ e -= stageWr(b, 0) - 0.5; });
+    let f = 0; rs.forEach(function(a){ f += fitPen(a, R.indexOf(a)); }); ds.forEach(function(b){ f -= fitPen(b, D.indexOf(b)); });
+    return { matchup: m, edge: m + 0.5 * e / rs.length + f / rs.length };
+  }
+  return [
+    Object.assign({ lane: 'top', rad: [R[2], R[3]], dire: [D[0], D[4]], radRole: 'offlane', direRole: 'safe lane' }, edge([R[2], R[3]], [D[0], D[4]])),
+    Object.assign({ lane: 'mid', rad: [R[1]], dire: [D[1]], radRole: 'mid', direRole: 'mid' }, edge([R[1]], [D[1]])),
+    Object.assign({ lane: 'bot', rad: [R[0], R[4]], dire: [D[2], D[3]], radRole: 'safe lane', direRole: 'offlane' }, edge([R[0], R[4]], [D[2], D[3]]))
+  ];
+}
+
+/* Evaluate two lineups. Partial lineups (during the draft) skip position terms. Full lineups are
+   read as position-ordered when `positioned`; otherwise each team gets its best position order. */
+function evaluate(R, D, positioned){
+  const full = R.length === 5 && D.length === 5;
+  if (full && !positioned){ R = bestOrder(R); D = bestOrder(D); }
+  const out = { stages: [], R: R, D: D, positioned: full };
   let vsSum = 0; const pairs = [];
   R.forEach(function(a){ D.forEach(function(b){ const v = vs(a, b); vsSum += v; pairs.push({ a: a, b: b, v: v }); }); });
   function synTeam(T){ let s = 0; const l = [];
     for (let x = 0; x < T.length; x++) for (let y = x + 1; y < T.length; y++){ const v = syn(T[x], T[y]); s += v; l.push({ a: T[x], b: T[y], v: v }); }
     return { s: s, l: l }; }
   const sR = synTeam(R), sD = synTeam(D);
+  const ln = full ? lanes(R, D) : null;
+  out.lanes = ln;
   for (let s = 0; s < 3; s++){
-    let hr = 0, hd = 0;
-    R.forEach(function(h){ hr += stageWr(h, s) - 0.5; });
-    D.forEach(function(h){ hd += stageWr(h, s) - 0.5; });
-    const parts = { hero: hr - hd, matchup: vsSum / 5, synergy: (sR.s - sD.s) / 2, comp: comp(R, s) - comp(D, s) };
-    const diff = parts.hero + parts.matchup + parts.synergy + parts.comp;
+    let hr = 0, hd = 0, fr = 0, fd = 0;
+    R.forEach(function(h, p){ hr += (full ? POSW[s][p] : 1) * (stageWr(h, s) - 0.5 + (full ? H[h].posAdj[p] : 0)); if (full) fr += POSW[s][p] * fitPen(h, p); });
+    D.forEach(function(h, p){ hd += (full ? POSW[s][p] : 1) * (stageWr(h, s) - 0.5 + (full ? H[h].posAdj[p] : 0)); if (full) fd += POSW[s][p] * fitPen(h, p); });
+    const parts = { hero: hr - hd, matchup: vsSum / 5, synergy: (sR.s - sD.s) / 2, comp: comp(R, s) - comp(D, s),
+      lanes: full ? LANEW[s] * (ln[0].matchup + ln[1].matchup + ln[2].matchup) : 0, fit: fr - fd };
+    const diff = parts.hero + parts.matchup + parts.synergy + parts.comp + parts.lanes + parts.fit;
     const p = sig(4 * 0.9 * diff + logit(META.radiantWin));
     out.stages.push({ p: p, parts: parts, heroR: hr, heroD: hd });
   }
@@ -90,11 +157,9 @@ function pickValue(h, A, E){
   E.forEach(function(e){ v += vs(h, e) / 5; });
   A.forEach(function(a){ v += syn(h, a) / 2; });
   const need = roleNeed(A);
-  if (need.sup && has(h,'Support')) v += 0.02;
-  if (need.car && has(h,'Carry')) v += 0.02;
   if (need.ini && (has(h,'Initiator'))) v += 0.012;
-  if (!need.sup && has(h,'Support') && countRole(A,'Support') >= 3) v -= 0.02;
-  if (!need.car && has(h,'Carry') && !has(h,'Support') && countRole(A,'Carry') >= 3) v -= 0.015;
+  // fill open positions: a hero pros only play at a position the team already covers is worth less
+  if (A.length && A.length < 5) v += 0.025 * A.length * (coverage(A.concat([h])) - coverage(A) - 0.75);
   v += 0.03 * Math.min(1, contest(h) * 2);
   return v;
 }
@@ -138,10 +203,16 @@ function raxUp(sd){ let n = 0; LANES.forEach(function(l){ n += sd.rax[l][0] + sd
 /* ---------- match simulation ---------- */
 const KILLW = { Carry: 1.35, Nuker: 1.3, Escape: 1.05, Initiator: 1.0, Disabler: 0.95, Durable: 0.9, Pusher: 1.0, Support: 0.6 };
 const DEATHW = { Support: 1.4, Carry: 0.85, Durable: 0.75, Escape: 0.85 };
+// kill and death share by position and stage
+const KILLP = [[0.8, 1.4, 1.1, 1.0, 0.6], [1.1, 1.3, 1.0, 0.85, 0.6], [1.5, 1.2, 0.95, 0.75, 0.55]];
+const DEATHP = [[0.9, 0.9, 1.2, 1.1, 1.0], [0.8, 0.9, 1.0, 1.15, 1.3], [0.8, 0.9, 1.0, 1.15, 1.3]];
+const LANEK = 9; // logit per win-rate point of lane edge
 
+/* R and D are position-ordered (index 0 = position 1). */
 function simulate(R, D, seed){
   const rand = rng(seed);
-  const ev = evaluate(R, D);
+  const ev = evaluate(R, D, true);
+  const LN3 = ev.lanes.map(function(l){ return { lane: l.lane, rad: l.rad, dire: l.dire, radRole: l.radRole, direRole: l.direRole, edge: l.edge, kills: [0, 0], winner: null }; });
   const teams = [R, D];
   const side = [freshSide(), freshSide()];
   const kda = {}; R.concat(D).forEach(function(h){ kda[h] = [0,0,0]; });
@@ -219,20 +290,25 @@ function simulate(R, D, seed){
       takeStructure(t, att, o, sec);
     }
   }
-  function fight(t, size, place, sec, extra){
-    const q = fightP(t, extra);
+  function fight(t, size, place, sec, extra, lane){
+    const q = lane ? sig(0.5 * DRAFTW * logit(ev.stages[0].p) + LANEK * lane.edge + form[0] + leadLogit(t, 0)) : fightP(t, extra);
     let w = rand() < q ? 0 : 1; const l = 1 - w;
     let wk = Math.max(1, Math.round(size * (0.62 + rand() * 0.38)));
     let lk = size - wk; if (lk > wk){ const z = wk; wk = lk; lk = z; }
     if (size <= 2 && rand() < 0.75) lk = 0, wk = size;
     const s = stageOf(t);
     function credit(team, n){
-      const killers = teams[team], victims = teams[1 - team];
+      const killers = lane ? (team === 0 ? lane.rad : lane.dire) : teams[team];
+      const victims = lane ? (team === 0 ? lane.dire : lane.rad) : teams[1 - team];
+      if (lane) lane.kills[team] += n;
+      const dead = {};
       for (let i = 0; i < n; i++){
-        const k = pickW(killers, function(h){ return roleW(h, KILLW) * (0.6 + stageWr(h, s)); });
-        const v = pickW(victims, function(h){ return roleW(h, DEATHW); });
+        const k = pickW(killers, function(h){ return KILLP[s][teams[team].indexOf(h)] * Math.sqrt(roleW(h, KILLW)) * (0.6 + stageWr(h, s)); });
+        const alive = victims.filter(function(h){ return !dead[h]; });
+        const v = pickW(alive.length ? alive : victims, function(h){ return DEATHP[s][teams[1 - team].indexOf(h)] * Math.sqrt(roleW(h, DEATHW)); });
+        dead[v] = 1;
         kda[k][0]++; kda[v][1]++;
-        killers.forEach(function(a){ if (a !== k && rand() < (size >= 3 ? 0.55 : 0.25)) kda[a][2]++; });
+        killers.forEach(function(a){ if (a !== k && rand() < (size >= 3 ? 0.55 : 0.4)) kda[a][2]++; });
         st.kills[team]++;
         st.lead += (team === 0 ? 1 : -1) * (180 + 11 * t);
         if (!st.fb){ st.fb = true; log(t, sec, 'fb', team, 'First Blood: ' + H[k].name + ' killed ' + H[v].name, { killer: k, victim: v }); }
@@ -262,6 +338,12 @@ function simulate(R, D, seed){
       if (s === 0) size = rand() < 0.72 ? 1 : 2 + (rand() < 0.25 ? 1 : 0);
       else if (s === 1) size = rand() < 0.45 ? 1 + (rand() < 0.4 ? 1 : 0) : 3 + Math.floor(rand() * 4);
       else size = rand() < 0.3 ? 1 + (rand() < 0.4 ? 1 : 0) : 3 + Math.floor(rand() * 6);
+      if (t <= 10){ // laning phase: kills happen in lanes between the heroes laning against each other
+        const place = pickW(['top lane', 'mid lane', 'bot lane', 'the jungle'], function(x){ return x === 'the jungle' ? 0.3 : x === 'mid lane' ? 0.85 : 1; });
+        const lane = place === 'the jungle' ? null : LN3[['top lane', 'mid lane', 'bot lane'].indexOf(place)];
+        fight(t, lane && lane.lane === 'mid' ? 1 : Math.min(size, 2), place, sec, 0, lane);
+        continue;
+      }
       const place = pickW(['top lane', 'mid lane', 'bot lane', 'the jungle', 'the river'], function(x){ return x === 'the river' && st.rosh.alive && t > 14 ? 2 : 1; });
       const r = fight(t, size, place, sec);
       if (size >= 3 && r.margin >= 2){
@@ -276,13 +358,30 @@ function simulate(R, D, seed){
     }
     if (winner !== null) break;
 
-    // laning / split-push pressure
+    // end of the laning phase: each lane is won, lost or even
+    if (t === 10) LN3.forEach(function(L){
+      const x = LANEK * L.edge + (L.kills[0] - L.kills[1]) * 0.35 + gauss() * 0.45 + 0.5 * form[0];
+      L.winner = x > 0.4 ? 0 : x < -0.4 ? 1 : -1;
+      if (L.winner >= 0) st.lead += (L.winner === 0 ? 1 : -1) * 550;
+      const nm = function(a){ return a.map(function(h){ return H[h].name; }).join(' and '); };
+      const where = L.lane === 'mid' ? 'mid' : L.lane === 'top' ? 'the top lane' : 'the bottom lane';
+      const w = L.winner, txt = w < 0
+        ? 'Laning: ' + where + ' went even (' + nm(L.rad) + ' vs ' + nm(L.dire) + ')'
+        : 'Laning: ' + TEAM[w] + ' won ' + where + ' (' + nm(w ? L.dire : L.rad) + ' over ' + nm(w ? L.rad : L.dire) + ')';
+      log(t, 59, 'lane', w, txt, { lane: L.lane });
+    });
+
+    // laning / split-push pressure (early towers fall in the lanes a team won)
     for (let team = 0; team < 2 && winner === null; team++){
       const adv = team === 0 ? fightP(t) : 1 - fightP(t);
       let base = t < 7 ? 0 : t < 12 ? 0.11 : t < 20 ? 0.2 : t < 30 ? 0.18 : 0.14;
       if (rand() < base * (0.4 + 1.2 * adv)) {
         const opts = nextTarget(team).filter(function(o){ return o.kind === 'tower' && (o.tier === 1 || (o.tier === 2 && t >= 16)); });
-        if (opts.length){ const o = opts[Math.floor(rand() * opts.length)]; takeStructure(t, team, o, 20 + Math.floor(rand() * 39)); }
+        if (opts.length){
+          const o = t < 16 ? pickW(opts, function(x){ const L = LN3.find(function(y){ return y.lane === x.lane; }); return !L || L.winner === null || L.winner === -1 ? 1 : L.winner === team ? 3 : 0.4; })
+            : opts[Math.floor(rand() * opts.length)];
+          takeStructure(t, team, o, 20 + Math.floor(rand() * 39));
+        }
       }
     }
 
@@ -333,7 +432,7 @@ function simulate(R, D, seed){
       rosh: clone(st.rosh), torm: clone(st.torm), shards: st.shards.slice(), p: livePr(t), kda: clone(kda), day: Math.floor(t / 5) % 2 === 0 };
   }
   events.sort(function(a, b){ return a.t - b.t || a.sec - b.sec; });
-  return { ev: ev, frames: frames, events: events, winner: winner, endT: endT, seed: seed };
+  return { ev: ev, frames: frames, events: events, winner: winner, endT: endT, seed: seed, lanes: LN3 };
 }
 function ordinal(n){ return n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'); }
 
@@ -350,6 +449,7 @@ const PHASES = [[0,6,'Ban phase 1'],[7,8,'Pick phase 1'],[9,11,'Ban phase 2'],[1
 
 return { load: load, heroes: function(){ return H; }, vs: vs, syn: syn, evaluate: evaluate, pickValue: pickValue,
   botChoose: botChoose, simulate: simulate, rng: rng, CM: CM, PHASES: PHASES, META: META, stageWr: stageWr,
-  towersUp: towersUp, raxUp: raxUp, contest: contest, LANES: LANES, has: has };
+  towersUp: towersUp, raxUp: raxUp, contest: contest, LANES: LANES, has: has,
+  POS: POS, share: share, fitPen: fitPen, bestOrder: bestOrder, lanes: lanes, teamPosValue: teamPosValue };
 })();
 if (typeof module !== 'undefined') module.exports = DC;
